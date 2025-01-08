@@ -1,0 +1,24 @@
+Tests:
+    ☐ Crashes (it should never)
+    ☐ HTTP/1.1
+
+Dynamic Error Page:
+    ☐ 400
+    ☐ 403
+    ☐ 404
+    ☐ 405
+    ☐ 413
+    ☐ 500
+
+HTTP:
+    ☐ Request
+    ☐ Response
+
+Methods:
+    ☐ GET
+    ☐ POST
+    ☐ DELETE
+
+CGI:
+    ☐ Python
+    ☐ PHP
