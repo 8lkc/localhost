@@ -5,6 +5,7 @@
 </h1>
 
 ## Table of Contents
+
 - [Table of Contents](#table-of-contents)
 - [Tech Stack](#tech-stack)
 - [Overview](#overview)
@@ -12,6 +13,7 @@
   - [Cloning](#cloning)
   - [File System](#file-system)
 - [Usage](#usage)
+  - [Sequence](#sequence)
 - [Contributors](#contributors)
   - [Authors](#authors)
   - [Peers](#peers)
@@ -103,8 +105,22 @@ tree --dirsfirst
         +-📖 README.md
         +-⚙️ rustfmt.toml
 
-
 ## Usage
+
+### Sequence
+
+```mermaid
+sequenceDiagram
+
+Note left of Config: File
+Config ->> Server: Parsed
+Server ->> Server: Bind Listener to Address
+loop Listening...
+Client ->> Server: Request
+Server ->> Server: Handle
+Server -->> Client: Response
+end
+```
 
 ## Contributors
 

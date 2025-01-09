@@ -1,5 +1,18 @@
+Server Configuration:
+    ☐ Name
+    ☐ Host
+    ☐ Ports
+    ☐ Allowed methods
+    ☐ Allowed headers
+    ☐ Request timeout
+    ☐ Session timeout
+    ☐ Cookie name
+
+☐ Parse Configuration file
+☐ Populate Structures
+
 HTTP:
-    ☐ Request
+    ⭘ Request @jefaye @started(25-01-09 16:53)
     ☐ Response
     Status:
         ☐ 400
