@@ -65,14 +65,30 @@ tree --dirsfirst
         |
         +---📂 src/
         |       |
-        |       +-📂 cgi/
+        |       +---📂 cgi/
+        |       |       |
+        |       |       +-📄 handlers.rs
+        |       |       +-📄 mod.rs
         |       |
         |       +-📂 config/
+        |       |       |
+        |       |       +-📄 mod.rs
+        |       |       +-📄 parser.rs
         |       |
-        |       +-📂 http/
+        |       +--📂 http/
+        |       |       |
+        |       |       +-📄 mod.rs
+        |       |       +-📄 request.rs
+        |       |       +-📄 response.rs
+        |       |       +-📄 status.rs
         |       |
         |       +-📂 server/
+        |       |       |
+        |       |       +-📄 connection.rs
+        |       |       +-📄 epoll.rs
+        |       |       +-📄 mod.rs
         |       |
+        |       +-📄 lib.rs
         |       +-📄 main.rs
         |
         +-📂 todos/

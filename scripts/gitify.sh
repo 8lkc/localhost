@@ -5,8 +5,8 @@ set -e
 source "$(dirname $0)/utils.sh"
 
 BRANCH="main"
-USER="jefaye"
-MAIL="clement.jean.l.faye@gmail.com"
+USER=""
+MAIL=""
 
 # Checks if there is already a USER and MAIL in configuration...
 # If no USER or MAIL if found, it will config it...

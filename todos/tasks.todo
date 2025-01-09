@@ -1,24 +1,33 @@
-Tests:
-    ☐ Crashes (it should never)
-    ☐ HTTP/1.1
-
-Dynamic Error Page:
-    ☐ 400
-    ☐ 403
-    ☐ 404
-    ☐ 405
-    ☐ 413
-    ☐ 500
-
 HTTP:
     ☐ Request
     ☐ Response
-
-Methods:
-    ☐ GET
-    ☐ POST
-    ☐ DELETE
+    Status:
+        ☐ 400
+        ☐ 403
+        ☐ 404
+        ☐ 405
+        ☐ 413
+        ☐ 500
+    Methods:
+        ☐ GET
+        ☐ POST
+        ☐ DELETE
 
 CGI:
     ☐ Python
     ☐ PHP
+
+Configuration file:
+    ☐ Host
+    ☐ Ports
+    ☐ Error paths
+    ☐ Upload limit
+
+HTML files:
+    ☐ Index
+    ☐ Error (dymamic)
+
+Tests:
+    ☐ Crashes (it should never)
+    ☐ HTTP/1.1
+    
