@@ -56,7 +56,7 @@ tree --dirsfirst
         |
         +-📂 config/
         |       |
-        |       +-⚙️ server.conf
+        |       +-⚙️ server.toml
         |
         +-📂 scripts/
         |       |
