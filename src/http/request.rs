@@ -1,4 +1,1 @@
-pub struct Request {
-    methods: Vec<String>,
-    
-}
+pub struct Request {}
