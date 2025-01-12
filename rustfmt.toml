@@ -11,7 +11,7 @@ wrap_comments = true
 chain_width = 30
 struct_lit_width = 10
 attr_fn_like_width = 25
-fn_call_width = 30
+fn_call_width = 45
 struct_field_align_threshold = 20
 
 control_brace_style = "ClosingNextLine"

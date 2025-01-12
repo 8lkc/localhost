@@ -13,6 +13,7 @@
   - [Cloning](#cloning)
   - [File System](#file-system)
 - [Usage](#usage)
+  - [Classes](#classes)
   - [Sequence](#sequence)
 - [Contributors](#contributors)
   - [Authors](#authors)
@@ -60,6 +61,11 @@ tree --dirsfirst
         |       |
         |       +-⚙️ server.toml
         |
+        +-📂 pages/
+        |       |
+        |       +-📄 error.html
+        |       +-📄 index.html
+        |
         +-📂 scripts/
         |       |
         |       +-📜 gitify.sh
@@ -72,11 +78,6 @@ tree --dirsfirst
         |       |       +-📄 handlers.rs
         |       |       +-📄 mod.rs
         |       |
-        |       +-📂 config/
-        |       |       |
-        |       |       +-📄 mod.rs
-        |       |       +-📄 parser.rs
-        |       |
         |       +--📂 http/
         |       |       |
         |       |       +-📄 mod.rs
@@ -86,9 +87,16 @@ tree --dirsfirst
         |       |
         |       +-📂 server/
         |       |       |
+        |       |       +-📄 config.rs
         |       |       +-📄 connection.rs
         |       |       +-📄 epoll.rs
+        |       |       +-📄 handler.rs
         |       |       +-📄 mod.rs
+        |       |
+        |       +-📂 utils/
+        |       |       |
+        |       |       +-📄 error.rs
+        |       |       +-📄 logging.rs
         |       |
         |       +-📄 lib.rs
         |       +-📄 main.rs
@@ -96,6 +104,8 @@ tree --dirsfirst
         +-📂 todos/
         |       |
         |       +-📝 audit.todo
+        |       +-📝 instructions.todo
+        |       +-📝 rules.todo
         |       +-📝 tasks.todo
         |
         +-🚫 .gitignore
@@ -107,18 +117,42 @@ tree --dirsfirst
 
 ## Usage
 
+### Classes
+
+```mermaid
+classDiagram
+
+class Server {
+  + name
+  + host
+  + ports
+  - allowed_methods
+  - allowed_headers
+  - request_timeout
+  - session_timeout
+  + cookie_name
+
+  + init(data)
+  + start()
+}
+```
+
 ### Sequence
 
 ```mermaid
 sequenceDiagram
 
 Note left of Config: File
-Config ->> Server: Parsed
+Config ->> Server: Initialisation
 Server ->> Server: Bind Listener to Address
+
 loop Listening...
-Client ->> Server: Request
-Server ->> Server: Handle
-Server -->> Client: Response
+  Client ->> Server: Request
+  Server ->> Server: Status line
+  Server ->> Server: HTML Page Content
+  Server ->> Server: Content length
+  Server -->> Client: Response
+  Note right of Client: View
 end
 ```
 

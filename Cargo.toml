@@ -2,8 +2,6 @@
 name = "webserver"
 version = "0.1.0"
 edition = "2021"
-
-[dependencies]
 # libc = "0.2"
 # log = "0.4"
 # env_logger = "0.11.6"

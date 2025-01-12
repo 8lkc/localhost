@@ -1,0 +1,4 @@
+Error Handling:
+    ☐ Error propagation:
+    All functions succeptible to fail in error should return a type io::Result<_>.
+    That way, all error will be handled in the main function.
