@@ -147,11 +147,11 @@ Config ->> Server: Initialisation
 Server ->> Server: Bind Listener to Address
 
 loop Listening...
-  Client ->> Server: Request
+  Client ->>+ Server: Request
   Server ->> Server: Status line
   Server ->> Server: HTML Page Content
   Server ->> Server: Content length
-  Server -->> Client: Response
+  Server -->>- Client: Response
   Note right of Client: View
 end
 ```
