@@ -123,18 +123,6 @@ tree --dirsfirst
 classDiagram
 direction LR
 
-class Server {
-  <<struct>>
-  socket_adrr
-  +new(socket_addr) Server
-  +run()
-}
-
-class Router {
-  <<struct>>
-  +route(req, stream) 
-}
-
 class Handler {
   <<trait>>
   +handle(request) Response
@@ -152,12 +140,48 @@ class Default {
   +default() Self
 }
 
+class Server {
+  <<struct>>
+  socket_adrr
+  +new(socket_addr) Server
+  +run()
+}
+
+class Router {
+  <<struct>>
+  +route(req, stream) 
+}
+
+class WebService {
+  <<struct>>
+  +load_json() [Data]
+}
+
+class StaticPage
+<<struct>> StaticPage
+
+class ErrorPage
+<<struct>> ErrorPage
+
 class Request {
   <<struct>>
   +method
   +resource
   +headers
   +msg_body
+}
+
+class Method {
+  <<enum>>
+  GET
+  POST
+  DELETE
+  Uninitialized
+}
+
+class Resource {
+  <<enum>>
+  Path(String)
 }
 
 class Response {
@@ -181,59 +205,36 @@ class Data {
   -status
 }
 
-class StaticPage
-<<struct>> StaticPage
-
-class ErrorPage
-<<struct>> ErrorPage
-
-class WebService {
-  <<struct>>
-  +load_json() [Data]
-}
-
-class Method {
-  <<enum>>
-  GET
-  POST
-  DELETE
-  Uninitialized
-}
-
-class Resource {
-  <<enum>>
-  Path(String)
-}
-
-Server *-- Router: Has
-Server *.. Handler: Has
-Router -- Request: Processes
-Handler -- Request: Handles
-Handler -- Response: Sends
-Request *-- Method: Has
-Request *-- Resource: Has
-Response *.. Data: Can have
-WebService -- Data: Loads
-
-StaticPage ..|> Handler: Implements
-ErrorPage ..|> Handler: Implements
-WebService ..|> Handler: Implements
 Request ..|> From: Implements
 Response ..|> From: Implements
 Response ..|> Default: Implements
 Method ..|> From: Implements
 
+Server -- Router: Calls
+Router -- Resource: Gets
+Router -- Method: Checks
+Router -- Request: Processes
+Router .. Handler: Calls
+Handler -- Request: Handles
+Handler <|.. WebService: Implements
+StaticPage ..|> Handler: Implements
+ErrorPage ..|> Handler: Implements
+Handler -- Response: Sends
+Request *-- Resource: Belongs_to
+Request *-- Method: Belongs_to
+WebService -- Data: Loads
+
 Request ..() Debug
 Response ..() Debug
 Response ..() PartialEq
 Response ..() Clone
-Response ..() Default
 Method ..() Debug
 Method ..() PartialEq
 Resource ..() Debug
 Resource ..() PartialEq
 Data ..() Serialize
 Data ..() Deserialize
+Data ..* Response: Added_to
 ```
 
 ### Sequence

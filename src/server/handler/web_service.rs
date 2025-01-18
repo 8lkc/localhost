@@ -39,7 +39,6 @@ impl Handler for WebService {
         let Resource::Path(s) = &req.resource;
         let route: Vec<&str> = s.split("/").collect();
 
-        // if route if /api/shipping/orders, return json
         match route[2] {
             "shipping" if route.len() > 2 && route[3] == "data" => {
                 let body = Some(serde_json::to_string(&Self::load_json()).unwrap());
