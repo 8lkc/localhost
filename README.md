@@ -121,20 +121,122 @@ tree --dirsfirst
 
 ```mermaid
 classDiagram
+direction LR
+
+class From {
+  <<trait>>
+  +from(str) Self
+  +from(Response) String
+}
+
+class Default {
+  <<trait>>
+  +default() Self
+}
+
+class Handler {
+  <<trait>>
+  +handle(request) Response
+  +load_file(file_name) String
+}
+
+class Data {
+  <<struct>>
+  -id
+  -date
+  -status
+}
+
+Data ..() Serialize
+Data ..() Deserialize
+
+class StaticPage
+<<struct>> StaticPage
+StaticPage ..|> Handler: Implements
+
+class ErrorPage
+<<struct>> ErrorPage
+ErrorPage ..|> Handler: Implements
+
+class WebService {
+  <<struct>>
+  +load_json() [Data]
+}
+
+WebService ..|> Handler: Implements
+
+class Router {
+  <<struct>>
+  +route(req, stream) 
+}
 
 class Server {
-  + name
-  + host
-  + ports
-  - allowed_methods
-  - allowed_headers
-  - request_timeout
-  - session_timeout
-  + cookie_name
-
-  + init(data)
-  + start()
+  <<struct>>
+  socket_adrr
+  +new(socket_addr) Server
+  +run()
 }
+
+class Method {
+  <<enum>>
+  GET
+  POST
+  DELETE
+  Uninitialized
+}
+
+Method ..() Debug
+Method ..() PartialEq
+Method ..|> From: Implements
+
+class Resource {
+  <<enum>>
+  Path(String)
+}
+
+Resource ..() Debug
+Resource ..() PartialEq
+
+class Request {
+  <<struct>>
+  +method
+  +resource
+  +headers
+  +msg_body
+}
+
+Request ..() Debug
+Request ..|> From: Implements
+
+class Response {
+  <<struct>>
+  -status_code
+  -status_text
+  -headers
+  -body
+  +new(status_code, headers, body) Response
+  +send(write_stream) Result
+  +status_code() string
+  +status_text() string
+  +headers() String
+  +body() string
+}
+
+Response ..() Debug
+Response ..() PartialEq
+Response ..() Clone
+Response ..() Default
+Response ..|> From: Implements
+Response ..|> Default: Implements
+
+Server *.. Handler: Has
+Server *-- Router: Has
+Handler -- Request: Handles
+Handler -- Response: Sends
+Response *.. Data: Can have
+WebService -- Data: Loads
+Request *-- Method: Has
+Request *-- Resource: Has
 ```
 
 ### Sequence

@@ -1,16 +1,23 @@
-use super::router::Router;
-use http::httprequest::HttpRequest;
-use std::io::prelude::*;
-use std::net::TcpListener;
-use std::str;
+use {
+    super::router::Router,
+    http::httprequest::HttpRequest,
+    std::{
+        io::prelude::*,
+        net::TcpListener,
+        str,
+    },
+};
 
 pub struct Server<'a> {
     socket_addr: &'a str,
 }
 impl<'a> Server<'a> {
     pub fn new(socket_addr: &'a str) -> Self {
-        Server { socket_addr }
+        Server {
+            socket_addr,
+        }
     }
+
     pub fn run(&self) {
         // Start a server listening on socket address
         let connection_listener = TcpListener::bind(self.socket_addr).unwrap();
@@ -20,9 +27,13 @@ impl<'a> Server<'a> {
             let mut stream = stream.unwrap();
             println!("Connection established");
             let mut read_buffer = [0; 90];
-            stream.read(&mut read_buffer).unwrap();
+            stream
+                .read(&mut read_buffer)
+                .unwrap();
             // Convert HTTP request to Rust data structure
-            let req: HttpRequest = String::from_utf8(read_buffer.to_vec()).unwrap().into();
+            let req: HttpRequest = String::from_utf8(read_buffer.to_vec())
+                .unwrap()
+                .into();
             // Route request to appropriate handler
             Router::route(req, &mut stream);
         }
