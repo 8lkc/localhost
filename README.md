@@ -123,6 +123,24 @@ tree --dirsfirst
 classDiagram
 direction LR
 
+class Server {
+  <<struct>>
+  socket_adrr
+  +new(socket_addr) Server
+  +run()
+}
+
+class Router {
+  <<struct>>
+  +route(req, stream) 
+}
+
+class Handler {
+  <<trait>>
+  +handle(request) Response
+  +load_file(file_name) String
+}
+
 class From {
   <<trait>>
   +from(str) Self
@@ -134,69 +152,6 @@ class Default {
   +default() Self
 }
 
-class Handler {
-  <<trait>>
-  +handle(request) Response
-  +load_file(file_name) String
-}
-
-class Data {
-  <<struct>>
-  -id
-  -date
-  -status
-}
-
-Data ..() Serialize
-Data ..() Deserialize
-
-class StaticPage
-<<struct>> StaticPage
-StaticPage ..|> Handler: Implements
-
-class ErrorPage
-<<struct>> ErrorPage
-ErrorPage ..|> Handler: Implements
-
-class WebService {
-  <<struct>>
-  +load_json() [Data]
-}
-
-WebService ..|> Handler: Implements
-
-class Router {
-  <<struct>>
-  +route(req, stream) 
-}
-
-class Server {
-  <<struct>>
-  socket_adrr
-  +new(socket_addr) Server
-  +run()
-}
-
-class Method {
-  <<enum>>
-  GET
-  POST
-  DELETE
-  Uninitialized
-}
-
-Method ..() Debug
-Method ..() PartialEq
-Method ..|> From: Implements
-
-class Resource {
-  <<enum>>
-  Path(String)
-}
-
-Resource ..() Debug
-Resource ..() PartialEq
-
 class Request {
   <<struct>>
   +method
@@ -204,9 +159,6 @@ class Request {
   +headers
   +msg_body
 }
-
-Request ..() Debug
-Request ..|> From: Implements
 
 class Response {
   <<struct>>
@@ -222,21 +174,66 @@ class Response {
   +body() string
 }
 
+class Data {
+  <<struct>>
+  -id
+  -date
+  -status
+}
+
+class StaticPage
+<<struct>> StaticPage
+
+class ErrorPage
+<<struct>> ErrorPage
+
+class WebService {
+  <<struct>>
+  +load_json() [Data]
+}
+
+class Method {
+  <<enum>>
+  GET
+  POST
+  DELETE
+  Uninitialized
+}
+
+class Resource {
+  <<enum>>
+  Path(String)
+}
+
+Server *-- Router: Has
+Server *.. Handler: Has
+Router -- Request: Processes
+Handler -- Request: Handles
+Handler -- Response: Sends
+Request *-- Method: Has
+Request *-- Resource: Has
+Response *.. Data: Can have
+WebService -- Data: Loads
+
+StaticPage ..|> Handler: Implements
+ErrorPage ..|> Handler: Implements
+WebService ..|> Handler: Implements
+Request ..|> From: Implements
+Response ..|> From: Implements
+Response ..|> Default: Implements
+Method ..|> From: Implements
+
+Request ..() Debug
 Response ..() Debug
 Response ..() PartialEq
 Response ..() Clone
 Response ..() Default
-Response ..|> From: Implements
-Response ..|> Default: Implements
-
-Server *.. Handler: Has
-Server *-- Router: Has
-Handler -- Request: Handles
-Handler -- Response: Sends
-Response *.. Data: Can have
-WebService -- Data: Loads
-Request *-- Method: Has
-Request *-- Resource: Has
+Method ..() Debug
+Method ..() PartialEq
+Resource ..() Debug
+Resource ..() PartialEq
+Data ..() Serialize
+Data ..() Deserialize
 ```
 
 ### Sequence
