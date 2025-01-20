@@ -169,20 +169,23 @@ architecture-beta
   service loader(logos:aws-config)[loader] in source
   service root(server)[root] in  server
   service request(internet)[request] in http
-  service response(internet)[response] in http
-  service router(logos:aws-opsworks)[router] in server
+  service middlewares(logos:aws-lambda)[middlewares] in server
+  service router(logos:react-router)[router] in server
   service handlers(logos:aws-step-functions)[handlers] in server
+  service response(internet)[response] in http
   junction builder in localhost
 
   config:B --> T:loader
   loader:R --> L:root
-  request:L --> R:root
-  root:B --> T:router
+  request:B --> R:root
+  root:B --> T:middlewares
+  middlewares:B --> T:router
   router:B --> T:handlers
   builder:T --> B:handlers
   templates:L -- R:builder
   data:R -- L:builder
   handlers:R --> L:response
+  %% request:B -- T:response
 ```
 
 ### Classes
@@ -277,10 +280,11 @@ Response ..|> From: Implements
 Response ..|> Default: Implements
 Method ..|> From: Implements
 
+Server -- Request: Builds
 Server -- Router: Calls
 Router -- Resource: Gets
 Router -- Method: Checks
-Router -- Request: Processes
+Router -- Request: Directs
 Router .. Handler: Calls
 Handler -- Request: Handles
 Handler <|.. WebService: Implements
@@ -333,31 +337,6 @@ title TCP Connection
   deactivate Server
   deactivate Client
   Note over Client,Server: Disconnected
-```
-
-```mermaid
-sequenceDiagram
-  Participant Config
-  Participant Server
-  Participant Router
-  Participant Handlers
-  Participant Client
-
-  Note left of Config: File
-  Config ->> Server: Initialisation
-  Server ->> Server: Bind Listener to Address
-
-  loop Listening to incoming Streams...
-    Note right of Server: Get Stream
-    Client ->>+ Server: Request
-    Server ->> Router: Check Request Method
-    Server ->> Router: Get 
-    Server ->> Server: Status line
-    Server ->> Server: HTML Page Content
-    Server ->> Server: Content length
-    Server -->>- Client: Response
-    Note right of Client: View
-  end
 ```
 
 ## Usage
