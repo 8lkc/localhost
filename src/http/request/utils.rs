@@ -1,22 +1,17 @@
 use super::method::{
     Method,
     Resource,
-    Version,
 };
 
-pub(super) fn process_req_line(s: &str) -> (Method, Resource, Version) {
-    // Parse the request line into individual chunks split by whitespaces.
+pub(super) fn process_req_line(s: &str) -> (Method, Resource) {
     let mut words = s.split_whitespace();
-    // Extract the HTTP method from first part of the request line
+
     let method = words.next().unwrap();
-    // Extract the resource (URI/URL) from second part of the request line
     let resource = words.next().unwrap();
-    // Extract the HTTP version from third part of the request line
-    let version = words.next().unwrap();
+
     (
         method.into(),
         Resource::Path(resource.to_string()),
-        version.into(),
     )
 }
 

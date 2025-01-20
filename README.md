@@ -9,12 +9,14 @@
 - [Table of Contents](#table-of-contents)
 - [Tech Stack](#tech-stack)
 - [Overview](#overview)
+  - [TCP Header](#tcp-header)
 - [Installation](#installation)
   - [Cloning](#cloning)
   - [File System](#file-system)
-- [Usage](#usage)
+- [Architecture](#architecture)
   - [Classes](#classes)
   - [Sequence](#sequence)
+- [Usage](#usage)
 - [Contributors](#contributors)
   - [Authors](#authors)
   - [Peers](#peers)
@@ -29,6 +31,32 @@
 [![MARKDOWN](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white)](#table-of-contents)
 
 ## Overview
+
+### TCP Header
+
+  ```mermaid
+  ---
+  title: "TCP Packet"
+  ---
+  packet-beta
+  0-15: "Source Port"
+  16-31: "Destination Port"
+  32-63: "Sequence Number"
+  64-95: "Acknowledgment Number"
+  96-99: "Data Offset"
+  100-105: "Reserved"
+  106: "URG"
+  107: "ACK"
+  108: "PSH"
+  109: "RST"
+  110: "SYN"
+  111: "FIN"
+  112-127: "Window"
+  128-143: "Checksum"
+  144-159: "Urgent Pointer"
+  160-191: "(Options and Padding)"
+  192-255: "Data (variable length)"
+```
 
 ## Installation
 
@@ -46,82 +74,121 @@ Receiving objects: 100% (15/15), done.
 
 cd localhost
 tree --dirsfirst
-
 ```
 
 ### File System
+```
+📂./
+  |
+  +-📂 /assets
+  |       |
+  |       +-🌄 ferris.svg
+  |
+  +-📂 /config
+  |       |
+  |       +-⚙️ server.toml
+  |
+  +-📂 /data
+  |       |
+  |       +-📄 data.json
+  |
+  +-📂 /scripts
+  |       |
+  |       +-📜 gitify.sh
+  |       +-📜 utils.sh
+  |
+  +---📂 /src
+  |       |
+  |       +--📂 /http
+  |       |       |
+  |       |       +-📂 /request
+  |       |       |       |
+  |       |       |       +-📄 method.rs
+  |       |       |       +-📄 mod.rs
+  |       |       |       +-📄 utils.rs
+  |       |       |
+  |       |       +-📂 /response
+  |       |       |       |
+  |       |       |       +-📄 func.rs
+  |       |       |       +-📄 mod.rs
+  |       |       |
+  |       |       +-📄 mod.rs
+  |       |
+  |       +-📂 /server
+  |       |       |
+  |       |       +-📂 /handler
+  |       |       |       |
+  |       |       |       +-📄 mod.rs
+  |       |       |       +-📄 static_page.rs
+  |       |       |       +-📄 web_service.rs
+  |       |       |
+  |       |       +-📄 mod.rs
+  |       |       +-📄 router.rs
+  |       |
+  |       +-📄 lib.rs
+  |       +-📄 main.rs
+  |
+  +-📂 /templates
+  |       |
+  |       +-📄 error.html
+  |       +-📄 index.html
+  |
+  +-📂 /tests
+  |       |
+  |       +-📄 request_test.rs
+  |       +-📄 response_test.rs
+  |
+  +-📂 /todos
+  |       |
+  |       +-📝 audit.todo
+  |       +-📝 instructions.todo
+  |       +-📝 rules.todo
+  |       +-📝 tasks.todo
+  |
+  +-🚫 .gitignore
+  +-🔒 Cargo.lock
+  +-⚙️ Cargo.toml
+  +-🔑 LICENSE
+  +-📖 README.md
+  +-⚙️ rustfmt.toml
+```
 
-    --📂./
-        |
-        +-📂 assets/
-        |       |
-        |       +-🌄 ferris.svg
-        |
-        +-📂 config/
-        |       |
-        |       +-⚙️ server.toml
-        |
-        +-📂 pages/
-        |       |
-        |       +-📄 error.html
-        |       +-📄 index.html
-        |
-        +-📂 scripts/
-        |       |
-        |       +-📜 gitify.sh
-        |       +-📜 utils.sh
-        |
-        +---📂 src/
-        |       |
-        |       +---📂 cgi/
-        |       |       |
-        |       |       +-📄 handlers.rs
-        |       |       +-📄 mod.rs
-        |       |
-        |       +--📂 http/
-        |       |       |
-        |       |       +-📄 mod.rs
-        |       |       +-📄 request.rs
-        |       |       +-📄 response.rs
-        |       |       +-📄 status.rs
-        |       |
-        |       +-📂 server/
-        |       |       |
-        |       |       +-📄 config.rs
-        |       |       +-📄 connection.rs
-        |       |       +-📄 epoll.rs
-        |       |       +-📄 handler.rs
-        |       |       +-📄 mod.rs
-        |       |
-        |       +-📂 utils/
-        |       |       |
-        |       |       +-📄 error.rs
-        |       |       +-📄 logging.rs
-        |       |
-        |       +-📄 lib.rs
-        |       +-📄 main.rs
-        |
-        +-📂 todos/
-        |       |
-        |       +-📝 audit.todo
-        |       +-📝 instructions.todo
-        |       +-📝 rules.todo
-        |       +-📝 tasks.todo
-        |
-        +-🚫 .gitignore
-        +-🔒 Cargo.lock
-        +-⚙️ Cargo.toml
-        +-🔑 LICENSE
-        +-📖 README.md
-        +-⚙️ rustfmt.toml
+## Architecture
 
-## Usage
+```mermaid
+architecture-beta
+  group localhost(logos:google-home)[localhost]
+  group source(logos:rust)[source] in localhost
+  group server(server)[server] in source
+  group http(internet)[http] in source
+
+  service config(logos:toml)[config] in localhost
+  service templates(logos:html-5)[templates] in localhost
+  service data(logos:json)[data] in localhost
+
+  service loader(logos:aws-config)[loader] in source
+  service root(server)[root] in  server
+  service request(internet)[request] in http
+  service response(internet)[response] in http
+  service router(logos:aws-opsworks)[router] in server
+  service handlers(logos:aws-step-functions)[handlers] in server
+  junction builder in localhost
+
+  config:B --> T:loader
+  loader:R --> L:root
+  request:L --> R:root
+  root:B --> T:router
+  router:B --> T:handlers
+  builder:T --> B:handlers
+  templates:L -- R:builder
+  data:R -- L:builder
+  handlers:R --> L:response
+```
 
 ### Classes
 
 ```mermaid
 classDiagram
-direction LR
 
 class Handler {
   <<trait>>
@@ -241,20 +308,59 @@ Data ..* Response: Added_to
 
 ```mermaid
 sequenceDiagram
+title TCP Connection
+  participant Client
+  participant Server
 
-Note left of Config: File
-Config ->> Server: Initialisation
-Server ->> Server: Bind Listener to Address
+  Note over Client,Server: Sequence numbers is relative.<br/>It's usually a random number.
 
-loop Listening...
-  Client ->>+ Server: Request
-  Server ->> Server: Status line
-  Server ->> Server: HTML Page Content
-  Server ->> Server: Content length
-  Server -->>- Client: Response
-  Note right of Client: View
-end
+  activate Client
+  Client->>+Server: TCP SYN Seq=0
+  Server-->>Client: TCP SYN-ACK Seq=0 Ack=1
+  Client-->>Server: TCP ACK Seq=1 Ack=1
+
+  Note over Client,Server: Connected
+  loop
+    Client->>Server: Data Seq=1 Ack=1 
+    Server-->>Client: Data Seq=1 Ack=2 
+  end
+  Note over Client,Server: Disconnection...
+
+  Client->>Server: TCP FIN Seq=2 Ack=1
+  Server-->>Client: TCP ACK Seq=1 Ack=3
+  Server->>Client: TCP FIN Seq=1 Ack=3
+  Client-->>Server: TCP ACK Seq=2 Ack=2
+  deactivate Server
+  deactivate Client
+  Note over Client,Server: Disconnected
 ```
+
+```mermaid
+sequenceDiagram
+  Participant Config
+  Participant Server
+  Participant Router
+  Participant Handlers
+  Participant Client
+
+  Note left of Config: File
+  Config ->> Server: Initialisation
+  Server ->> Server: Bind Listener to Address
+
+  loop Listening to incoming Streams...
+    Note right of Server: Get Stream
+    Client ->>+ Server: Request
+    Server ->> Router: Check Request Method
+    Server ->> Router: Get 
+    Server ->> Server: Status line
+    Server ->> Server: HTML Page Content
+    Server ->> Server: Content length
+    Server -->>- Client: Response
+    Note right of Client: View
+  end
+```
+
+## Usage
 
 ## Contributors
 

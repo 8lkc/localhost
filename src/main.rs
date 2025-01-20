@@ -1,6 +1,3 @@
-use {
-    localhost::Server,
-    std::io::Result,
-};
+use localhost::Server;
 
-fn main() -> Result<()> { Server::new("127.0.0.1:7878").run() }
+fn main() { Server::new("127.0.0.1:7878").run() }

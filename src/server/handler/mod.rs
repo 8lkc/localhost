@@ -21,7 +21,7 @@ pub use {
 };
 
 pub trait Handler {
-    fn handle(req: &Request) -> Response;
+    fn handle(req: &Request) -> Result<Response, String>;
     fn load_file(file_name: &str) -> Option<String> {
         let default_path = format!("{}/public", env!("CARGO_MANIFEST_DIR"));
         let public_path = env::var("PUBLIC_VAR").unwrap_or(default_path);
@@ -35,12 +35,12 @@ pub trait Handler {
 pub struct ErrorPage;
 
 impl Handler for ErrorPage {
-    fn handle(_req: &Request) -> Response {
-        Response::new(
+    fn handle(_req: &Request) -> Result<Response, String> {
+        Ok(Response::new(
             "404",
             None,
             Self::load_file("pages/error.html"),
-        )
+        ))
     }
 }
 

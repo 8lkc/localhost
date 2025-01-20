@@ -1,4 +1,4 @@
-mod implementation;
+mod func;
 
 use std::collections::HashMap;
 
