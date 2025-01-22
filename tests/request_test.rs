@@ -23,9 +23,6 @@ fn test_read_http() {
 
     let req: Request = s.into();
     assert_eq!(Method::GET, req.method);
-    assert_eq!(
-        Resource::Path("/greeting".to_string()),
-        req.resource
-    );
+    assert_eq!(Resource::Path("/greeting".to_string()), req.resource);
     assert_eq!(headers_expected, req.headers);
 }

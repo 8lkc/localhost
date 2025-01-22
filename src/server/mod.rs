@@ -50,4 +50,11 @@ impl Server {
             }
         }
     }
+
+    pub fn has_valid_config(&self) -> bool {
+        self.host.is_some()
+            && self.methods.is_some()
+            && self.ports.is_some()
+            && self.timeout.is_some()
+    }
 }

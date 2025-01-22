@@ -24,11 +24,7 @@ pub struct ErrorPage;
 
 impl Handler for ErrorPage {
     fn handle(_req: &Request) -> Result<Response, String> {
-        Ok(Response::new(
-            "404",
-            None,
-            Self::load_file("error.html"),
-        ))
+        Ok(Response::new("404", None, Self::load_file("error.html")))
     }
 }
 

@@ -38,11 +38,7 @@ impl Handler for WebService {
                 headers.insert("Content-Type", "applicaion/json");
                 Ok(Response::new("200", Some(headers), body))
             }
-            _ => Ok(Response::new(
-                "404",
-                None,
-                Self::load_file("error.html"),
-            )),
+            _ => Ok(Response::new("404", None, Self::load_file("error.html"))),
         }
     }
 }

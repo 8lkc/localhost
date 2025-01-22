@@ -1,10 +1,10 @@
-use localhost::{loader, Multiplexer};
+use localhost::Loader;
 
 fn main() {
-    let mux = match loader("./config/server.toml") {
-        Ok(m) => m,
-        Err(e) => {
-            println!("{e}");
-        }
-    };
+    let mux = Loader::load("./config/server.toml").unwrap_or_default();
+
+    for server in mux.servers {
+        println!("{:#?}", server);
+        // server.run()
+    }
 }
