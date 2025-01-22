@@ -1,5 +1,5 @@
-use std::{fs::File, io::Read};
 use crate::Multiplexer;
+use std::{fs::File, io::Read};
 
 pub struct Loader;
 
@@ -13,7 +13,7 @@ impl Loader {
 
         let mut mux: Multiplexer = toml::from_str(&contents).map_err(|e| e.to_string())?;
 
-        mux.check();
+        mux.clean();
 
         Ok(mux)
     }

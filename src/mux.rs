@@ -13,7 +13,7 @@ impl Default for Multiplexer {
 }
 
 impl Multiplexer {
-    pub fn check(&mut self) {
+    pub fn clean(&mut self) {
         let mut idx = 1;
 
         self.servers.retain(|server| {

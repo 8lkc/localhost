@@ -5,6 +5,10 @@ fn main() {
 
     for server in mux.servers {
         println!("{:#?}", server);
-        // server.run()
+
+        if let Err(error) = server.run() {
+            println!("{error}");
+            continue;
+        }
     }
 }

@@ -16,9 +16,9 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn run(&self) {
+    pub fn run(&self) -> Result<(), String> {
         // Start a server listening on socket address
-        let listener: TcpListener = TcpListener::bind(self.host.as_ref().unwrap()).unwrap();
+        let listener = TcpListener::bind(self.host()).map_err(|e| e.to_string())?;
         println!("Running on {:?}", self.host);
 
         // Listen to incoming connections in a loop
@@ -49,6 +49,8 @@ impl Server {
                 continue;
             }
         }
+
+        Ok(())
     }
 
     pub fn has_valid_config(&self) -> bool {
@@ -56,5 +58,21 @@ impl Server {
             && self.methods.is_some()
             && self.ports.is_some()
             && self.timeout.is_some()
+    }
+
+    pub fn host(&self) -> &str {
+        self.host.as_ref().unwrap()
+    }
+
+    pub fn ports(&self) -> &Vec<usize> {
+        self.ports.as_ref().unwrap()
+    }
+
+    pub fn methods(&self) -> &Vec<String> {
+        self.methods.as_ref().unwrap()
+    }
+
+    pub fn timeout(&self) -> usize {
+        self.timeout.unwrap()
     }
 }

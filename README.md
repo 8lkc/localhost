@@ -131,7 +131,9 @@ tree --dirsfirst
   |       |       +-📄 router.rs
   |       |
   |       +-📄 lib.rs
+  |       +-📄 loader.rs
   |       +-📄 main.rs
+  |       +-📄 mux.rs
   |
   +-📂 /tests
   |       |
@@ -212,6 +214,16 @@ class Default {
   +default() Self
 }
 
+class Multiplexer {
+  <<struct>>
+  +servers
+  +default()
+  +clean()
+}
+
+class Loader
+<<struct>> Loader
+
 namespace server {
   class Handler {
     <<trait>>
@@ -221,9 +233,16 @@ namespace server {
 
   class Server {
     <<struct>>
-    socket_adrr
-    +new(socket_addr) Server
-    +run()
+    -host
+    -ports
+    -methods
+    -timeout
+    +run() Result
+    +has_valid_config() Result
+    +host() String
+    +ports() [usize]
+    +methods() [String]
+    +timeout() usize
   }
 
   class Router {
@@ -289,16 +308,20 @@ class Data {
   -status
 }
 
+Multiplexer ..|> Default: Implements
 Request ..|> From: Implements
 Response ..|> From: Implements
 Response ..|> Default: Implements
 Method ..|> From: Implements
 
+Loader -- Multiplexer: Configures
+Loader -- Server: Configures
+Multiplexer *-- Server: Has
 Server -- Request: Builds
 Server -- Router: Calls
+Router -- Request: Directs
 Router -- Resource: Gets
 Router -- Method: Checks
-Router -- Request: Directs
 Router .. Handler: Calls
 Handler -- Request: Handles
 Handler <|.. WebService: Implements
@@ -308,6 +331,7 @@ Handler -- Response: Sends
 Request *-- Resource: Belongs_to
 Request *-- Method: Belongs_to
 WebService -- Data: Loads
+Data ..* Response: Added_to
 
 Request ..() Debug
 Response ..() Debug
@@ -319,7 +343,6 @@ Resource ..() Debug
 Resource ..() PartialEq
 Data ..() Serialize
 Data ..() Deserialize
-Data ..* Response: Added_to
 ```
 
 ### Sequence

@@ -10,8 +10,14 @@ fn test_response_struct_creation_200() {
 
     assert_eq!(response_actual.status_code(), "200");
     assert_eq!(response_actual.status_text(), "OK");
-    assert_eq!(response_actual.headers(), "Content-Type:text/html\r\n");
-    assert_eq!(response_actual.body(), "Item was shipped on 21st Dec 2020");
+    assert_eq!(
+        response_actual.headers(),
+        "Content-Type:text/html\r\n"
+    );
+    assert_eq!(
+        response_actual.body(),
+        "Item was shipped on 21st Dec 2020"
+    );
 }
 
 #[test]
@@ -24,8 +30,14 @@ fn test_response_struct_creation_404() {
 
     assert_eq!(response_actual.status_code(), "404");
     assert_eq!(response_actual.status_text(), "Not Found");
-    assert_eq!(response_actual.headers(), "Content-Type:text/html\r\n");
-    assert_eq!(response_actual.body(), "Item was shipped on 21st Dec 2020");
+    assert_eq!(
+        response_actual.headers(),
+        "Content-Type:text/html\r\n"
+    );
+    assert_eq!(
+        response_actual.body(),
+        "Item was shipped on 21st Dec 2020"
+    );
 }
 
 #[test]
