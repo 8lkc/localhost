@@ -10,20 +10,20 @@ use {
 };
 
 pub struct Server<'a> {
-    socket_addr: &'a str,
+    host: &'a str,
 }
 
 impl<'a> Server<'a> {
-    pub fn new(socket_addr: &'a str) -> Self {
+    pub fn new(host: &'a str) -> Self {
         Server {
-            socket_addr,
+            host,
         }
     }
 
     pub fn run(&self) {
         // Start a server listening on socket address
-        let listener = TcpListener::bind(self.socket_addr).unwrap();
-        println!("Running on {}", self.socket_addr);
+        let listener = TcpListener::bind(self.host).unwrap();
+        println!("Running on {}", self.host);
 
         // Listen to incoming connections in a loop
         for stream in listener.incoming() {

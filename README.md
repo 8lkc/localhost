@@ -92,6 +92,11 @@ tree --dirsfirst
   |       |
   |       +-📄 data.json
   |
+  +-📂 /templates
+  |       |
+  |       +-📄 error.html
+  |       +-📄 index.html
+  |
   +-📂 /scripts
   |       |
   |       +-📜 gitify.sh
@@ -128,11 +133,6 @@ tree --dirsfirst
   |       +-📄 lib.rs
   |       +-📄 main.rs
   |
-  +-📂 /templates
-  |       |
-  |       +-📄 error.html
-  |       +-📄 index.html
-  |
   +-📂 /tests
   |       |
   |       +-📄 request_test.rs
@@ -157,47 +157,49 @@ tree --dirsfirst
 
 ```mermaid
 architecture-beta
-  group localhost(logos:google-home)[localhost]
+
+  group localhost(logos:rust)[localhost]
   group source(logos:rust)[source] in localhost
-  group server(server)[server] in source
-  group http(internet)[http] in source
+  group servers(logos:rust)[servers] in source
+  group http(logos:rust)[http] in source
 
   service config(logos:toml)[config] in localhost
   service templates(logos:html-5)[templates] in localhost
   service data(logos:json)[data] in localhost
 
   service loader(logos:aws-config)[loader] in source
-  service root(server)[root] in  server
-  service request(internet)[request] in http
-  service middlewares(logos:aws-lambda)[middlewares] in server
-  service router(logos:react-router)[router] in server
-  service handlers(logos:aws-step-functions)[handlers] in server
-  service response(internet)[response] in http
+  service multiplexer(server)[multiplexer] in source
+
+  service root(server)[root] in  servers
+  service middlewares(logos:aws-lambda)[middlewares] in servers
+  service router(logos:react-router)[router] in servers
+  service handlers(logos:aws-step-functions)[handlers] in servers
+
+  service requests(internet)[requests] in http
+  service sessions(internet)[sessions] in http
+  service responses(internet)[responses] in http
+
   junction builder in localhost
 
-  config:B --> T:loader
-  loader:R --> L:root
-  request:B --> R:root
-  root:B --> T:middlewares
+  config:R --> L:loader
+  loader:R --> L:multiplexer
+  requests:L --> R:multiplexer
+  multiplexer:B --> T:root
+  root:R <-- L:sessions
+  root:L --> R:middlewares
   middlewares:B --> T:router
-  router:B --> T:handlers
+  router:R --> L:handlers
   builder:T --> B:handlers
   templates:L -- R:builder
   data:R -- L:builder
-  handlers:R --> L:response
-  %% request:B -- T:response
+  handlers:R --> L:responses
 ```
 
 ### Classes
 
 ```mermaid
 classDiagram
-
-class Handler {
-  <<trait>>
-  +handle(request) Response
-  +load_file(file_name) String
-}
+direction LR
 
 class From {
   <<trait>>
@@ -210,29 +212,40 @@ class Default {
   +default() Self
 }
 
-class Server {
-  <<struct>>
-  socket_adrr
-  +new(socket_addr) Server
-  +run()
+namespace server {
+  class Handler {
+    <<trait>>
+    +handle(request) Response
+    +load_file(file_name) String
+  }
+
+  class Server {
+    <<struct>>
+    socket_adrr
+    +new(socket_addr) Server
+    +run()
+  }
+
+  class Router {
+    <<struct>>
+    +route(req, stream) 
+  }
+
+  class WebService {
+    <<struct>>
+    +load_json() [Data]
+  }
+
+  class StaticPage {
+    <<struct>>
+  }
+
+  class ErrorPage {
+    <<struct>>
+  }
 }
 
-class Router {
-  <<struct>>
-  +route(req, stream) 
-}
-
-class WebService {
-  <<struct>>
-  +load_json() [Data]
-}
-
-class StaticPage
-<<struct>> StaticPage
-
-class ErrorPage
-<<struct>> ErrorPage
-
+namespace http {
 class Request {
   <<struct>>
   +method
@@ -266,6 +279,7 @@ class Response {
   +status_text() string
   +headers() String
   +body() string
+}
 }
 
 class Data {

@@ -39,7 +39,7 @@ impl Handler for ErrorPage {
         Ok(Response::new(
             "404",
             None,
-            Self::load_file("pages/error.html"),
+            Self::load_file("error.html"),
         ))
     }
 }

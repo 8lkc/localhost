@@ -21,7 +21,7 @@ impl Handler for StaticPage {
             "" => Ok(Response::new(
                 "200",
                 None,
-                Self::load_file("pages/index.html"),
+                Self::load_file("index.html"),
             )),
             path => match Self::load_file(path) {
                 Some(contents) => {
@@ -46,7 +46,7 @@ impl Handler for StaticPage {
                 None => Ok(Response::new(
                     "404",
                     None,
-                    Self::load_file("pages/error.html"),
+                    Self::load_file("error.html"),
                 )),
             },
         }
