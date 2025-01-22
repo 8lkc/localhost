@@ -1,23 +1,17 @@
 mod method;
 mod utils;
 
-pub use method::{
-    Method,
-    Resource,
-};
+pub use method::{Method, Resource};
 use {
     std::collections::HashMap,
-    utils::{
-        process_header_line,
-        process_req_line,
-    },
+    utils::{process_header_line, process_req_line},
 };
 
 #[derive(Debug)]
 pub struct Request {
-    pub method:   Method,
+    pub method: Method,
     pub resource: Resource,
-    pub headers:  HashMap<String, String>,
+    pub headers: HashMap<String, String>,
     pub msg_body: String,
 }
 
@@ -34,20 +28,18 @@ impl From<String> for Request {
 
                 parsed_method = method;
                 parsed_resource = resource;
-            }
-            else if line.contains(":") {
+            } else if line.contains(":") {
                 let (key, value) = process_header_line(line);
                 parsed_headers.insert(key, value);
-            }
-            else {
+            } else {
                 parsed_msg_body = line;
             }
         }
         // Parse the incoming HTTP request into HttpRequest struct
         Request {
-            method:   parsed_method,
+            method: parsed_method,
             resource: parsed_resource,
-            headers:  parsed_headers,
+            headers: parsed_headers,
             msg_body: parsed_msg_body.to_string(),
         }
     }

@@ -1,3 +1,10 @@
-use localhost::Server;
+use localhost::{loader, Multiplexer};
 
-fn main() { Server::new("127.0.0.1:7878").run() }
+fn main() {
+    let mux = match loader("./config/server.toml") {
+        Ok(m) => m,
+        Err(e) => {
+            println!("{e}");
+        }
+    };
+}

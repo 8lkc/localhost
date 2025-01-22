@@ -3,27 +3,23 @@ mod router;
 
 use {
     router::Router,
-    std::{
-        io::Read,
-        net::TcpListener,
-    },
+    serde::{Deserialize, Serialize},
+    std::{io::Read, net::TcpListener},
 };
 
-pub struct Server<'a> {
-    host: &'a str,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Server {
+    host: Option<String>,
+    ports: Option<Vec<usize>>,
+    methods: Option<Vec<String>>,
+    timeout: Option<usize>,
 }
 
-impl<'a> Server<'a> {
-    pub fn new(host: &'a str) -> Self {
-        Server {
-            host,
-        }
-    }
-
+impl Server {
     pub fn run(&self) {
         // Start a server listening on socket address
-        let listener = TcpListener::bind(self.host).unwrap();
-        println!("Running on {}", self.host);
+        let listener: TcpListener = TcpListener::bind(self.host.as_ref().unwrap()).unwrap();
+        println!("Running on {:?}", self.host);
 
         // Listen to incoming connections in a loop
         for stream in listener.incoming() {
@@ -31,6 +27,7 @@ impl<'a> Server<'a> {
                 Ok(stream) => stream,
                 Err(_) => continue,
             };
+
             dbg!("Connection established!");
 
             let mut read_buffer = [0; 90];

@@ -1,7 +1,4 @@
-use {
-    localhost::Response,
-    std::collections::HashMap,
-};
+use {localhost::Response, std::collections::HashMap};
 
 #[test]
 fn test_response_struct_creation_200() {

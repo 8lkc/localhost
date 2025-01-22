@@ -2,23 +2,11 @@ mod static_page;
 mod web_service;
 
 use {
-    crate::http::{
-        Request,
-        Response,
-    },
-    serde::{
-        Deserialize,
-        Serialize,
-    },
-    std::{
-        env,
-        fs,
-    },
+    crate::http::{Request, Response},
+    serde::{Deserialize, Serialize},
+    std::{env, fs},
 };
-pub use {
-    static_page::StaticPage,
-    web_service::WebService,
-};
+pub use {static_page::StaticPage, web_service::WebService};
 
 pub trait Handler {
     fn handle(req: &Request) -> Result<Response, String>;
@@ -46,7 +34,7 @@ impl Handler for ErrorPage {
 
 #[derive(Serialize, Deserialize)]
 pub struct Data {
-    id:     i32,
-    data:   String,
+    id: i32,
+    data: String,
     status: String,
 }

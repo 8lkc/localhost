@@ -1,15 +1,6 @@
 use {
-    super::handler::{
-        ErrorPage,
-        Handler,
-        StaticPage,
-        WebService,
-    },
-    crate::http::{
-        Method,
-        Request,
-        Resource,
-    },
+    super::handler::{ErrorPage, Handler, StaticPage, WebService},
+    crate::http::{Method, Request, Resource},
     std::io::prelude::*,
 };
 

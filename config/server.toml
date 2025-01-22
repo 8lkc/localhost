@@ -1,23 +1,19 @@
 [server]
-name = "default"
+
+[[servers]]
 host = "127.0.0.1"
-ports = [8080, 3000, 5500]
-timeout = 2500
-methods = ["GET", "POST", "DELETE"]
-
-[[servers]]
-name = "server_1"
 ports = [8080, 3000]
+methods = ["GET", "POST", "DELETE"]
 timeout = 5000
-methods = ["GET", "POST"]
 
 [[servers]]
-name = "server_2"
+host = "192.168.20.10"
 ports = [5500, 4000]
-host = "0.0.0.0"
+methods = ["GET"]
 timeout = 3000
-method = ["GET"]
 
 [[servers]]
-name = "server_3"
+host = "0.0.0.0"
 ports = [4000, 8080]
+methods = ["POST"]
+timeout = 4500

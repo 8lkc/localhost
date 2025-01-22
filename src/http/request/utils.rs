@@ -1,7 +1,4 @@
-use super::method::{
-    Method,
-    Resource,
-};
+use super::method::{Method, Resource};
 
 pub(super) fn process_req_line(s: &str) -> (Method, Resource) {
     let mut words = s.split_whitespace();

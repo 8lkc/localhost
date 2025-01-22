@@ -1,18 +1,7 @@
 use {
-    super::{
-        Data,
-        Handler,
-    },
-    crate::http::{
-        Request,
-        Resource,
-        Response,
-    },
-    std::{
-        collections::HashMap,
-        env,
-        fs,
-    },
+    super::{Data, Handler},
+    crate::http::{Request, Resource, Response},
+    std::{collections::HashMap, env, fs},
 };
 
 pub struct WebService;
@@ -33,6 +22,10 @@ impl Handler for WebService {
     fn handle(req: &Request) -> Result<Response, String> {
         let Resource::Path(s) = &req.resource;
         let route: Vec<&str> = s.split("/").collect();
+
+        if route.len() < 3 {
+            return Err("Too short".to_string());
+        }
 
         match route[2] {
             "shipping" if route.len() > 3 && route[3] == "data" => {

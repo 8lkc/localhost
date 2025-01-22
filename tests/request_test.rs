@@ -1,10 +1,6 @@
 use {
+    localhost::{Method, Request, Resource},
     std::collections::HashMap,
-    localhost::{
-        Method,
-        Request,
-        Resource,
-    },
 };
 
 #[test]

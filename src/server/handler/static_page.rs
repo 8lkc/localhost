@@ -1,10 +1,6 @@
 use {
     super::Handler,
-    crate::http::{
-        Request,
-        Resource,
-        Response,
-    },
+    crate::http::{Request, Resource, Response},
     std::collections::HashMap,
 };
 
@@ -29,11 +25,9 @@ impl Handler for StaticPage {
 
                     if contents.ends_with(".css") {
                         map.insert("Content-Type", "text/css");
-                    }
-                    else if contents.ends_with(".js") {
+                    } else if contents.ends_with(".js") {
                         map.insert("Content-Type", "text/javascript");
-                    }
-                    else {
+                    } else {
                         map.insert("Content-Type", "text/html");
                     }
 

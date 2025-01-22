@@ -2,10 +2,7 @@ use {
     super::Response,
     std::{
         collections::HashMap,
-        io::{
-            Result,
-            Write,
-        },
+        io::{Result, Write},
     },
 };
 
@@ -49,9 +46,13 @@ impl<'a> Response<'a> {
         Ok(())
     }
 
-    pub fn status_code(&self) -> &str { self.status_code }
+    pub fn status_code(&self) -> &str {
+        self.status_code
+    }
 
-    pub fn status_text(&self) -> &str { self.status_text }
+    pub fn status_text(&self) -> &str {
+        self.status_text
+    }
 
     pub fn headers(&self) -> String {
         let map: HashMap<&str, &str> = self.headers.clone().unwrap();
