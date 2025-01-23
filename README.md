@@ -201,7 +201,7 @@ architecture-beta
 
 ```mermaid
 classDiagram
-direction LR
+%% direction LR
 
 class From {
   <<trait>>

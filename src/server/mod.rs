@@ -1,5 +1,6 @@
 mod handler;
 mod router;
+mod test;
 
 use {
     router::Router,
