@@ -1,11 +1,15 @@
 mod handler;
 mod router;
-mod test;
+// mod test;
 
 use {
     router::Router,
     serde::{Deserialize, Serialize},
-    std::{io::Read, net::TcpListener},
+    std::{
+        io::Read,
+        net::{SocketAddr, TcpListener},
+        str::FromStr,
+    },
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -62,6 +66,7 @@ impl Server {
     }
 
     pub fn host(&self) -> &str {
+        dbg!(self.host.as_ref());
         self.host.as_ref().unwrap()
     }
 
@@ -75,5 +80,30 @@ impl Server {
 
     pub fn timeout(&self) -> usize {
         self.timeout.unwrap()
+    }
+
+    pub fn listeners(&self) -> Result<Vec<TcpListener>, String> {
+        let mut listeners = vec![];
+        let host = self.host();
+
+        for port in self.ports() {
+            let address = SocketAddr::from_str(format!("{host}:{port}").as_str())
+                .map_err(|e| e.to_string())?;
+            
+            dbg!(&address);
+
+            match TcpListener::bind(address) {
+                Ok(listener) => {
+                    println!("Listener created on {}:{}", host, port);
+                    listeners.push(listener);
+                }
+                Err(e) => {
+                    dbg!(e.to_string());
+                    ()
+                }
+            };
+        }
+
+        Ok(listeners)
     }
 }

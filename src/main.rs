@@ -1,14 +1,19 @@
 use localhost::Loader;
 
 fn main() {
-    let mux = Loader::load("./config/server.toml").unwrap_or_default();
-
-    for server in mux.servers {
-        println!("{:#?}", server);
-
-        if let Err(error) = server.run() {
-            println!("{error}");
-            continue;
+    let mux = match Loader::load("./config/server.toml") {
+        Ok(multiplexer) => multiplexer,
+        Err(error) => {
+            dbg!(error);
+            return;
         }
+    };
+
+    if let Err(error) = mux.add_fd() {
+        dbg!(error);
     }
+
+    dbg!(mux.epoll_fd());
+
+    mux.run()
 }
