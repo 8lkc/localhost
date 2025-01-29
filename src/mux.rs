@@ -1,16 +1,16 @@
-use crate::{loader::Config, Server};
 use libc::{epoll_ctl, epoll_event, epoll_wait, EPOLLIN, EPOLL_CTL_ADD};
 use std::{
-    collections::HashMap,
-    net::TcpListener,
+    net::{TcpListener, TcpStream},
     os::{fd::AsRawFd, unix::io::RawFd},
 };
+use crate::{loader::Config, server::Server};
 
 #[derive(Debug)]
 pub struct Multiplexer {
     epoll_fd: RawFd,
     servers: Vec<Server>,
     listeners: Vec<TcpListener>,
+    streams: Vec<TcpStream>,
 }
 
 impl Multiplexer {
@@ -39,6 +39,7 @@ impl Multiplexer {
             epoll_fd,
             servers,
             listeners,
+            streams: vec![],
         })
     }
 
@@ -98,14 +99,33 @@ impl Multiplexer {
 
             for n in 0..nfds as usize {
                 let fd = events[n].u64 as RawFd;
-                
+
                 for listener in self.listeners.iter() {
                     if listener.as_raw_fd() == fd {
                         match listener.accept() {
-                            Ok((stream, addr)) => {},
+                            Ok((stream, addr)) => {
+                                dbg!(stream, addr);
+                                let stream_fd = stream.as_raw_fd();
+
+                                let mut event = unsafe { std::mem::zeroed() };
+                                event.events = EPOLL_IN as u32;
+                                event.u64 = stream_fd as u64;
+
+                                if unsafe {
+                                    epoll_ctl(
+                                        self.epoll_fd,
+                                        EPOLL_CTL_ADD,
+                                        stream_fd,
+                                        &mut event,
+                                    )
+                                } < 0
+                                {
+                                    dbg!(io::Error::last_os_error().to_string())
+                                }
+                            }
                             Err(error) => {
                                 dbg!(error);
-                                continue
+                                continue;
                             }
                         }
                     }

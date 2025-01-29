@@ -3,7 +3,7 @@ mod router;
 // mod test;
 
 use {
-    router::Router,
+    router::{Route, Router},
     serde::{Deserialize, Serialize},
     std::{
         io::Read,
@@ -16,8 +16,22 @@ use {
 pub struct Server {
     host: Option<String>,
     ports: Option<Vec<usize>>,
-    methods: Option<Vec<String>>,
-    timeout: Option<usize>,
+    root : Option<String>,
+    error_pages : Option<Vec<String>>,
+    routes : Option<Vec<Route>>,
+    check_session : Option<bool>,
+    uploads_max_size: Option<u64>,
+    
+    
+    
+    // host = "127.0.0.1"
+    // ports = [8080, 5500, 4000, 8000]
+    // # root = "/Users/ivan/Desktop/z01/localhost/public"
+    // root = "/Users/ivan/Desktop/z01/localhost/public"
+    // error_pages = ["404.html", "400.html", "405.html", "403.html"]
+    // uploads_max_size = 10485760
+    // cgi_handler = { "py" = "python-cgi.py"}
+    // listing = true
 }
 
 impl Server {
@@ -80,6 +94,13 @@ impl Server {
 
     pub fn timeout(&self) -> usize {
         self.timeout.unwrap()
+    }
+    pub fn check_session(&self) -> usize {
+        self.check_session()
+    }
+    
+    pub fn uploads_max_size(&self) -> usize {
+        self.uploads_max_size()
     }
 
     pub fn listeners(&self) -> Result<Vec<TcpListener>, String> {

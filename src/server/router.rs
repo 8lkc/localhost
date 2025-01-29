@@ -4,6 +4,13 @@ use {
     std::io::prelude::*,
 };
 
+pub struct Route {
+    path: Option<String>,
+    method: Option<Vec<String>>,
+    directory: Option<String>,
+    default_file: Option<String>
+}
+
 pub struct Router;
 
 impl Router {
