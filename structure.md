@@ -8,11 +8,14 @@ src/
 │   └── epoll.rs        # Event loop
 ├── http/
 │   ├── request.rs      # Request parsing
+│   ├── status.rs       # Status of the request
+|   ├── mod.rs           
 │   ├── response.rs     # Response building
 │   └── headers.rs      # HTTP headers
 ├── handlers/
 │   ├── cgi.rs          # CGI execution
 │   ├── static.rs       # Static files
+│   ├── directory.rs    # Directory structure
 │   └── errors.rs       # Error pages
 └── utils/
     ├── timeout.rs      # Connection timeout
