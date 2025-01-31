@@ -1,9 +1,8 @@
 use {
-    super::handler::{ErrorPage, Handler, StaticPage, WebService},
-    crate::http::{Method, Request, Resource},
-    std::{collections::HashMap, io::prelude::*},
+    super::handler::{ErrorPage, Handler, StaticPage, WebService}, crate::http::{Method, Request, Resource}, serde::{Deserialize, Serialize}, std::{collections::HashMap, io::prelude::*}
 };
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Route {
     path: Option<String>,
     method: Option<Vec<String>>,
@@ -12,6 +11,7 @@ pub struct Route {
     redirect: HashMap<String, String>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Router;
 
 impl Router {

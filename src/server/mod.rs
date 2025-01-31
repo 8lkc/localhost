@@ -1,13 +1,16 @@
+pub mod cgi;
 mod handler;
 pub mod router;
-pub mod cgi;
 // mod test;
 
 use {
-    router::{Route, Router},
+    router::Router,
     serde::{Deserialize, Serialize},
     std::{
-        collections::HashMap, io::Read, net::{SocketAddr, TcpListener}, str::FromStr
+        collections::HashMap,
+        io::Read,
+        net::{SocketAddr, TcpListener},
+        str::FromStr,
     },
 };
 
@@ -15,12 +18,12 @@ use {
 pub struct Server {
     host: Option<String>,
     ports: Option<Vec<usize>>,
-    root : Option<String>,
-    error_pages : Option<Vec<String>>,
+    root: Option<String>,
+    error_pages: Option<Vec<String>>,
     uploads_max_size: Option<u64>,
-    cgi_handler : Option<HashMap<String, String>>,
+    cgi_handler: Option<HashMap<String, String>>,
     listing: Option<bool>,
-    routes : Option<Vec<Route>>,
+    router: Option<Router>,
 }
 
 impl Server {
@@ -63,9 +66,16 @@ impl Server {
 
     pub fn has_valid_config(&self) -> bool {
         self.host.is_some()
-            && self.methods.is_some()
+            && self.host.is_some()
             && self.ports.is_some()
-            && self.timeout.is_some()
+            && self.root.is_some()
+            && self.error_pages.is_some()
+            && self
+                .uploads_max_size
+                .is_some()
+            && self.cgi_handler.is_some()
+            && self.listing.is_some()
+            && self.router.is_some()
     }
 
     pub fn host(&self) -> &str {
@@ -77,19 +87,31 @@ impl Server {
         self.ports.as_ref().unwrap()
     }
 
-    pub fn methods(&self) -> &Vec<String> {
-        self.methods.as_ref().unwrap()
+    pub fn root(&self) -> &str {
+        self.root.as_ref().unwrap()
     }
 
-    pub fn timeout(&self) -> usize {
-        self.timeout.unwrap()
+    pub fn error_pages(&self) -> &Vec<String> {
+        self.error_pages
+            .as_ref()
+            .unwrap()
     }
-    pub fn check_session(&self) -> usize {
-        self.check_session()
+    pub fn uploads_max_size(&self) -> u64 {
+        self.uploads_max_size.unwrap()
     }
-    
-    pub fn uploads_max_size(&self) -> usize {
-        self.uploads_max_size()
+
+    pub fn cgi_handler(&self) -> &HashMap<String, String> {
+        self.cgi_handler
+            .as_ref()
+            .unwrap()
+    }
+
+    pub fn listing(&self) -> bool {
+        self.listing.unwrap()
+    }
+
+    pub fn router(&self) -> &Router {
+        self.router.as_ref().unwrap()
     }
 
     pub fn listeners(&self) -> Result<Vec<TcpListener>, String> {
@@ -99,7 +121,7 @@ impl Server {
         for port in self.ports() {
             let address = SocketAddr::from_str(format!("{host}:{port}").as_str())
                 .map_err(|e| e.to_string())?;
-            
+
             dbg!(&address);
 
             match TcpListener::bind(address) {

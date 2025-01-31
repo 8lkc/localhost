@@ -5,29 +5,31 @@ ports = [8080, 5500, 4000, 8000]
 root = "/Users/ivan/Desktop/z01/localhost/public"
 error_pages = ["404.html", "400.html", "405.html", "403.html"]
 uploads_max_size = 10485760
-cgi_handler = { "py" = "/python-cgi.py"}
+cgi_handler = { "py" = "/python-cgi.py" }
 listing = true
 
-[[servers.routes]]
+[server.router]
+
+[[servers.router.routes]]
 path = "/"
 methods = ["GET"]
 default_file = "index.html"
 check_session = true
 redirect = { "/login/" = "signin.html" }
 
-[[servers.routes]]
+[[servers.router.routes]]
 path = "/login/"
 methods = ["GET", "POST"]
 default_file = "signin.html"
 check_session = false
 
-[[servers.routes]]
+[[servers.router.routes]]
 path = "/register/"
 methods = ["GET", "POST"]
 default_file = "signup.html"
 check_session = false
 
-[[servers.routes]]
+[[servers.router.routes]]
 path = "/logout/"
 methods = ["POST", "DELETE"]
 default_file = "signout.html"
