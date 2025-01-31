@@ -1,12 +1,16 @@
-use super::Server;
-use crate::http::Request;
-use std::io::Write;
-use std::net::TcpStream;
-use std::process::Command;
+use {
+    super::Server,
+    crate::http::Request,
+    std::{
+        io::Write,
+        net::TcpStream,
+        process::Command,
+    },
+};
 
-pub struct CGI;
+pub struct CommonGatewayInterface;
 
-impl CGI {
+impl CommonGatewayInterface {
     pub fn is_cgi_request(
         &self,
         request: &Request,
@@ -16,7 +20,9 @@ impl CGI {
         let extension = path
             .split('.')
             .last()
-            .ok_or_else(|| "No file extension found in the request path".to_string())?;
+            .ok_or_else(|| {
+                "No file extension found in the request path".to_string()
+            })?;
 
         let server = servers.iter().find(|server| {
             server
@@ -46,7 +52,9 @@ impl CGI {
         stream: &mut TcpStream,
     ) -> Result<(), String> {
         if !std::path::Path::new(request.resource.path()).exists() {
-            return Err("CGI script not found".to_string());
+            return Err(
+                "CommonGatewayInterface script not found".to_string()
+            );
         }
         let query_string = request
             .resource
@@ -57,21 +65,24 @@ impl CGI {
         let output = Command::new(cgi_script)
             .arg(request.resource.path())
             .env("REQUEST_METHOD", &request.method.to_string())
-            .env(
-                "QUERY_STRING",
-                query_string,
-            )
+            .env("QUERY_STRING", query_string)
             .output()
-            .map_err(|e| format!("Failed to execute CGI: {}", e))?;
+            .map_err(|e| {
+                format!(
+                    "Failed to execute CommonGatewayInterface: {}",
+                    e
+                )
+            })?;
 
         if output.status.success() {
             stream
                 .write_all(&output.stdout)
                 .map_err(|e| format!("Failed to write response: {}", e))?;
-        } else {
+        }
+        else {
             let error_message = String::from_utf8_lossy(&output.stderr);
             return Err(format!(
-                "CGI script error: {}",
+                "CommonGatewayInterface script error: {}",
                 error_message
             ));
         }

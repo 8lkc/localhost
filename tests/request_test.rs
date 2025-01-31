@@ -1,5 +1,9 @@
 use {
-    localhost::{Method, Request, Resource},
+    localhost::{
+        Method,
+        Request,
+        Resource,
+    },
     std::collections::HashMap,
 };
 
@@ -12,8 +16,8 @@ fn test_method_into() {
 #[test]
 fn test_read_http() {
     let s = String::from(
-        "GET /greeting HTTP/1.1\r\nHost: localhost:3000\r\nUser-Agent: curl/7.64.1\r\nAccept: \
-         */*\r\n\r\n",
+        "GET /greeting HTTP/1.1\r\nHost: localhost:3000\r\nUser-Agent: \
+         curl/7.64.1\r\nAccept: */*\r\n\r\n",
     );
 
     let mut headers_expected = HashMap::new();

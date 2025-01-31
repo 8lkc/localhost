@@ -2,7 +2,10 @@ use {
     super::Response,
     std::{
         collections::HashMap,
-        io::{Result, Write},
+        io::{
+            Result,
+            Write,
+        },
     },
 };
 
@@ -39,20 +42,19 @@ impl<'a> Response<'a> {
         response
     }
 
-    pub fn send_response(&self, write_stream: &mut impl Write) -> Result<()> {
+    pub fn send_response(
+        &self,
+        write_stream: &mut impl Write,
+    ) -> Result<()> {
         let res = self.clone();
         let response_string: String = String::from(res);
         let _ = write!(write_stream, "{}", response_string);
         Ok(())
     }
 
-    pub fn status_code(&self) -> &str {
-        self.status_code
-    }
+    pub fn status_code(&self) -> &str { self.status_code }
 
-    pub fn status_text(&self) -> &str {
-        self.status_text
-    }
+    pub fn status_text(&self) -> &str { self.status_text }
 
     pub fn headers(&self) -> String {
         let map: HashMap<&str, &str> = self.headers.clone().unwrap();

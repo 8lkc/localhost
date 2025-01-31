@@ -1,7 +1,18 @@
 use {
-    super::{Data, Handler},
-    crate::http::{Request, Resource, Response},
-    std::{collections::HashMap, env, fs},
+    super::{
+        Data,
+        Handler,
+    },
+    crate::http::{
+        Request,
+        Resource,
+        Response,
+    },
+    std::{
+        collections::HashMap,
+        env,
+        fs,
+    },
 };
 
 pub struct WebService;
@@ -29,8 +40,10 @@ impl Handler for WebService {
 
         match route[2] {
             "shipping" if route.len() > 3 && route[3] == "data" => {
-                let body =
-                    Some(serde_json::to_string(&Self::load_json()).map_err(|e| e.to_string())?);
+                let body = Some(
+                    serde_json::to_string(&Self::load_json())
+                        .map_err(|e| e.to_string())?,
+                );
 
                 dbg!(&body);
 

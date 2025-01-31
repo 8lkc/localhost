@@ -23,7 +23,6 @@ impl std::fmt::Display for Method {
             Method::Uninitialized => write!(f, "Uninitialized"),
         }
     }
-    
 }
 
 #[derive(Debug, PartialEq)]
@@ -34,8 +33,7 @@ pub enum Resource {
 impl Resource {
     pub fn path(&self) -> &str {
         match self {
-            Resource::Path(path) => path.as_str()
+            Resource::Path(path) => path.as_str(),
         }
     }
 }
-

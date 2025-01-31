@@ -1,4 +1,7 @@
-use {localhost::Response, std::collections::HashMap};
+use {
+    localhost::Response,
+    std::collections::HashMap,
+};
 
 #[test]
 fn test_response_struct_creation_200() {
@@ -52,8 +55,10 @@ fn test_http_response_creation() {
     );
 
     let http_string: String = response_expected.into();
-    let response_actual = "HTTP/1.1 404 Not Found\r\nContent-Type:text/html\r\nContent-Length: \
-                           33\r\n\r\nItem was shipped on 21st Dec 2020";
+    let response_actual = "HTTP/1.1 404 Not \
+                           Found\r\nContent-Type:text/html\r\\
+                           nContent-Length: 33\r\n\r\nItem was shipped on \
+                           21st Dec 2020";
 
     assert_eq!(http_string, response_actual);
 }

@@ -3,4 +3,12 @@ mod loader;
 mod mux;
 mod server;
 
-pub use loader::Loader;
+pub use {
+    http::{
+        Method,
+        Request,
+        Resource,
+        Response,
+    },
+    loader::Loader,
+};
