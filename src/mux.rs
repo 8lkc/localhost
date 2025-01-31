@@ -1,4 +1,5 @@
-use libc::{epoll_ctl, epoll_event, epoll_wait, EPOLLIN, EPOLL_CTL_ADD};
+use libc::{epoll_ctl, epoll_event, epoll_wait, EPOLLIN, EPOLL_CTL_ADD, EPOLL_CTL_DEL};
+use std::io::{BufReader, BufRead, Read};
 use std::{
     net::{TcpListener, TcpStream},
     os::{fd::AsRawFd, unix::io::RawFd},
@@ -110,11 +111,15 @@ impl Multiplexer {
                                 let buf_reader = BufReader::new(&stream);
                                 let mut request_string = String::new();
                                 for line in buf_reader.lines() {
-                                    let line = line.map_err(|e| e.to_string())?;
-                                    request_string.push_str(&line);
-                                    request_string.push_str("\n");
-                                    if line.is_empty() {
-                                        break;
+                                    match line {
+                                        Ok(line) => {
+                                            request_string.push_str(&line);
+                                            request_string.push_str("\n");
+                                        }
+                                        Err(error) => {
+                                            dbg!(error);
+                                            continue;
+                                        }
                                     }
                                 }
                                 
@@ -132,7 +137,7 @@ impl Multiplexer {
                                     },
                                     Ok(None) => {
                                         let router = Router;
-                                        router.route(request, &mut stream);
+                                       // router.route(request, &mut stream);
                                         continue;
                                     }
                                     Err(error) => {
@@ -142,7 +147,7 @@ impl Multiplexer {
                                     
                                 };
                                 let mut event = unsafe { std::mem::zeroed() };
-                                event.events = EPOLL_IN as u32;
+                                event.events = EPOLLIN as u32;
                                 event.u64 = stream_fd as u64;
 
                                 if unsafe {
@@ -154,7 +159,7 @@ impl Multiplexer {
                                     )
                                 } < 0
                                 {
-                                    dbg!(io::Error::last_os_error().to_string())
+                                   // dbg!(io::Error::last_os_error().to_string())
                                 }
                             }
                             Err(error) => {
