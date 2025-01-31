@@ -105,8 +105,12 @@ impl Multiplexer {
                 for listener in self.listeners.iter() {
                     if listener.as_raw_fd() == fd {
                         match listener.accept() {
-                            Ok((stream, addr)) => {
-                                dbg!(stream, addr);
+                            Ok((mut stream, addr)) => {
+                                if let Err(e) = stream.set_nonblocking(true).map_err(|e| e.to_string()) {
+                                    dbg!(e);
+                                    continue;
+                                }
+                                dbg!(&stream, addr);
                                 let stream_fd = stream.as_raw_fd();
                                 let buf_reader = BufReader::new(&stream);
                                 let mut request_string = String::new();
@@ -127,7 +131,7 @@ impl Multiplexer {
                                 let cgi = CGI;
 
 
-                                match cgi.is_cgi_request(&request, self.servers) {
+                                match cgi.is_cgi_request(&request, &self.servers) {
                                     Ok(Some(cgi_py)) => {
                                         let cgi_script = cgi.execute_cgi(&cgi_py, &request,&mut  stream);
                                         if let Err(error) = cgi_script {
@@ -146,7 +150,7 @@ impl Multiplexer {
                                     }
                                     
                                 };
-                                let mut event = unsafe { std::mem::zeroed() };
+                                let mut event :epoll_event  = unsafe { std::mem::zeroed() };
                                 event.events = EPOLLIN as u32;
                                 event.u64 = stream_fd as u64;
 
@@ -159,7 +163,7 @@ impl Multiplexer {
                                     )
                                 } < 0
                                 {
-                                   // dbg!(io::Error::last_os_error().to_string())
+                                    dbg!(std::io::Error::last_os_error().to_string());
                                 }
                             }
                             Err(error) => {

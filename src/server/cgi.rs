@@ -10,7 +10,7 @@ impl CGI {
     pub fn is_cgi_request(
         &self,
         request: &Request,
-        servers: Vec<Server>,
+        servers: &Vec<Server>,
     ) -> Result<Option<String>, String> {
         let path = request.resource.path();
         let extension = path
