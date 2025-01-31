@@ -1,7 +1,7 @@
 use {
     super::handler::{ErrorPage, Handler, StaticPage, WebService},
     crate::http::{Method, Request, Resource},
-    std::io::prelude::*,
+    std::{collections::HashMap, io::prelude::*},
 };
 
 pub struct Route {
@@ -9,7 +9,7 @@ pub struct Route {
     method: Option<Vec<String>>,
     default_file: Option<String>,
     check_session: Option<bool>,
-    redirect: Option<String, String>,
+    redirect: HashMap<String, String>,
 }
 
 pub struct Router;
