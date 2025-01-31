@@ -19,3 +19,12 @@ impl From<&str> for Method {
 pub enum Resource {
     Path(String),
 }
+
+impl Resource {
+    pub fn path(&self) -> &str {
+        match self {
+            Resource::Path(path) => path.as_str()
+        }
+    }
+}
+

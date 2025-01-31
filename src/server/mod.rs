@@ -1,14 +1,13 @@
 mod handler;
-mod router;
+pub mod router;
+pub mod cgi;
 // mod test;
 
 use {
     router::{Route, Router},
     serde::{Deserialize, Serialize},
     std::{
-        io::Read,
-        net::{SocketAddr, TcpListener},
-        str::FromStr,
+        collections::HashMap, io::Read, net::{SocketAddr, TcpListener}, str::FromStr
     },
 };
 
@@ -18,20 +17,10 @@ pub struct Server {
     ports: Option<Vec<usize>>,
     root : Option<String>,
     error_pages : Option<Vec<String>>,
-    routes : Option<Vec<Route>>,
-    check_session : Option<bool>,
     uploads_max_size: Option<u64>,
-    
-    
-    
-    // host = "127.0.0.1"
-    // ports = [8080, 5500, 4000, 8000]
-    // # root = "/Users/ivan/Desktop/z01/localhost/public"
-    // root = "/Users/ivan/Desktop/z01/localhost/public"
-    // error_pages = ["404.html", "400.html", "405.html", "403.html"]
-    // uploads_max_size = 10485760
-    // cgi_handler = { "py" = "python-cgi.py"}
-    // listing = true
+    cgi_handler : Option<HashMap<String, String>>,
+    listing: Option<bool>,
+    routes : Option<Vec<Route>>,
 }
 
 impl Server {

@@ -7,8 +7,9 @@ use {
 pub struct Route {
     path: Option<String>,
     method: Option<Vec<String>>,
-    directory: Option<String>,
-    default_file: Option<String>
+    default_file: Option<String>,
+    check_session: Option<bool>,
+    redirect: Option<String, String>,
 }
 
 pub struct Router;

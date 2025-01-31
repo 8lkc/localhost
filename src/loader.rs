@@ -6,10 +6,11 @@ use std::{fs::File, io::Read};
 /// Represents the main configuration structure
 /// holding a collection of server configurations.
 /// 
+
 pub struct Config {
     servers: Vec<Server>,
 }
-
+type ErrorMux = Result<Multiplexer, String>;
 impl Config {
     /// Returns the ownership of the
     /// server configurations as an unwraping.
@@ -68,7 +69,7 @@ impl Loader {
     /// * The configuration file contains invalid TOML syntax.
     /// * An error occurs during the creation of the `Multiplexer`.
     /// 
-    pub fn load(path: &'static str) -> Result<Multiplexer, String> {
+    pub fn load(path: &'static str) -> ErrorMux {
         let mut file = File::open(path).map_err(|e| e.to_string())?;
         let mut contents = String::new();
 

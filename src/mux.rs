@@ -3,7 +3,8 @@ use std::{
     net::{TcpListener, TcpStream},
     os::{fd::AsRawFd, unix::io::RawFd},
 };
-use crate::{loader::Config, server::Server};
+use crate::{http::Request, loader::Config, server::Server, server::cgi::CGI, server::router::Router};
+
 
 #[derive(Debug)]
 pub struct Multiplexer {
@@ -12,7 +13,7 @@ pub struct Multiplexer {
     listeners: Vec<TcpListener>,
     streams: Vec<TcpStream>,
 }
-
+type ErrorAddFd = Result<(), String>;
 impl Multiplexer {
     pub fn new(config: Config) -> Result<Self, String> {
         let servers = config.servers();
@@ -51,7 +52,7 @@ impl Multiplexer {
         &self.servers
     }
 
-    pub fn add_fd(&self) -> Result<(), String> {
+    pub fn add_fd(&self) -> ErrorAddFd {
         for listener in self.listeners.iter() {
             let fd = listener.as_raw_fd();
 
@@ -106,7 +107,40 @@ impl Multiplexer {
                             Ok((stream, addr)) => {
                                 dbg!(stream, addr);
                                 let stream_fd = stream.as_raw_fd();
+                                let buf_reader = BufReader::new(&stream);
+                                let mut request_string = String::new();
+                                for line in buf_reader.lines() {
+                                    let line = line.map_err(|e| e.to_string())?;
+                                    request_string.push_str(&line);
+                                    request_string.push_str("\n");
+                                    if line.is_empty() {
+                                        break;
+                                    }
+                                }
+                                
+                                let request = Request::from(request_string);
+                                let cgi = CGI;
 
+
+                                match cgi.is_cgi_request(&request, self.servers) {
+                                    Ok(Some(cgi_py)) => {
+                                        let cgi_script = cgi.execute_cgi(&cgi_py, &request,&mut  stream);
+                                        if let Err(error) = cgi_script {
+                                            dbg!(error);
+                                            continue;
+                                        }
+                                    },
+                                    Ok(None) => {
+                                        let router = Router;
+                                        router.route(request, &mut stream);
+                                        continue;
+                                    }
+                                    Err(error) => {
+                                        dbg!(error);
+                                        continue;
+                                    }
+                                    
+                                };
                                 let mut event = unsafe { std::mem::zeroed() };
                                 event.events = EPOLL_IN as u32;
                                 event.u64 = stream_fd as u64;
