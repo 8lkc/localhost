@@ -1,5 +1,5 @@
 mod linux;
-mod macos;
+mod mac_os;
 
 use {
     crate::server::Server,

@@ -14,12 +14,12 @@ impl CommonGatewayInterface {
     pub fn is_cgi_request(
         &self,
         request: &Request,
-        servers: &Vec<Server>,
+        servers: &[Server],
     ) -> Result<Option<String>, String> {
         let path = request.resource.path();
         let extension = path
             .split('.')
-            .last()
+            .next_back()
             .ok_or_else(|| {
                 "No file extension found in the request path".to_string()
             })?;
@@ -64,7 +64,7 @@ impl CommonGatewayInterface {
             .unwrap_or("");
         let output = Command::new(cgi_script)
             .arg(request.resource.path())
-            .env("REQUEST_METHOD", &request.method.to_string())
+            .env("REQUEST_METHOD", request.method.to_string())
             .env("QUERY_STRING", query_string)
             .output()
             .map_err(|e| {

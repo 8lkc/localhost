@@ -16,11 +16,12 @@ use {
 #[derive(Debug, Serialize, Deserialize)]
 /// Represents the main configuration structure
 /// holding a collection of server configurations.
-
 pub struct Config {
     servers: Vec<Server>,
 }
+
 type ErrorMux = Result<Multiplexer, String>;
+
 impl Config {
     /// Returns the ownership of the
     /// server configurations as an unwraping.

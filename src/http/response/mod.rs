@@ -10,18 +10,18 @@ pub struct Response<'a> {
     body:        Option<String>,
 }
 
-impl<'a> Default for Response<'a> {
+impl Default for Response<'_> {
     fn default() -> Self {
         Self {
-            status_code: "200".into(),
-            status_text: "OK".into(),
+            status_code: "200",
+            status_text: "OK",
             headers:     None,
             body:        None,
         }
     }
 }
 
-impl<'a> From<Response<'a>> for String {
+impl From<Response<'_>> for String {
     fn from(res: Response) -> String {
         format!(
             "HTTP/1.1 {} {}\r\n{}Content-Length: {}\r\n\r\n{}",

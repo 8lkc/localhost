@@ -16,14 +16,14 @@ use localhost::Loader;
 fn main() {
     let mux = match Loader::load("./config/server.toml") {
         Ok(multiplexer) => multiplexer,
-        Err(error) => {
-            dbg!(error);
+        Err(e) => {
+            dbg!(e);
             return;
         }
     };
 
-    if let Err(error) = mux.add_fd() {
-        dbg!(error);
+    if let Err(e) = mux.add_fd() {
+        dbg!(e);
     }
 
     dbg!(mux.epoll_fd());

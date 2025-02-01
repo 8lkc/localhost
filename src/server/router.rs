@@ -29,44 +29,36 @@ pub struct Route {
     redirect:      Option<HashMap<String, String>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Router {
-    routes: Option<Vec<Route>>,
+impl Route {
+    pub fn has_valid_config(&self) -> bool {
+        self.path.is_some()
+            && self.method.is_some()
+            && self.default_file.is_some()
+            && self.check_session.is_some()
+    }
 }
 
-impl Router {
-    pub fn has_valid_config(&self) -> bool {
-        match &self.routes {
-            Some(routes) => routes.iter().all(|route| {
-                route.path.is_some()
-                    && route.method.is_some()
-                    && route.default_file.is_some()
-                    && route.check_session.is_some()
-                    && route.redirect.is_some()
-            }),
-            None => false,
-        }
-    }
+pub struct Router;
 
+impl Router {
     pub fn run(
-        &self,
-        req: Request,
+        request: Request,
         stream: &mut impl Write,
     ) -> Result<(), String> {
-        match (&req.method, &req.resource) {
+        match (&request.method, &request.resource) {
             (Method::GET, Resource::Path(s)) => {
                 let route: Vec<&str> = s.split("/").collect();
 
                 match route[1] {
-                    "api" => WebService::handle(&req)?
+                    "api" => WebService::handle(&request)?
                         .send_response(stream)
                         .map_err(|e| e.to_string()),
-                    _ => StaticPage::handle(&req)?
+                    _ => StaticPage::handle(&request)?
                         .send_response(stream)
                         .map_err(|e| e.to_string()),
                 }
             }
-            _ => ErrorPage::handle(&req)?
+            _ => ErrorPage::handle(&request)?
                 .send_response(stream)
                 .map_err(|e| e.to_string()),
         }

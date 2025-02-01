@@ -24,16 +24,17 @@ impl Handler for StaticPage {
                 Self::load_file("index.html"),
             )),
             path => match Self::load_file(path) {
-                Some(contents) => {
+                Some(mut contents) => {
                     let mut map = HashMap::new();
 
-                    if contents.ends_with(".css") {
+                    if path.ends_with(".css") {
                         map.insert("Content-Type", "text/css");
                     }
-                    else if contents.ends_with(".js") {
+                    else if path.ends_with(".js") {
                         map.insert("Content-Type", "text/javascript");
                     }
                     else {
+                        contents = format!("{}.html", contents);
                         map.insert("Content-Type", "text/html");
                     }
 

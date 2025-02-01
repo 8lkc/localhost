@@ -4,7 +4,10 @@ pub mod router;
 // mod test;
 
 use {
-    router::Router,
+    router::{
+        Route,
+        Router,
+    },
     serde::{
         Deserialize,
         Serialize,
@@ -29,7 +32,7 @@ pub struct Server {
     uploads_max_size: Option<u64>,
     cgi_handler:      Option<HashMap<String, String>>,
     listing:          Option<bool>,
-    router:           Option<Router>,
+    routes:           Option<Vec<Route>>,
 }
 
 impl Server {
@@ -44,7 +47,11 @@ impl Server {
                 .is_some()
             && self.cgi_handler.is_some()
             && self.listing.is_some()
-            && self.router.is_some()
+            && self.routes.is_some()
+            // && self
+            //     .routes()
+            //     .iter()
+            //     .all(|route| route.has_valid_config())
     }
 
     pub fn run(&self) -> Result<(), String> {
@@ -63,7 +70,7 @@ impl Server {
             dbg!("Connection established!");
 
             let mut read_buffer = [0; 90];
-            if let Err(_) = stream.read(&mut read_buffer) {
+            if stream.read(&mut read_buffer).is_err() {
                 dbg!("Failed to read stream!");
                 continue;
             }
@@ -76,10 +83,7 @@ impl Server {
             .into();
 
             // Route request to appropriate handler
-            if let Err(_) = self
-                .router()
-                .run(req, &mut stream)
-            {
+            if Router::run(req, &mut stream).is_err() {
                 dbg!("Failed to direct request!");
                 continue;
             }
@@ -115,7 +119,7 @@ impl Server {
 
     pub fn listing(&self) -> bool { self.listing.unwrap() }
 
-    pub fn router(&self) -> &Router { self.router.as_ref().unwrap() }
+    pub fn routes(&self) -> &Vec<Route> { self.routes.as_ref().unwrap() }
 
     pub fn listeners(&self) -> Result<Vec<TcpListener>, String> {
         let mut listeners = vec![];
@@ -135,7 +139,6 @@ impl Server {
                 }
                 Err(e) => {
                     dbg!(e.to_string());
-                    ()
                 }
             };
         }

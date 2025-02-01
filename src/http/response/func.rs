@@ -17,7 +17,7 @@ impl<'a> Response<'a> {
     ) -> Response<'a> {
         let mut response = Response::default();
         if status_code != "200" {
-            response.status_code = status_code.into();
+            response.status_code = status_code;
         };
 
         response.headers = match &headers {
@@ -30,11 +30,11 @@ impl<'a> Response<'a> {
         };
 
         response.status_text = match response.status_code {
-            "200" => "OK".into(),
-            "400" => "Bad Request".into(),
-            "404" => "Not Found".into(),
-            "500" => "Internal Server Error".into(),
-            _ => "Not Found".into(),
+            "200" => "OK",
+            "400" => "Bad Request",
+            "404" => "Not Found",
+            "500" => "Internal Server Error",
+            _ => "Not Found",
         };
 
         response.body = body;
