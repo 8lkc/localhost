@@ -18,7 +18,6 @@ impl Server {
     }
 
     pub fn start(&mut self) -> io::Result<()> {
-        // Créer le listener pour le premier port
         let addr = format!("{}:{}", self.config.host, self.config.ports[0]);
         let listener = TcpListener::bind(&addr)?;
         
@@ -32,7 +31,6 @@ impl Server {
                 match listener.accept() {
                     Ok((stream, addr)) => {
                         println!("New connection from: {}", addr);
-                        // TODO: Gérer la connexion
                         self.handle_connection(stream)?;
                     }
                     Err(e) => {
