@@ -52,10 +52,10 @@ RUST_LOG = "debug"
 
 # ----- Target Specific Settings -----
 
-[target.x86_64-unknown-linux-gnu]
+# [target.x86_64-unknown-linux-gnu]
 # Linker to use
 # Default: gcc/cc
-linker = "clang"
+# linker = "clang"
 
 # Additional flags for this target
 rustflags = ["-C", "link-arg=-fuse-ld=lld"]

@@ -1,3 +1,5 @@
+use std::io::{Error, ErrorKind};
+
 #[cfg(target_os = "linux")]
 use {
     super::{ErrorAddFd, Multiplexer},
@@ -8,11 +10,19 @@ use {
     },
     libc::{epoll_create1, epoll_ctl, epoll_event, epoll_wait, EPOLLIN, EPOLL_CTL_ADD},
     std::{
-        io::{BufRead, BufReader, Error, ErrorKind},
+        io::{BufRead, BufReader},
         os::{fd::AsRawFd, unix::io::RawFd},
         ptr::null_mut,
     },
 };
+
+#[repr(C)]
+union EventData {
+    ptr: *mut libc::c_void,
+    fd: i32,
+    u32: u32,
+    u64: u64,
+}
 
 #[cfg(target_os = "linux")]
 impl Multiplexer {
@@ -58,7 +68,7 @@ impl Multiplexer {
 
             let mut event = epoll_event {
                 events: EPOLLIN as u32,
-                u64: fd as u64,
+                data: EventData { fd }, // Using the union correctly
             };
 
             if unsafe { epoll_ctl(self.epoll_fd, EPOLL_CTL_ADD, fd, &mut event) } < 0 {
@@ -69,12 +79,24 @@ impl Multiplexer {
     }
 
     pub fn run(&self) {
-        let mut events: Vec<epoll_event> = vec![epoll_event { events: 0, u64: 0 }; 32];
+        let mut events = vec![
+            epoll_event {
+                events: 0,
+                data: EventData { u64: 0 },
+            };
+            32
+        ];
 
         loop {
             dbg!("Start Multiplexer...");
-            let nfds =
-                unsafe { epoll_wait(self.epoll_fd, events.as_mut_ptr(), events.len() as i32, -1) };
+            let nfds = unsafe { 
+                epoll_wait(
+                    self.epoll_fd,
+                    events.as_mut_ptr(),
+                    events.len() as i32,
+                    -1
+                ) 
+            };
 
             if nfds < 0 {
                 dbg!(Error::last_os_error().to_string());
@@ -82,7 +104,7 @@ impl Multiplexer {
             }
 
             for event in events.iter().take(nfds as usize) {
-                let fd = event.u64 as RawFd;
+                let fd = unsafe { event.data.fd };
 
                 for listener in self.listeners.iter() {
                     if listener.as_raw_fd() == fd {
@@ -151,13 +173,18 @@ impl Multiplexer {
                                     }
                                 };
 
-                                let mut event = epoll_event {
+                                let mut new_event = epoll_event {
                                     events: EPOLLIN as u32,
-                                    u64: stream_fd as u64,
+                                    data: EventData { fd: stream_fd },
                                 };
 
                                 if unsafe {
-                                    epoll_ctl(self.epoll_fd, EPOLL_CTL_ADD, stream_fd, &mut event)
+                                    epoll_ctl(
+                                        self.epoll_fd,
+                                        EPOLL_CTL_ADD,
+                                        stream_fd,
+                                        &mut new_event,
+                                    )
                                 } < 0
                                 {
                                     dbg!(Error::last_os_error().to_string());
