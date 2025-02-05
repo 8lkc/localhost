@@ -1,19 +1,10 @@
 use {
-    crate::{
-        mux::Multiplexer,
-        server::Server,
-    },
-    serde::{
-        Deserialize,
-        Serialize,
-    },
-    std::{
-        fs::File,
-        io::Read,
-    },
+    crate::{mux::Multiplexer, server::Server},
+    serde::{Deserialize, Serialize},
+    std::{fs::File, io::Read},
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 /// Represents the main configuration structure
 /// holding a collection of server configurations.
 pub struct Config {
@@ -25,7 +16,9 @@ type ErrorMux = Result<Multiplexer, String>;
 impl Config {
     /// Returns the ownership of the
     /// server configurations as an unwraping.
-    pub fn servers(self) -> Vec<Server> { self.servers }
+    pub fn servers(self) -> Vec<Server> {
+        self.servers
+    }
 
     /// Removes any invalid server configuration from the list.
     ///
@@ -83,8 +76,7 @@ impl Loader {
         file.read_to_string(&mut contents)
             .map_err(|e| e.to_string())?;
 
-        let mut config: Config =
-            toml::from_str(&contents).map_err(|e| e.to_string())?;
+        let mut config: Config = toml::from_str(&contents).map_err(|e| e.to_string())?;
         config.clean();
 
         let mux = Multiplexer::new(config).map_err(|e| e.to_string())?;

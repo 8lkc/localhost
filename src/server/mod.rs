@@ -4,35 +4,26 @@ pub mod router;
 // mod test;
 
 use {
-    router::{
-        Route,
-        Router,
-    },
-    serde::{
-        Deserialize,
-        Serialize,
-    },
+    router::{Route, Router},
+    serde::{Deserialize, Serialize},
     std::{
         collections::HashMap,
         io::Read,
-        net::{
-            SocketAddr,
-            TcpListener,
-        },
+        net::{SocketAddr, TcpListener},
         str::FromStr,
     },
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Server {
-    host:             Option<String>,
-    ports:            Option<Vec<usize>>,
-    root:             Option<String>,
-    error_pages:      Option<Vec<String>>,
+    host: Option<String>,
+    ports: Option<Vec<usize>>,
+    root: Option<String>,
+    error_pages: Option<Vec<String>>,
     uploads_max_size: Option<u64>,
-    cgi_handler:      Option<HashMap<String, String>>,
-    listing:          Option<bool>,
-    routes:           Option<Vec<Route>>,
+    cgi_handler: Option<HashMap<String, String>>,
+    listing: Option<bool>,
+    routes: Option<Vec<Route>>,
 }
 
 impl Server {
@@ -42,22 +33,19 @@ impl Server {
             && self.ports.is_some()
             && self.root.is_some()
             && self.error_pages.is_some()
-            && self
-                .uploads_max_size
-                .is_some()
+            && self.uploads_max_size.is_some()
             && self.cgi_handler.is_some()
             && self.listing.is_some()
             && self.routes.is_some()
-            // && self
-            //     .routes()
-            //     .iter()
-            //     .all(|route| route.has_valid_config())
+        // && self
+        //     .routes()
+        //     .iter()
+        //     .all(|route| route.has_valid_config())
     }
 
     pub fn run(&self) -> Result<(), String> {
         // Start a server listening on socket address
-        let listener =
-            TcpListener::bind(self.host()).map_err(|e| e.to_string())?;
+        let listener = TcpListener::bind(self.host()).map_err(|e| e.to_string())?;
         println!("Running on {:?}", self.host);
 
         // Listen to incoming connections in a loop
@@ -97,14 +85,16 @@ impl Server {
         self.host.as_ref().unwrap()
     }
 
-    pub fn ports(&self) -> &Vec<usize> { self.ports.as_ref().unwrap() }
+    pub fn ports(&self) -> &Vec<usize> {
+        self.ports.as_ref().unwrap()
+    }
 
-    pub fn root(&self) -> &str { self.root.as_ref().unwrap() }
+    pub fn root(&self) -> &str {
+        self.root.as_ref().unwrap()
+    }
 
     pub fn error_pages(&self) -> &Vec<String> {
-        self.error_pages
-            .as_ref()
-            .unwrap()
+        self.error_pages.as_ref().unwrap()
     }
 
     pub fn uploads_max_size(&self) -> u64 {
@@ -112,23 +102,24 @@ impl Server {
     }
 
     pub fn cgi_handler(&self) -> &HashMap<String, String> {
-        self.cgi_handler
-            .as_ref()
-            .unwrap()
+        self.cgi_handler.as_ref().unwrap()
     }
 
-    pub fn listing(&self) -> bool { self.listing.unwrap() }
+    pub fn listing(&self) -> bool {
+        self.listing.unwrap()
+    }
 
-    pub fn routes(&self) -> &Vec<Route> { self.routes.as_ref().unwrap() }
+    pub fn routes(&self) -> &Vec<Route> {
+        self.routes.as_ref().unwrap()
+    }
 
     pub fn listeners(&self) -> Result<Vec<TcpListener>, String> {
         let mut listeners = vec![];
         let host = self.host();
 
         for port in self.ports() {
-            let address =
-                SocketAddr::from_str(format!("{host}:{port}").as_str())
-                    .map_err(|e| e.to_string())?;
+            let address = SocketAddr::from_str(format!("{host}:{port}").as_str())
+                .map_err(|e| e.to_string())?;
 
             dbg!(&address);
 

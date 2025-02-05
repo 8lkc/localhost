@@ -2,10 +2,6 @@ mod request;
 mod response;
 
 pub use {
-    request::{
-        Method,
-        Request,
-        Resource,
-    },
+    request::{Method, Request, Resource},
     response::Response,
 };

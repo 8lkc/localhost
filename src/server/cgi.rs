@@ -1,11 +1,7 @@
 use {
     super::Server,
     crate::http::Request,
-    std::{
-        io::Write,
-        net::TcpStream,
-        process::Command,
-    },
+    std::{io::Write, net::TcpStream, process::Command},
 };
 
 pub struct CommonGatewayInterface;
@@ -20,9 +16,7 @@ impl CommonGatewayInterface {
         let extension = path
             .split('.')
             .next_back()
-            .ok_or_else(|| {
-                "No file extension found in the request path".to_string()
-            })?;
+            .ok_or_else(|| "No file extension found in the request path".to_string())?;
 
         let server = servers.iter().find(|server| {
             server
@@ -36,11 +30,7 @@ impl CommonGatewayInterface {
             Some(server) => Ok(server
                 .cgi_handler
                 .as_ref()
-                .and_then(|handlers| {
-                    handlers
-                        .get(extension)
-                        .cloned()
-                })),
+                .and_then(|handlers| handlers.get(extension).cloned())),
             None => Ok(None),
         }
     }
@@ -52,34 +42,21 @@ impl CommonGatewayInterface {
         stream: &mut TcpStream,
     ) -> Result<(), String> {
         if !std::path::Path::new(request.resource.path()).exists() {
-            return Err(
-                "CommonGatewayInterface script not found".to_string()
-            );
+            return Err("CommonGatewayInterface script not found".to_string());
         }
-        let query_string = request
-            .resource
-            .path()
-            .split('?')
-            .nth(1)
-            .unwrap_or("");
+        let query_string = request.resource.path().split('?').nth(1).unwrap_or("");
         let output = Command::new(cgi_script)
             .arg(request.resource.path())
             .env("REQUEST_METHOD", request.method.to_string())
             .env("QUERY_STRING", query_string)
             .output()
-            .map_err(|e| {
-                format!(
-                    "Failed to execute CommonGatewayInterface: {}",
-                    e
-                )
-            })?;
+            .map_err(|e| format!("Failed to execute CommonGatewayInterface: {}", e))?;
 
         if output.status.success() {
             stream
                 .write_all(&output.stdout)
                 .map_err(|e| format!("Failed to write response: {}", e))?;
-        }
-        else {
+        } else {
             let error_message = String::from_utf8_lossy(&output.stderr);
             return Err(format!(
                 "CommonGatewayInterface script error: {}",

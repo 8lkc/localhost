@@ -4,11 +4,6 @@ mod mux;
 mod server;
 
 pub use {
-    http::{
-        Method,
-        Request,
-        Resource,
-        Response,
-    },
+    http::{Method, Request, Resource, Response},
     loader::Loader,
 };

@@ -6,8 +6,8 @@ use std::collections::HashMap;
 pub struct Response<'a> {
     status_code: &'a str,
     status_text: &'a str,
-    headers:     Option<HashMap<&'a str, &'a str>>,
-    body:        Option<String>,
+    headers: Option<HashMap<&'a str, &'a str>>,
+    body: Option<String>,
 }
 
 impl Default for Response<'_> {
@@ -15,8 +15,8 @@ impl Default for Response<'_> {
         Self {
             status_code: "200",
             status_text: "OK",
-            headers:     None,
-            body:        None,
+            headers: None,
+            body: None,
         }
     }
 }

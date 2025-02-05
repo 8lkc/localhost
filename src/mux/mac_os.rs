@@ -1,8 +1,3 @@
-use std::{
-    io::{Error, ErrorKind},
-    mem::MaybeUninit,
-};
-
 #[cfg(target_os = "macos")]
 use {
     super::{ErrorAddFd, Multiplexer},
@@ -13,7 +8,8 @@ use {
     },
     libc::{c_void, kevent, kqueue, EVFILT_READ, EV_ADD},
     std::{
-        io::{BufRead, BufReader},
+        io::{BufRead, BufReader, Error, ErrorKind},
+        mem::MaybeUninit,
         os::{fd::AsRawFd, unix::io::RawFd},
         ptr::{null, null_mut},
     },
@@ -113,9 +109,9 @@ impl Multiplexer {
                                     dbg!(e);
                                     continue;
                                 }
-                                
+
                                 dbg!(&stream, addr);
-                                
+
                                 let stream_fd = stream.as_raw_fd();
                                 let mut buf_reader = BufReader::new(&stream);
                                 let mut req_str = String::new();
@@ -127,7 +123,7 @@ impl Multiplexer {
                                         Ok(_) => {
                                             req_str.push_str(&line);
                                             // line.push('\n');
-                            
+
                                             if line == "\r\n" || line == "\n" {
                                                 break 'buf_reading;
                                             }

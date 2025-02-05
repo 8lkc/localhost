@@ -1,15 +1,16 @@
 #[cfg(target_os = "linux")]
 use {
-    super::Multiplexer,
+    super::{ErrorAddFd, Multiplexer},
     crate::{
         http::Request,
         loader::Config,
-        server::{cgi::CommonGatewayInterface, Server},
+        server::{cgi::CommonGatewayInterface, router::Router, Server},
     },
-    libc::{epoll_ctl, epoll_event, epoll_wait, EPOLLIN, EPOLL_CTL_ADD, EPOLL_CTL_DEL},
+    libc::{epoll_create1, epoll_ctl, epoll_event, epoll_wait, EPOLLIN, EPOLL_CTL_ADD},
     std::{
-        io::{BufRead, BufReader},
+        io::{BufRead, BufReader, Error, ErrorKind},
         os::{fd::AsRawFd, unix::io::RawFd},
+        ptr::null_mut,
     },
 };
 
@@ -17,9 +18,9 @@ use {
 impl Multiplexer {
     pub fn new(config: Config) -> Result<Self, String> {
         let servers = config.servers();
-        let epoll_fd = unsafe { libc::epoll_create1(0) };
+        let epoll_fd = unsafe { epoll_create1(0) };
         if epoll_fd == -1 {
-            return Err(std::io::Error::last_os_error().to_string());
+            return Err(Error::last_os_error().to_string());
         };
 
         let mut mux_listeners = vec![];
@@ -55,20 +56,20 @@ impl Multiplexer {
 
             listener.set_nonblocking(true).map_err(|e| e.to_string())?;
 
-            let mut event: epoll_event = unsafe { std::mem::zeroed() };
-            event.events = EPOLLIN as u32;
-            event.u64 = fd as u64;
+            let mut event = epoll_event {
+                events: EPOLLIN as u32,
+                u64: fd as u64,
+            };
 
-            if unsafe { epoll_ctl(self.epoll_fd, libc::EPOLL_CTL_ADD, fd, &mut event) } < 0 {
-                return Err(std::io::Error::last_os_error().to_string());
+            if unsafe { epoll_ctl(self.epoll_fd, EPOLL_CTL_ADD, fd, &mut event) } < 0 {
+                return Err(Error::last_os_error().to_string());
             }
         }
         Ok(())
     }
 
     pub fn run(&self) {
-        let mut events: Vec<epoll_event> = Vec::with_capacity(32);
-        unsafe { events.set_len(32) };
+        let mut events: Vec<epoll_event> = vec![epoll_event { events: 0, u64: 0 }; 32];
 
         loop {
             dbg!("Start Multiplexer...");
@@ -76,12 +77,12 @@ impl Multiplexer {
                 unsafe { epoll_wait(self.epoll_fd, events.as_mut_ptr(), events.len() as i32, -1) };
 
             if nfds < 0 {
-                dbg!(std::io::Error::last_os_error().to_string());
+                dbg!(Error::last_os_error().to_string());
                 continue;
             }
 
-            for n in 0..nfds as usize {
-                let fd = events[n].u64 as RawFd;
+            for event in events.iter().take(nfds as usize) {
+                let fd = event.u64 as RawFd;
 
                 for listener in self.listeners.iter() {
                     if listener.as_raw_fd() == fd {
@@ -150,19 +151,20 @@ impl Multiplexer {
                                     }
                                 };
 
-                                let mut event: epoll_event = unsafe { std::mem::zeroed() };
-                                event.events = EPOLLIN as u32;
-                                event.u64 = stream_fd as u64;
+                                let mut event = epoll_event {
+                                    events: EPOLLIN as u32,
+                                    u64: stream_fd as u64,
+                                };
 
                                 if unsafe {
                                     epoll_ctl(self.epoll_fd, EPOLL_CTL_ADD, stream_fd, &mut event)
                                 } < 0
                                 {
-                                    dbg!(std::io::Error::last_os_error().to_string());
+                                    dbg!(Error::last_os_error().to_string());
                                 }
                             }
-                            Err(e) => {
-                                dbg!(e);
+                            Err(error) => {
+                                dbg!(error);
                                 continue;
                             }
                         }
