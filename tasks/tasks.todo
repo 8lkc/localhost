@@ -1,0 +1,44 @@
+____________________________________________________________________________________________________________________________________________________
+=== SET UP THE BASICS ===
+    ☐ Learn how to use libc for system calls in Rust.
+    ☐ Create a simple TCP server that listens for connections on a port and accepts incoming clients.
+    ☐ Read raw HTTP requests and print them for debugging.
+____________________________________________________________________________________________________________________________________________________
+=== PARSE HTTP REQUESTS ===
+    ☐ Parse the HTTP request `line, headers, and body` into a struct.
+    ☐ Print the parsed HTTP request for debugging.
+    ☐ Understand how to extract the requested file path or action.
+____________________________________________________________________________________________________________________________________________________
+=== SEND RESPONSES ===
+    ☐ Create a simple HTTP response struct:
+    ☐ Generate HTTP responses with headers (`Content-Type`, `Content-Length`, etc.) and a body.
+    ☐ Send a simple HTTP response to the client.
+    ☐ Understand how to send different types of responses.
+    ☐ Handle basic files: serve static HTML, CSS, JS, or images.
+____________________________________________________________________________________________________________________________________________________
+=== ADD I/O MULTIPLEXING ===
+    ☐ Learn how to use `epoll` (or equivalent) to handle multiple clients efficiently.
+    ☐ Implement I/O multiplexing in the server.
+    ☐ Handle multiple clients concurrently.
+____________________________________________________________________________________________________________________________________________________
+=== ADD ADVANCED FEATURES ===
+    ☐ Implement:
+        ☐ Support for GET, POST, and DELETE methods.
+        ☐ File uploads.
+        ☐ Session and cookie handling.
+        ☐ Default error pages (400, 403, etc.).
+____________________________________________________________________________________________________________________________________________________
+=== HANDLE CONFIGURATION ===
+    ☐ Add support for configuration files.
+    ☐ Read server configuration from a file.
+    ☐ Parse a configuration file to set server options (e.g., routes, limits).
+    ☐ Allow users to specify the server's port, IP address, and other settings.
+____________________________________________________________________________________________________________________________________________________
+=== ADD CGI SUPPORT ===
+    ☐ Learn how to use CGI scripts to generate dynamic content.
+    ☐ Implement CGI support in the server.
+    ☐ Execute CGI scripts and return the output to the client.
+    ☐ Understand how to pass environment variables to CGI scripts.
+____________________________________________________________________________________________________________________________________________________
+=== STRESS TESTING ===
+    ☐ Use `siege` to test and ensure your server doesn't crash under load.
