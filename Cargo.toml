@@ -8,3 +8,4 @@ http = "1.2.0"
 libc = "0.2.169"
 mio = {version = "1.0.3", features = ["net", "os-poll"]}
 serde = { version = "1.0.217", features = ["derive"] }
+serde_yaml = "0.9.34+deprecated"

@@ -5,7 +5,7 @@ use server::config::ServerConfig;
 
 fn main() -> std::io::Result<()> {
     // Configuration de base
-    let config = ServerConfig::new(String::from("127.0.0.1"), vec![8080]);
+    let config = ServerConfig::new();
     
     // Création et démarrage du serveur
     let mut server = Server::new(config)?;
