@@ -1,3 +1,5 @@
-host: "127.0.0.1"
-ports:
-  - 8080
+servers:
+  - name: "server1"
+    host: "127.0.0.1"
+    ports:
+      - 8080
