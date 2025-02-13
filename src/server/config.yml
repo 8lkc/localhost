@@ -1,0 +1,13 @@
+servers:
+  - name: "server01"
+    host: "127.0.0.1"
+    ports:
+      - 8080
+      - 8090
+  - name: "srever02"
+    host: "localhost"
+    ports:
+      - 8081
+      - 8010
+      - 4300
+      - 5400

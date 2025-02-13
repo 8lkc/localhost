@@ -1,8 +1,0 @@
-servers:
-  - host: "127.0.0.1"
-    ports:
-      - 8080
-      - 8090
-  - host: "localhost"
-    ports:
-      - 8081
