@@ -1,7 +1,7 @@
 <h1 align=center>
     localhost
     <br>
-    <img alt="Ferris" src="assets/ferris.svg">
+    <img alt="Ferris" src="public/assets/ferris.svg">
 </h1>
 
 ## Table of Contents

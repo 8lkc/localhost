@@ -43,4 +43,28 @@ HTML files:
 Tests:
     ☐ Crashes (it should never)
     ☐ HTTP/1.1
-    
+
+
+REMAINING TO IMPLEMENT:
+Request timeout handling
+DELETE method support
+File upload handling
+Cookies and sessions management
+Default error pages for [400,403,404,405,413,500]
+   - Currently only have 404
+Chunked and unchunked requests handling
+Setting appropriate status codes for responses
+Directory listing feature
+CGI improvements:
+   - Current CGI implementation is basic
+   - Need to handle PATH_INFO environment variable
+   - Need to ensure correct relative paths
+
+Configuration File Features to Add:
+Custom error pages path setting
+Client body size limit for uploads
+Route settings:
+   - HTTP redirection
+   - Define directories/files for URL routing
+   - Default file for directory requests
+   - CGI extension mapping

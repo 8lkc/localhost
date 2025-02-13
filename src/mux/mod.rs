@@ -1,19 +1,28 @@
+#[cfg(target_os = "linux")]
 mod linux;
+
+#[cfg(target_os = "macos")]
 mod mac_os;
 
 use {
-    crate::server::Server,
-    std::{
-        net::{TcpListener, TcpStream},
-        os::fd::RawFd,
-    },
+     crate::server::Server,
+     std::{
+          net::{
+               TcpListener,
+               TcpStream,
+          },
+          os::fd::RawFd,
+     },
 };
 
 pub struct Multiplexer {
-    epoll_fd: RawFd,
-    servers: Vec<Server>,
-    listeners: Vec<TcpListener>,
-    streams: Vec<TcpStream>,
-}
+     #[cfg(target_os = "linux")]
+     epoll_fd: RawFd,
 
-type ErrorAddFd = Result<(), String>;
+     #[cfg(target_os = "macos")]
+     kqueue_fd: RawFd,
+
+     servers:   Vec<Server>,
+     listeners: Vec<TcpListener>,
+     streams:   Vec<TcpStream>,
+}
