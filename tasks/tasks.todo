@@ -1,44 +1,127 @@
 ____________________________________________________________________________________________________________________________________________________
-=== SET UP THE BASICS ===
-    ☐ Learn how to use libc for system calls in Rust.
-    ☐ Create a simple TCP server that listens for connections on a port and accepts incoming clients.
-    ☐ Read raw HTTP requests and print them for debugging.
+=== PROJECT INITIATION ===
+    ✔ Create a new Rust project (`cargo new localhost`) @done(25-02-13 02:42 PM)
+    ✔ Add the necessary dependencies (`libc` for `epoll`) @done(25-02-13 03:37 PM)
+    Set up the basic project structure:
+        ✔ `src/` folder @done(25-02-13 02:42 PM)
+        ✔ `main.rs` file @done(25-02-13 02:42 PM)
+        ✔ `config/` folder @done(25-02-13 03:38 PM)
+        ✔ `static/` folder (static HTML pages) @done(25-02-13 03:39 PM)
+        ✔ `cgi-bin/` folder (CGI scripts) @done(25-02-13 03:39 PM)
 ____________________________________________________________________________________________________________________________________________________
-=== PARSE HTTP REQUESTS ===
-    ☐ Parse the HTTP request `line, headers, and body` into a struct.
-    ☐ Print the parsed HTTP request for debugging.
-    ☐ Understand how to extract the requested file path or action.
+=== TCP SERVER CREATION ===
+    ☐ Create a listening socket on an address and port
+    ☐ Set the socket to non-blocking mode
+    ☐ Associate socket with `epoll` to manage multiple connections
+    ☐ Main loop to accept incoming connections
+    ☐ Read data sent by client
+    ☐ Close inactive connections cleanly
 ____________________________________________________________________________________________________________________________________________________
-=== SEND RESPONSES ===
-    ☐ Create a simple HTTP response struct:
-    ☐ Generate HTTP responses with headers (`Content-Type`, `Content-Length`, etc.) and a body.
-    ☐ Send a simple HTTP response to the client.
-    ☐ Understand how to send different types of responses.
-    ☐ Handle basic files: serve static HTML, CSS, JS, or images.
+=== HTTP REQUEST PARSING AND HANDLING ===
+    Read and analyze incoming requests:
+        ☐ Extract HTTP method (`GET`, `POST`, `DELETE`)
+        ☐ Extract requested URL
+        ☐ Extract and store headers
+        ☐ Manage chunked and non-chunked requests
+        ☐ Extract request body (if present)
+    Check validity of request:
+        ☐ Correct request (`200 OK`)
+        ☐ Invalid URL (`404 Not Found`)
+        ☐ Method not supported (`405 Method Not Allowed`)
 ____________________________________________________________________________________________________________________________________________________
-=== ADD I/O MULTIPLEXING ===
-    ☐ Learn how to use `epoll` (or equivalent) to handle multiple clients efficiently.
-    ☐ Implement I/O multiplexing in the server.
-    ☐ Handle multiple clients concurrently.
+=== HTTP RESPONSE HANDLING ===
+    ☐ Generate a well-formatted HTTP response
+    Add the necessary HTTP headers:
+        ☐ `Content-Type`
+        ☐ `Content-Length`
+        ☐ `Set-Cookie` (if needed)
+    Manage common HTTP statuses:
+        ☐ `200 OK`
+        ☐ `400 Bad Request`
+        ☐ `403 Forbidden`
+        ☐ `404 Not Found`
+        ☐ `405 Method Not Allowed`
+        ☐ `500 Internal Server Error`
+    ☐ Send response to client via `epoll`
+    ☐ Test with a browser (`localhost:8080`)
+    ☐ Test with `curl` (`curl -X GET http://localhost:8080/`)
 ____________________________________________________________________________________________________________________________________________________
-=== ADD ADVANCED FEATURES ===
-    ☐ Implement:
-        ☐ Support for GET, POST, and DELETE methods.
-        ☐ File uploads.
-        ☐ Session and cookie handling.
-        ☐ Default error pages (400, 403, etc.).
+=== MANAGING STATIC FILES ===
+    ☐ Define a static file folder (`/static/`)
+    ☐ Read a requested HTML file (`index.html`)
+    ☐ Return its contents as an HTTP response
+    ☐ Manage default directories and files (`index.html`)
+    ☐ Manage forbidden files (`403 Forbidden`)
+    Check and send the correct `Content-Type`:
+        ☐ `.html` → `text/html`
+        ☐ `.css` → `text/css`
+        ☐ `.js` → `application/javascript`
+        ☐ `.png` → `image/png`
+        ☐ `.jpg` → `image/jpeg`
+        ☐ `.gif` → `image/gif`
 ____________________________________________________________________________________________________________________________________________________
-=== HANDLE CONFIGURATION ===
-    ☐ Add support for configuration files.
-    ☐ Read server configuration from a file.
-    ☐ Parse a configuration file to set server options (e.g., routes, limits).
-    ☐ Allow users to specify the server's port, IP address, and other settings.
+=== CGI MANAGEMENT (DYNAMIC SCRIPT EXECUTION) ===
+    ☐ Define a `cgi-bin/` folder for scripts
+    ☐ Execute a Python script (`.py`) as CGI
+    ☐ Execute a PHP (`.php`) script as CGI
+    ☐ Capture script output and send it as a response
+    ☐ Test with a simple `Python` script:
+        @python [
+            # cgi-bin/test.py
+            print("Content-Type: text/html\n")
+            print("<h1>Hello from Python CGI</h1>")
+        ]
+    ☐ Test with a simple `PHP` script:
+        @php [
+            <!-- cgi-bin/test.php -->
+            <?php echo "<h1>Hello from PHP CGI</h1>"; ?>
+        ]
 ____________________________________________________________________________________________________________________________________________________
-=== ADD CGI SUPPORT ===
-    ☐ Learn how to use CGI scripts to generate dynamic content.
-    ☐ Implement CGI support in the server.
-    ☐ Execute CGI scripts and return the output to the client.
-    ☐ Understand how to pass environment variables to CGI scripts.
+=== MANAGING POST REQUESTS AND FILE DOWNLOADS ===
+    ☐ Extract the body of a `POST` request
+    ☐ Store data in a temporary file
+    ☐ Manage HTML forms with file uploads
+    ☐ Limit the size of uploaded files (`413 Payload Too Large`)
+    ☐ Testing with an `HTML form`:
+        @html [
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <input type="submit" value="Upload">
+            </form>
+        ]
 ____________________________________________________________________________________________________________________________________________________
-=== STRESS TESTING ===
-    ☐ Use `siege` to test and ensure your server doesn't crash under load.
+=== COOKIE AND SESSION MANAGEMENT ===
+    ☐ Generate a unique cookie for each visitor
+    ☐ Store user sessions
+    ☐ Enable login via a simple form
+    ☐ Check if a user has an active session
+    ☐ Testing with `curl` and cookies:
+        @sh [
+            curl -X GET http://localhost:8080/ --cookie "session_id=12345"
+        ]
+____________________________________________________________________________________________________________________________________________________
+=== DYNAMIC CONFIGURATION ===
+    ☐ Create `config.toml` file for parameters
+    Read values from file:
+        ☐ Server address (`127.0.0.1`)
+        ☐ Listened ports (`8080`, `9090`, etc.)
+        ☐ Maximum upload size (`10MB`)
+        ☐ Static and CGI file directories
+    ☐ Apply configuration to server
+____________________________________________________________________________________________________________________________________________________
+=== TESTING AND ROBUSTNESS ===
+    ☐ Testing the server with `siege`:
+        @sh [
+            siege -b http://localhost:8080/
+        ]
+    ☐ Test for invalid configuration files
+    ☐ Test attacks (injections, simulated DDoS, etc.)
+    ☐ Check memory consumption and avoid leaks
+    ☐ Make sure server doesn't crash (error logs)
+____________________________________________________________________________________________________________________________________________________
+=== 🔴 BONUS ===
+    ☐ HTTPS support with `openssl`
+    ☐ Implement advanced log management (`access.log`, `error.log`)
+    ☐ Create a memory cache to accelerate requests
+    ☐ Optimize performance (`epoll` + intelligent buffering)
+    ☐ Rewrite server in `C` or `C++` to compare performance
