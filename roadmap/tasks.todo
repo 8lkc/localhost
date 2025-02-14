@@ -5,12 +5,12 @@ ________________________________________________________________________________
     Set up the basic project structure:
         ✔ `src/` folder @done(25-02-13 02:42 PM)
         ✔ `main.rs` file @done(25-02-13 02:42 PM)
-        ✔ `config/` folder @done(25-02-13 03:38 PM)
+        ✔ `server/` folder @done(25-02-13 03:38 PM)
         ✔ `static/` folder (static HTML pages) @done(25-02-13 03:39 PM)
         ✔ `cgi-bin/` folder (CGI scripts) @done(25-02-13 03:39 PM)
 ____________________________________________________________________________________________________________________________________________________
 === TCP SERVER CREATION ===
-    ☐ Create a listening socket on an address and port
+    ✔ Create a listening socket on an address and port @done(25-02-13 09:35 PM)
     ☐ Set the socket to non-blocking mode
     ☐ Associate socket with `epoll` to manage multiple connections
     ☐ Main loop to accept incoming connections
@@ -101,7 +101,7 @@ ________________________________________________________________________________
         ]
 ____________________________________________________________________________________________________________________________________________________
 === DYNAMIC CONFIGURATION ===
-    ☐ Create `config.toml` file for parameters
+    ✔ Create `config.toml` file for parameters @done(25-02-14 11:15 AM)
     Read values from file:
         ☐ Server address (`127.0.0.1`)
         ☐ Listened ports (`8080`, `9090`, etc.)

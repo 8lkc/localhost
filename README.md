@@ -50,7 +50,9 @@ The project will be designed with stress testing and memory safety in mind. This
     │     └──── tasks.todo
     ├──── src
     │     ├──── cgi-bin
-    │     ├──── config
+    │     ├──── server
+    │     │     ├──── config.rs
+    │     │     ├──── handlers.rs
     │     │     └──── mod.rs
     │     ├──── static
     │     └──── main.rs
@@ -64,6 +66,8 @@ The project will be designed with stress testing and memory safety in mind. This
 ## 3️⃣ Usage
 
 ### ➖ Installation
+
+First of all make sure to have access to the `project repository`. **Then apply the following process:**
 
 1.  **Clone the repository:**
 ```bash
@@ -81,5 +85,4 @@ cd localhost
 ```bash
 make
 ```
-
 This command will execute the commands contained in the `makefile`.

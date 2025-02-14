@@ -1,0 +1,4 @@
+[[servers]]
+name = "server01"
+host = "127.0.0.1"
+ports = [8080, 9090]
