@@ -26,7 +26,5 @@ fn main() {
         dbg!(e);
     }
 
-    dbg!(mux.epoll_fd());
-
     mux.run()
 }

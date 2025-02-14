@@ -1,4 +1,4 @@
-// #[cfg(target_os = "linux")]
+#[cfg(target_os = "linux")]
 use {
     super::{
         ErrorAddFd,
@@ -36,7 +36,7 @@ use {
     },
 };
 
-// #[cfg(target_os = "linux")]
+#[cfg(target_os = "linux")]
 impl Multiplexer {
     pub fn new(config: Config) -> Result<Self, String> {
         let servers = config.servers();
@@ -52,7 +52,7 @@ impl Multiplexer {
                 Ok(server_listeners) => {
                     mux_listeners.push(server_listeners)
                 }
-                Err(error) => return Err(error.to_string()),
+                Err(e) => return Err(e),
             }
         }
 

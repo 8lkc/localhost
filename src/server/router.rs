@@ -44,7 +44,10 @@ impl Route {
 pub struct Router;
 
 impl Router {
-    pub fn run(request: Request, stream: &mut impl Write) -> AppResult<()> {
+    pub fn run(
+        request: Request,
+        stream: &mut impl Write,
+    ) -> AppResult<()> {
         let response = match (&request.method, &request.resource) {
             (Method::GET, Resource::Path(s)) => {
                 let route: Vec<&str> = s.split("/").collect();

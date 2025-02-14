@@ -83,9 +83,8 @@ impl From<serde_json::Error> for AppErr {
 }
 
 impl AppErr {
-    pub fn new(msg: &str) -> Self {
-        Self::Custom(msg.to_string())
-    }
+    pub fn new(msg: &str) -> Self { Self::Custom(msg.to_string()) }
+
     pub fn last_os_error() -> Self {
         Self::Other(io::Error::last_os_error())
     }
