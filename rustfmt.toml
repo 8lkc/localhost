@@ -11,10 +11,6 @@ edition = "2021"
 # Default: 100
 max_width = 75
 
-# Number of spaces per tab
-# Default: 4
-tab_spaces = 5
-
 
 # ----- Width & Alignment Controls -----
 

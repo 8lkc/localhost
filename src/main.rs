@@ -14,19 +14,19 @@ use localhost::Loader;
 /// * An error occurs while adding the listening socket to the
 ///   `Multiplexer`.
 fn main() {
-     let mux = match Loader::load("./config/server.toml") {
-          Ok(multiplexer) => multiplexer,
-          Err(e) => {
-               dbg!(e);
-               return;
-          }
-     };
+    let mux = match Loader::load("./config/server.toml") {
+        Ok(multiplexer) => multiplexer,
+        Err(e) => {
+            dbg!(e);
+            return;
+        }
+    };
 
-     if let Err(e) = mux.add_fd() {
-          dbg!(e);
-     }
+    if let Err(e) = mux.add_fd() {
+        dbg!(e);
+    }
 
-     dbg!(mux.epoll_fd());
+    dbg!(mux.epoll_fd());
 
-     mux.run()
+    mux.run()
 }
