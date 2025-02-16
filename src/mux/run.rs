@@ -1,25 +1,48 @@
 #[cfg(target_os = "linux")]
-use libc::epoll_event;
-use libc::{EPOLLET, EPOLLIN, EPOLL_CTL_ADD};
+use libc::{
+    epoll_event,
+    EPOLLET,
+    EPOLLIN,
+    EPOLL_CTL_ADD,
+};
 use {
     super::Multiplexer,
     crate::{
-        server::{cgi::CommonGatewayInterface, router::Router},
-        syscall, Request,
+        server::{
+            cgi::CommonGatewayInterface,
+            router::Router,
+        },
+        syscall,
+        Request,
     },
     std::{
-        io::{BufRead, BufReader, Error, ErrorKind},
+        io::{
+            BufRead,
+            BufReader,
+            Error,
+            ErrorKind,
+        },
         mem::MaybeUninit,
-        os::fd::{AsRawFd, RawFd},
+        os::fd::{
+            AsRawFd,
+            RawFd,
+        },
     },
 };
 #[cfg(target_os = "macos")]
 use {
     crate::utils::timeout,
-    libc::{kevent, EVFILT_READ, EV_ADD},
+    libc::{
+        kevent,
+        EVFILT_READ,
+        EV_ADD,
+    },
     std::{
         ffi::c_void,
-        ptr::{null, null_mut},
+        ptr::{
+            null,
+            null_mut,
+        },
     },
 };
 
@@ -173,16 +196,16 @@ impl Multiplexer {
                     #[cfg(target_os = "linux")]
                     let mut event = epoll_event {
                         events: EPOLLIN as u32 | EPOLLET as u32,
-                        u64: stream_fd as u64,
+                        u64:    stream_fd as u64,
                     };
                     #[cfg(target_os = "macos")]
                     let changes = kevent {
-                        ident: stream_fd as usize,
+                        ident:  stream_fd as usize,
                         filter: EVFILT_READ,
-                        flags: EV_ADD,
+                        flags:  EV_ADD,
                         fflags: 0,
-                        data: 0,
-                        udata: null_mut::<c_void>(),
+                        data:   0,
+                        udata:  null_mut::<c_void>(),
                     };
 
                     #[cfg(target_os = "linux")]

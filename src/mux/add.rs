@@ -1,11 +1,33 @@
-use crate::syscall;
-use libc::EPOLL_CTL_ADD;
 #[cfg(target_os = "linux")]
-use libc::{epoll_event, EPOLLET, EPOLLIN};
+use libc::{
+    epoll_event,
+    EPOLLET,
+    EPOLLIN,
+    EPOLL_CTL_ADD,
+};
+use {
+    super::Multiplexer,
+    crate::{
+        syscall,
+        utils::AppResult,
+    },
+    std::os::fd::AsRawFd,
+};
 #[cfg(target_os = "macos")]
-use libc::{kevent, EVFILT_READ, EV_ADD};
-
-use {super::Multiplexer, crate::utils::AppResult, std::os::fd::AsRawFd};
+use {
+    libc::{
+        kevent,
+        EVFILT_READ,
+        EV_ADD,
+    },
+    std::{
+        ffi::c_void,
+        ptr::{
+            null,
+            null_mut,
+        },
+    },
+};
 
 impl Multiplexer {
     /// Adds a new file descriptor for each listener.

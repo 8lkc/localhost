@@ -42,11 +42,7 @@ struct_field_align_threshold = 20
 group_imports = "StdExternalCrate"
 
 
-# ----- Functions & Control Flow -----
-
-# Allow single-line if statements
-# Default: 50
-single_line_if_else_max_width = 75
+# ----- Functions & Control Flow -----c
 
 # Allow functions to be formatted on a single line
 # Default: false

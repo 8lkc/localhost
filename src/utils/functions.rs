@@ -1,15 +1,21 @@
 use {
     super::AppResult,
     crate::{
-        http::{Method, Resource},
+        http::{
+            Method,
+            Resource,
+        },
         server::Server,
     },
     std::net::TcpListener,
 };
-
 #[cfg(target_os = "macos")]
 use {
-    libc::{c_long, time_t, timespec},
+    libc::{
+        c_long,
+        time_t,
+        timespec,
+    },
     std::time::Duration,
 };
 
@@ -64,7 +70,7 @@ pub fn timeout(timeout_in_ms: u64) -> *const timespec {
     let nanos = duration.subsec_nanos() as c_long;
 
     &timespec {
-        tv_sec: secs,
+        tv_sec:  secs,
         tv_nsec: nanos,
     }
 }
