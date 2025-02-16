@@ -1,6 +1,21 @@
-use crate::http::{
-    Method,
-    Resource,
+use {
+    super::AppResult,
+    crate::{
+        http::{
+            Method,
+            Resource,
+        },
+        server::Server,
+    },
+    libc::{
+        c_long,
+        time_t,
+        timespec,
+    },
+    std::{
+        net::TcpListener,
+        time::Duration,
+    },
 };
 
 pub fn process_req_line(s: &str) -> (Method, Resource) {
@@ -30,4 +45,30 @@ pub fn process_header_line(s: &str) -> (String, String) {
         .to_string();
 
     (key, value)
+}
+
+pub fn get_listeners(
+    servers: &Vec<Server>,
+) -> AppResult<Vec<TcpListener>> {
+    let mut mux_listeners = vec![];
+    for server in servers {
+        mux_listeners.push(server.listeners()?);
+    }
+
+    // Flattens all listeners.
+    Ok(mux_listeners
+        .into_iter()
+        .flatten()
+        .collect())
+}
+
+pub fn timeout(timeout_in_ms: u64) -> *const timespec {
+    let duration = Duration::from_millis(timeout_in_ms);
+    let secs = duration.as_secs() as time_t;
+    let nanos = duration.subsec_nanos() as c_long;
+
+    &timespec {
+        tv_sec:  secs,
+        tv_nsec: nanos,
+    }
 }

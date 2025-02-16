@@ -35,12 +35,12 @@ impl Multiplexer {
 
                listener.set_nonblocking(true)?; //----                  ---> Moves each socket into nonblocking mode.
 
-               #[cfg(target_os = "macos")]
                #[cfg(target_os = "linux")]
                let event = epoll_event {
                     events: EPOLLIN | EPOLLET,
                     data:   fd as u64,
                };
+               #[cfg(target_os = "macos")]
                let event = kevent {
                     ident:  fd as usize,
                     filter: EVFILT_READ,
@@ -55,7 +55,7 @@ impl Multiplexer {
                    epoll_ctl(self.fd, EPOLL_CTL_ADD, fd, &event);
                    #[cfg(target_os = "macos")]
                    kevent(
-                         self.fd,
+                         self.file_descriptor,
                          &event,
                          1,
                          null_mut(),
