@@ -37,7 +37,7 @@ impl Multiplexer {
 
         // Creates a new kernel event queue.
         #[cfg(target_os = "linux")]
-        let file_descriptor = syscall!(epoll_create1)?; //                   <--- Initialize epoll for Linux
+        let file_descriptor = syscall!(epoll_create1, 0)?; //                   <--- Initialize epoll for Linux
         #[cfg(target_os = "macos")]
         let file_descriptor = syscall!(kqueue)?; //                   <--- Initialize kqueue for macOS
 
