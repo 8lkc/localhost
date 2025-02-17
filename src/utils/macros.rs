@@ -2,7 +2,7 @@
 macro_rules! check {
     ($result:expr) => {{
         if $result == -1 {
-            Err(std::io::Error::last_os_error())
+            Err($crate::utils::AppErr::last_os_error())
         }
         else {
             Ok($result)

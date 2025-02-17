@@ -22,7 +22,7 @@ fn main() {
         }
     };
 
-    if let Err(e) = mux.add_fd() {
+    if let Err(e) = mux.register_listeners() {
         dbg!(e);
     }
 

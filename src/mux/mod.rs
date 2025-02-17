@@ -1,6 +1,10 @@
-mod add;
+mod events;
 mod run;
 
+#[cfg(target_os = "linux")]
+use libc::epoll_event;
+#[cfg(target_os = "macos")]
+use libc::kevent;
 use {
     crate::{
         loader::Config,
@@ -12,13 +16,22 @@ use {
         },
     },
     std::{
+        mem::MaybeUninit,
         net::{
             TcpListener,
             TcpStream,
         },
-        os::fd::RawFd,
+        os::fd::{
+            AsRawFd,
+            RawFd,
+        },
     },
 };
+
+#[cfg(target_os = "linux")]
+pub type OsEvent = MaybeUninit<epoll_event>;
+#[cfg(target_os = "macos")]
+pub type OsEvent = MaybeUninit<kevent>;
 
 //------------------------------------------------------------------
 
@@ -49,5 +62,21 @@ impl Multiplexer {
             listeners,
             streams: vec![],
         })
+    }
+
+    /// Adds a new file descriptor for each listener.
+    pub fn register_listeners(&self) -> AppResult<()> {
+        for listener in self.listeners.iter() {
+            let fd = listener.as_raw_fd(); //----                        ---> Extracts the raw file descriptor.
+            listener.set_nonblocking(true)?; //----                  ---> Moves each socket into nonblocking mode.
+            self.register(fd)?;
+        }
+        Ok(())
+    }
+
+    pub fn find_listener(&self, fd: RawFd) -> Option<&TcpListener> {
+        self.listeners
+            .iter()
+            .find(|listener| listener.as_raw_fd() == fd)
     }
 }
