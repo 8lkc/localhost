@@ -1,16 +1,15 @@
-use std::{fs, io, net::TcpListener, path::Path};
+use std::{collections::HashMap, io, path::Path};
 
-use libc;
+use mio::net::{TcpListener, TcpStream};
 use serde::Deserialize;
+use std::os::fd::AsRawFd;
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Config {servers:Vec<Server>}
 impl Config {
-    pub fn from_file<P: AsRef<Path>>(path:P) -> io::Result<Self> {
-        let contents = fs::read_to_string(path)?;
-        let config:Config = toml::from_str(&contents)
-            .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err))?;
-        Ok(config)
+    pub fn from_file<P:AsRef<Path>>(path:P) -> Self {
+        let config = std::fs::read_to_string(path).unwrap();
+        toml::from_str(&config).expect("ERROR")
     }
 
     pub fn get_servers(&self) -> &[Server] {&self.servers}
@@ -24,64 +23,73 @@ impl EpollInstance {
         Self {file_descriptor: epoll_fd}
     }
 
-    pub(super) fn install(&self, listeners:&Vec<ListenerInfo>) -> io::Result<()> {
-        // Register each listener's file descriptor with the epoll instance.
-        for listener_info in listeners {
-            let fd = listener_info.get_file_descriptor();
-            let mut event = libc::epoll_event {events: (libc::EPOLLIN | libc::EPOLLET) as u32, u64: fd as u64};
-            if unsafe {
-                libc::epoll_ctl(self.file_descriptor, libc::EPOLL_CTL_ADD, fd, &mut event as *mut libc::epoll_event)
-            } < 0 {return Err(io::Error::last_os_error());}
-        }
+    pub(super) fn install(addresses:&[String], handler:fn(&mut TcpStream)) {
+        let epoll_instance = EpollInstance::new();
+        let mut servers = HashMap::new();
+        let mut clients = HashMap::new();
 
-        // Buffer to hold events (we assume a maximum of 10 events at a time).
-        let mut events = vec![libc::epoll_event { events: 0, u64: 0 }; 10];
+        for addresse in addresses {
+            let std_listener = std::net::TcpListener::bind(addresse).expect("Unable to start server");
+            std_listener.set_nonblocking(true).expect("Cannot set non-blocking");
+            let listener = TcpListener::from_std(std_listener);
+
+            let file_descriptor = listener.as_raw_fd();
+            let mut event = libc::epoll_event {
+                events: libc::EPOLLIN as u32,
+                u64: file_descriptor as u64,
+            };
+
+            unsafe {
+                if libc::epoll_ctl(epoll_instance.file_descriptor, libc::EPOLL_CTL_ADD, file_descriptor, &mut event) < 0 {
+                    panic!("Error adding file descriptor to epoll");
+                }
+            }
+            servers.insert(file_descriptor, listener);
+        }
+        println!("Servers listening on {:#?}", addresses);
+
+        let mut events: [libc::epoll_event; 1024] = unsafe {std::mem::zeroed()};
 
         loop {
-            // Wait indefinitely for events.
-            let nfds = unsafe {
-                libc::epoll_wait(self.file_descriptor, events.as_mut_ptr(), events.len() as i32, -1)
-            };
-            if nfds < 0 {return Err(io::Error::last_os_error());}
+            let num_events = unsafe {libc::epoll_wait(
+                epoll_instance.file_descriptor,
+                events.as_mut_ptr(),
+                events.len() as i32,
+                -1,
+            )};
+            if num_events < 0 {panic!("ERROR: epoll_wait")}
 
-            // Process each triggered event.
-            for n in 0..(nfds as usize) {
-                let ev = events[n];
-                let event_fd = ev.u64 as i32;
-                // Find the corresponding listener.
-                if let Some(listener_info) = listeners.iter().find(|l| l.file_descriptor == event_fd) {
-                    // Accept all pending connections.
-                    loop {
-                        match listener_info.listener.accept() {
-                            Ok((stream, addr)) => {
-                                println!("Accepted connection from {} on server '{}'", addr, listener_info.server_name);
-                                // Future: Register client streams with epoll for further I/O.
-                                drop(stream); // For now, we simply drop the connection.
-                            }
-                            Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => break,
-                            Err(err) => {
-                                eprintln!("Error accepting connection on server '{}': {}", listener_info.server_name, err);
-                                break;
+            for i in 0..num_events as usize {
+                let fd = events[i].u64 as i32;
+    
+                if let Some(listener) = servers.get(&fd) {
+                    match listener.accept() {
+                        Ok((stream, address)) => {
+                            println!("New connection from: {:?}", address);
+                            let stream_fd = stream.as_raw_fd();
+                            clients.insert(stream_fd, stream);
+    
+                            let mut event = libc::epoll_event {
+                                events: (libc::EPOLLIN | libc::EPOLLOUT) as u32,
+                                u64: stream_fd as u64,
+                            };
+    
+                            unsafe {
+                                if libc::epoll_ctl(epoll_instance.file_descriptor, libc::EPOLL_CTL_ADD, stream_fd, &mut event) < 0 {
+                                    panic!("Error adding client file descriptor to epoll");
+                                }
                             }
                         }
+                        Err(ref err) if err.kind() == std::io::ErrorKind::WouldBlock => {continue}
+                        Err(err) => {eprintln!("Error accepting connection: {:?}", err)}
                     }
-                } else {println!("Received event on unknown fd: {}", event_fd)}
+                } else if let Some(stream) = clients.get_mut(&fd) {handler(&mut *stream)}
             }
         }
     }
 }
 
-// Holds information for a single listener.
-pub(super) struct ListenerInfo {server_name:String, listener:TcpListener, file_descriptor:i32}
-impl ListenerInfo {
-    pub(super) fn new(server_name:String, listener:TcpListener, fd:i32) -> Self {
-        Self {server_name, listener, file_descriptor: fd}
-    }
-    // Getters
-    pub(super) fn get_file_descriptor(&self) -> i32 {self.file_descriptor}
-}
-
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Server {name:String, host:String, ports:Vec<u16>}
 impl Server {
     // Just for the getters

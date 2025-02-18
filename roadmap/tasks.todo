@@ -103,11 +103,11 @@ ________________________________________________________________________________
 === DYNAMIC CONFIGURATION ===
     ✔ Create `config.toml` file for parameters @done(25-02-14 11:15 AM)
     Read values from file:
-        ✔ Server address (`127.0.0.1`) @done(25-02-16 16:20)
-        ✔ Listened ports (`8080`, `9090`, etc.) @done(25-02-16 16:20)
+        ✔ Server address (`127.0.0.1`) @done(25-02-16 04:20 PM)
+        ✔ Listened ports (`8080`, `9090`, etc.) @done(25-02-16 04:20 PM)
         ☐ Maximum upload size (`10MB`)
         ☐ Static and CGI file directories
-    ☐ Apply configuration to server
+    ✔ Apply configuration to server @done(25-02-18 03:46 PM)
 ____________________________________________________________________________________________________________________________________________________
 === TESTING AND ROBUSTNESS ===
     ☐ Testing the server with `siege`:

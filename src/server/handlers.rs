@@ -1,29 +1,36 @@
-use std::{io, net::TcpListener, os::fd::AsRawFd};
+use std::io::{Read, Write};
 
-use super::config::{EpollInstance, ListenerInfo, Server};
+use mio::net::TcpStream;
 
-pub struct Localhost {listeners:Vec<ListenerInfo>}
+use super::config::{EpollInstance, Server};
+
+pub struct Localhost {addresses:Vec<String>}
 impl Localhost {
-    // Creates a new server manager by instantiating a listener for every port of every server.
-    pub fn new(servers:&[Server]) -> io::Result<Self> {
-        let mut listeners = Vec::new();
-        for server in servers {
-            for port in server.get_ports() {
-                let address = format!("{}:{}", server.get_host(), port);
-                let listener = TcpListener::bind(address.clone())?;
-                listener.set_nonblocking(true)?;
-                let file_descriptor = listener.as_raw_fd();
-                println!("Server '{}' listening on {}", server.get_name(), address);
-                listeners.push(ListenerInfo::new(String::from(server.get_name()), listener, file_descriptor));
-            }
+    fn new(servers:&[Server]) -> Self {
+        Self {
+            addresses: servers.iter().map(|server| {
+                server.get_ports().iter().map(|port| {format!("{}:{}", server.get_host(), port)}).collect::<Vec<String>>()
+            }).flatten().collect::<Vec<String>>()
         }
-        Ok(Self {listeners})
     }
 
-    // Starts the server manager.
-    pub fn start(&self) -> io::Result<()> {
-        // Create an epoll instance.
-        let epoll_instance = EpollInstance::new();
-        epoll_instance.install(&self.listeners)
+    fn handle_client(stream:&mut TcpStream) {
+        let mut buffer = [0; 1024];
+        match stream.read(&mut buffer) {
+            Ok(_) => {}
+            Err(ref err) if err.kind() == std::io::ErrorKind::WouldBlock => {return;}
+            Err(err) => {
+                eprintln!("Error reading from stream: {:?}", err);
+                return;
+            }
+        }
+        let response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, world!";
+        stream.write_all(response.as_bytes()).unwrap();
+        stream.flush().unwrap();
+    }
+
+    pub fn start(servers:&[Server]) {
+        let localhost = Localhost::new(servers);
+        EpollInstance::install(&localhost.addresses, Localhost::handle_client);
     }
 }
