@@ -5,10 +5,13 @@ use {
     },
     crate::{
         server::{
-            cgi::CommonGatewayInterface,
+            cgi::Cgi,
             router::Router,
         },
-        utils::read_buffer,
+        utils::{
+            read_buffer,
+            AppErr,
+        },
         Request,
     },
     std::os::fd::{
@@ -53,12 +56,15 @@ impl Multiplexer {
                     Ok((stream, addr)) => (stream, addr),
                     Err(_) => continue,
                 };
-                
-                dbg!(addr);
 
-                if let Err(_) = stream.set_nonblocking(true) {
+                if stream
+                    .set_nonblocking(true)
+                    .is_err()
+                {
                     continue;
                 }
+
+                dbg!(addr);
 
                 // Get the request from the stream.
                 let request = match read_buffer(&stream) {
@@ -66,23 +72,22 @@ impl Multiplexer {
                     None => continue,
                 };
 
-                let cgi = CommonGatewayInterface;
+                let cgi = Cgi;
                 match cgi.is_cgi_request(&request, &self.servers) {
-                    Ok(Some(cgi_py)) => {
+                    Ok(script) => {
                         dbg!("Run CGI...");
-                        let cgi_script = cgi.execute_cgi(
-                            &cgi_py,
-                            &request,
-                            &mut stream,
-                        );
+                        let cgi_script =
+                            cgi.execute(&script, &request, &mut stream);
 
                         if let Err(e) = cgi_script {
                             dbg!(e);
                             continue;
                         }
                     }
-                    Ok(None) => {
-                        if let Err(e) = Router::run(request, &mut stream) {
+                    Err(AppErr::NoCGI) => {
+                        if let Err(e) =
+                            Router::direct(request, &mut stream)
+                        {
                             dbg!(e);
                             continue;
                         }

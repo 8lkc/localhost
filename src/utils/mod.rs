@@ -1,12 +1,13 @@
-mod errors;
-mod functions;
-
 #[macro_use]
 mod macros;
+mod constants;
+mod errors;
+mod functions;
 
 #[cfg(target_os = "macos")]
 pub(super) use functions::timeout;
 pub(super) use {
+    constants::TIMEOUT,
     errors::{
         AppErr,
         AppResult,

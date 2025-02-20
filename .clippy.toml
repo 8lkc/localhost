@@ -6,7 +6,7 @@ cognitive-complexity-threshold = 20
 
 # Maximum allowed size for enum variants
 # Default: 200 bytes
-enum-variant-size-threshold = 200
+enum-variant-size-threshold = 250
 
 # Maximum number of arguments a function can have
 # Default: 7

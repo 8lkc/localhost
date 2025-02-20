@@ -30,7 +30,7 @@ pub struct Server {
     root:             Option<String>,
     error_pages:      Option<Vec<String>>,
     uploads_max_size: Option<u64>,
-    cgi_handler:      Option<HashMap<String, String>>,
+    cgi:              Option<HashMap<String, String>>,
     listing:          Option<bool>,
     routes:           Option<Vec<Route>>,
 }
@@ -42,12 +42,12 @@ impl Server {
             && self.ports.is_some()
             && self.root.is_some()
             && self.error_pages.is_some()
+            && self.listing.is_some()
+            && self.routes.is_some()
+            && self.cgi.is_some()
             && self
                 .uploads_max_size
                 .is_some()
-            && self.cgi_handler.is_some()
-            && self.listing.is_some()
-            && self.routes.is_some()
         // && self
         //     .routes()
         //     .iter()
@@ -85,7 +85,7 @@ impl Server {
             .into();
 
             // Route request to appropriate handler
-            if Router::run(req, &mut stream).is_err() {
+            if Router::direct(req, &mut stream).is_err() {
                 dbg!("Failed to direct request!");
                 continue;
             }
@@ -113,10 +113,9 @@ impl Server {
         self.uploads_max_size.unwrap()
     }
 
-    pub fn cgi_handler(&self) -> &HashMap<String, String> {
-        self.cgi_handler
-            .as_ref()
-            .unwrap()
+    /// Common Gateway Interface
+    pub fn cgi(&self) -> &HashMap<String, String> {
+        self.cgi.as_ref().unwrap()
     }
 
     pub fn listing(&self) -> bool { self.listing.unwrap() }

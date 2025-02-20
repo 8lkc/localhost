@@ -63,14 +63,15 @@ rustflags = ["-C", "link-arg=-fuse-ld=lld"]
 
 # ----- Network Settings -----
 
+[net]
+# Number of retries
+# Default: 2
+retry = 3
+
 [http]
 # Timeout in seconds
 # Default: 30
 timeout = 30
-
-# Number of retries
-# Default: 2
-retry = 2
 
 # Check certificate revocation
 # Default: true

@@ -12,7 +12,10 @@ use {
     },
     crate::{
         syscall,
-        utils::AppResult,
+        utils::{
+            AppResult,
+            TIMEOUT,
+        },
     },
     std::os::fd::RawFd,
 };
@@ -73,7 +76,10 @@ impl Multiplexer {
         }
     }
 
-    pub(super) fn poll(&self, events: &mut Vec<OsEvent>) -> AppResult<i32> {
+    pub(super) fn poll(
+        &self,
+        events: &mut Vec<OsEvent>,
+    ) -> AppResult<i32> {
         #[cfg(target_os = "linux")]
         {
             syscall!(
@@ -81,7 +87,7 @@ impl Multiplexer {
                 self.file_descriptor,
                 events.as_mut_ptr() as *mut epoll_event,
                 events.len() as i32,
-                1000,
+                TIMEOUT as i32,
             )
         }
         #[cfg(target_os = "macos")]
@@ -93,7 +99,7 @@ impl Multiplexer {
                 0,
                 events.as_mut_ptr() as *mut kevent,
                 events.len() as i32,
-                timeout(1000)
+                timeout(TIMEOUT)
             )
         }
     }

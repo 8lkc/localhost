@@ -1,8 +1,5 @@
 use std::{
-    error::{
-        self,
-        Error,
-    },
+    error,
     fmt::Display,
     io::{
         self,
@@ -19,6 +16,7 @@ pub enum AppErr {
     NonBlocking(io::Error),
     ParseAddress(AddrParseError),
     Other(io::Error),
+    NoCGI,
     Custom(String),
 }
 
@@ -42,11 +40,14 @@ impl Display for AppErr {
                 writeln!(f, "Address Parsing: {e}.")
             }
             Self::Other(e) => writeln!(f, "ERROR: {e}."),
+            Self::NoCGI => {
+                writeln!(f, "No Common Gateway Interface found!")
+            }
         }
     }
 }
 
-impl Error for AppErr {
+impl error::Error for AppErr {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
             Self::NonBlocking(e) => Some(e),
@@ -54,7 +55,7 @@ impl Error for AppErr {
             Self::DeserializeTOML(e) => Some(e),
             Self::ParseAddress(e) => Some(e),
             Self::Other(e) => Some(e),
-            Self::Custom(_) => None,
+            _ => None,
         }
     }
 }
@@ -80,6 +81,10 @@ impl From<AddrParseError> for AppErr {
 
 impl From<serde_json::Error> for AppErr {
     fn from(value: serde_json::Error) -> Self { Self::SerDeJSON(value) }
+}
+
+impl From<String> for AppErr {
+    fn from(value: String) -> Self { Self::Custom(value) }
 }
 
 impl AppErr {

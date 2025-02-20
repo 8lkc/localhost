@@ -1,6 +1,12 @@
 use {
     super::Server,
-    crate::http::Request,
+    crate::{
+        http::Request,
+        utils::{
+            AppErr,
+            AppResult,
+        },
+    },
     std::{
         io::Write,
         net::TcpStream,
@@ -8,14 +14,15 @@ use {
     },
 };
 
-pub struct CommonGatewayInterface;
+/// Common Gateway Interface
+pub struct Cgi;
 
-impl CommonGatewayInterface {
+impl Cgi {
     pub fn is_cgi_request(
         &self,
         request: &Request,
         servers: &[Server],
-    ) -> Result<Option<String>, String> {
+    ) -> AppResult<String> {
         let path = request.resource.path();
         let extension = path
             .split('.')
@@ -26,28 +33,23 @@ impl CommonGatewayInterface {
 
         let server = servers.iter().find(|server| {
             server
-                .cgi_handler
-                .as_ref()
-                .map(|handlers| handlers.contains_key(extension))
-                .unwrap_or(false)
+                .cgi()
+                .contains_key(extension)
         });
 
         match server {
             Some(server) => Ok(server
-                .cgi_handler
-                .as_ref()
-                .and_then(|handlers| {
-                    handlers
-                        .get(extension)
-                        .cloned()
-                })),
-            None => Ok(None),
+                .cgi()
+                .get(extension)
+                .cloned()
+                .unwrap()),
+            None => Err(AppErr::NoCGI),
         }
     }
 
-    pub fn execute_cgi(
+    pub fn execute(
         &self,
-        cgi_script: &str,
+        script: &str,
         request: &Request,
         stream: &mut TcpStream,
     ) -> Result<(), String> {
@@ -64,7 +66,7 @@ impl CommonGatewayInterface {
             .split('?')
             .nth(1)
             .unwrap_or("");
-        dbg!(cgi_script);
+        dbg!(script);
         let interpreter = self.get_interpreter(&script_path)?;
         let output = Command::new(interpreter)
             .arg(&format!("public{}", request.resource.path()))

@@ -44,7 +44,7 @@ impl Route {
 pub struct Router;
 
 impl Router {
-    pub fn run(
+    pub fn direct(
         request: Request,
         stream: &mut impl Write,
     ) -> AppResult<()> {
