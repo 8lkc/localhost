@@ -1,4 +1,3 @@
-pub mod cgi;
 mod handler;
 pub mod router;
 

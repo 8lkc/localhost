@@ -1,9 +1,10 @@
-mod static_page;
-mod web_service;
+mod api;
+mod cgi;
+mod http;
 
 use {
     crate::{
-        http::{
+        message::{
             Request,
             Response,
         },
@@ -19,8 +20,9 @@ use {
     },
 };
 pub use {
-    static_page::StaticPage,
-    web_service::WebService,
+    api::Api,
+    cgi::Cgi,
+    http::Http,
 };
 
 pub trait Handler {

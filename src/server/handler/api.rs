@@ -4,7 +4,7 @@ use {
         Handler,
     },
     crate::{
-        http::{
+        message::{
             Request,
             Resource,
             Response,
@@ -21,22 +21,9 @@ use {
     },
 };
 
-pub struct WebService;
+pub struct Api;
 
-impl WebService {
-    fn load_json() -> Vec<Data> {
-        let default_path =
-            format!("{}/public/data", env!("CARGO_MANIFEST_DIR"));
-        let data_path = env::var("DATA_PATH").unwrap_or(default_path);
-        let full_path = format!("{data_path}/data.json");
-        let json_contents = fs::read_to_string(full_path).unwrap();
-        let data = serde_json::from_str(json_contents.as_str()).unwrap();
-
-        data
-    }
-}
-
-impl Handler for WebService {
+impl Handler for Api {
     fn handle(req: &Request) -> AppResult<Response> {
         let Resource::Path(s) = &req.resource;
         let route: Vec<&str> = s.split("/").collect();
@@ -62,5 +49,18 @@ impl Handler for WebService {
                 Self::load_file("error.html"),
             )),
         }
+    }
+}
+
+impl Api {
+    fn load_json() -> Vec<Data> {
+        let default_path =
+            format!("{}/public/data", env!("CARGO_MANIFEST_DIR"));
+        let data_path = env::var("DATA_PATH").unwrap_or(default_path);
+        let full_path = format!("{data_path}/data.json");
+        let json_contents = fs::read_to_string(full_path).unwrap();
+        let data = serde_json::from_str(json_contents.as_str()).unwrap();
+
+        data
     }
 }

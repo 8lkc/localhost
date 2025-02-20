@@ -1,7 +1,7 @@
 use {
     super::Handler,
     crate::{
-        http::{
+        message::{
             Request,
             Resource,
             Response,
@@ -11,9 +11,9 @@ use {
     std::collections::HashMap,
 };
 
-pub struct StaticPage;
+pub struct Http;
 
-impl Handler for StaticPage {
+impl Handler for Http {
     fn handle(req: &Request) -> AppResult<Response> {
         // Get the path of static page resource being requested
         let Resource::Path(s) = &req.resource;

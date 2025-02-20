@@ -1,12 +1,13 @@
 use {
     super::handler::{
+        Api,
+        Cgi,
         ErrorPage,
         Handler,
-        StaticPage,
-        WebService,
+        Http,
     },
     crate::{
-        http::{
+        message::{
             Method,
             Request,
             Resource,
@@ -52,8 +53,9 @@ impl Router {
             (Method::GET, Resource::Path(s)) => {
                 let route: Vec<&str> = s.split("/").collect();
                 match route[1] {
-                    "api" => WebService::handle(&request),
-                    _ => StaticPage::handle(&request),
+                    "api" => Api::handle(&request),
+                    "cgi" => Cgi::handle(&request),
+                    _ => Http::handle(&request),
                 }
             }
             _ => ErrorPage::handle(&request),

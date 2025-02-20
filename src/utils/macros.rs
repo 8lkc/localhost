@@ -11,8 +11,11 @@ macro_rules! check {
 }
 
 #[macro_export]
+#[allow(clippy::macro_metavars_in_unsafe)]
 macro_rules! syscall {
     ($name:ident $(, $arg:expr)* $(,)?) => {{
-        $crate::check!(unsafe { libc::$name($($arg),*) })
+        let func = libc::$name;
+        let result = unsafe { func($($arg),*) };
+        $crate::check!(result)
     }};
 }

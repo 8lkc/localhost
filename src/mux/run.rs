@@ -4,14 +4,8 @@ use {
         OsEvent,
     },
     crate::{
-        server::{
-            cgi::Cgi,
-            router::Router,
-        },
-        utils::{
-            read_buffer,
-            AppErr,
-        },
+        server::router::Router,
+        utils::read_buffer,
         Request,
     },
     std::os::fd::{
@@ -21,16 +15,19 @@ use {
 };
 
 impl Multiplexer {
+    /// Starts the main process by setting a vector of potentially
+    /// uninitialized events with a specified capacity. Then gets the file
+    /// descriptor from the event, finds the listener associated with the
+    /// file descriptor, gets the stream and address from the associated
+    /// listener and makes the stream asynchronous. Then from the stream
+    /// buffer, gets the request, adds the stream file desriptor to the
+    /// `Multiplexer` and finally sends the `Request` to the `Router`.
     pub fn run(&self) -> ! {
-        // Set a vector of potentially uninitialized events
-        // with specified capacity.
         let mut events: Vec<OsEvent> = Vec::with_capacity(32);
         unsafe { events.set_len(32) };
 
-        // Start the main process.
         loop {
-            // Number of found descriptors
-            let nfds = self
+            let nfds = self //                      <-- Number of found descriptors.
                 .poll(&mut events)
                 .unwrap_or(0) as usize;
 
@@ -39,66 +36,40 @@ impl Multiplexer {
             for event in events.iter().take(nfds) {
                 let event = unsafe { event.assume_init() };
 
-                // Get the file descriptor from the event.
                 #[cfg(target_os = "linux")]
                 let event_fd = event.u64 as RawFd;
                 #[cfg(target_os = "macos")]
                 let event_fd = event.ident as RawFd;
 
-                // Find the listener associated with the file descriptor.
                 let fd_listener = match self.find_listener(event_fd) {
                     Some(listener) => listener,
                     None => continue,
                 };
 
-                // Get the stream and address from the associated listener.
-                let (mut stream, addr) = match fd_listener.accept() {
+                let (mut stream, _addr) = match fd_listener.accept() {
                     Ok((stream, addr)) => (stream, addr),
-                    Err(_) => continue,
-                };
-
-                if stream
-                    .set_nonblocking(true)
-                    .is_err()
-                {
-                    continue;
-                }
-
-                dbg!(addr);
-
-                // Get the request from the stream.
-                let request = match read_buffer(&stream) {
-                    Some(req_str) => Request::from(req_str),
-                    None => continue,
-                };
-
-                let cgi = Cgi;
-                match cgi.is_cgi_request(&request, &self.servers) {
-                    Ok(script) => {
-                        dbg!("Run CGI...");
-                        let cgi_script =
-                            cgi.execute(&script, &request, &mut stream);
-
-                        if let Err(e) = cgi_script {
-                            dbg!(e);
-                            continue;
-                        }
-                    }
-                    Err(AppErr::NoCGI) => {
-                        if let Err(e) =
-                            Router::direct(request, &mut stream)
-                        {
-                            dbg!(e);
-                            continue;
-                        }
-                    }
                     Err(e) => {
                         dbg!(e);
                         continue;
                     }
                 };
 
+                if let Err(e) = stream.set_nonblocking(true) {
+                    dbg!(e);
+                    continue;
+                };
+
+                let request = match read_buffer(&stream) {
+                    Some(req_str) => Request::from(req_str),
+                    None => continue,
+                };
+
                 if let Err(e) = self.register(stream.as_raw_fd()) {
+                    dbg!(e);
+                    continue;
+                };
+
+                if let Err(e) = Router::direct(request, &mut stream) {
                     dbg!(e);
                 }
             }

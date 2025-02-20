@@ -1,3 +1,6 @@
 #!/usr/bin/env python3
-print("Content-Type: text/html\n")  
-print("Hello, World!")
+for i in range(10):
+    if i % 2 == 0:
+        print(f"Even: {i}")
+    else:
+        print(f"Odd: {i}")

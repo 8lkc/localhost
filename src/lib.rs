@@ -1,15 +1,15 @@
-mod http;
 mod loader;
+mod message;
 mod mux;
 mod server;
 mod utils;
 
 pub use {
-    http::{
+    loader::Loader,
+    message::{
         Method,
         Request,
         Resource,
         Response,
     },
-    loader::Loader,
 };

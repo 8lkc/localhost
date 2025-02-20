@@ -1,7 +1,7 @@
 use {
     super::AppResult,
     crate::{
-        http::{
+        message::{
             Method,
             Resource,
         },
