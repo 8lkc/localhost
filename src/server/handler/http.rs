@@ -6,7 +6,10 @@ use {
             Resource,
             Response,
         },
-        utils::AppResult,
+        utils::{
+            HttpErr,
+            HttpResult,
+        },
     },
     std::collections::HashMap,
 };
@@ -14,7 +17,7 @@ use {
 pub struct Http;
 
 impl Handler for Http {
-    fn handle(req: &Request) -> AppResult<Response> {
+    fn handle(req: &Request) -> HttpResult<Response> {
         // Get the path of static page resource being requested
         let Resource::Path(s) = &req.resource;
 
@@ -22,7 +25,7 @@ impl Handler for Http {
         let route: Vec<&str> = s.split("/").collect();
         match route[1] {
             "" => Ok(Response::new(
-                "200",
+                200,
                 None,
                 Self::load_file("index.html"),
             )),
@@ -41,17 +44,9 @@ impl Handler for Http {
                         map.insert("Content-Type", "text/html");
                     }
 
-                    Ok(Response::new(
-                        "200",
-                        Some(map),
-                        Some(contents),
-                    ))
+                    Ok(Response::new(200, Some(map), Some(contents)))
                 }
-                None => Ok(Response::new(
-                    "404",
-                    None,
-                    Self::load_file("error.html"),
-                )),
+                None => Ok(Response::from(HttpErr::from(404))),
             },
         }
     }

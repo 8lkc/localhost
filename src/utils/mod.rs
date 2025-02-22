@@ -10,6 +10,8 @@ pub(super) use {
     errors::{
         AppErr,
         AppResult,
+        HttpErr,
+        HttpResult,
     },
     functions::{
         get_listeners,

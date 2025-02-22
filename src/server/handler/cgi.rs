@@ -4,7 +4,8 @@ use {
         message::Request,
         utils::{
             AppErr,
-            AppResult,
+            HttpErr,
+            HttpResult,
             INTERPRETERS,
         },
         Resource,
@@ -21,7 +22,7 @@ use {
 pub struct Cgi;
 
 impl Handler for Cgi {
-    fn handle(req: &Request) -> AppResult<Response> {
+    fn handle(req: &Request) -> HttpResult<Response> {
         let Resource::Path(path) = &req.resource;
 
         let ext = path
@@ -33,13 +34,13 @@ impl Handler for Cgi {
             .get(ext)
             .ok_or(AppErr::NoCGI)?;
 
-        let script_path = format!(
+        let script = format!(
             "{}/public{}",
             env!("CARGO_MANIFEST_DIR"),
             path
         );
-        if !Path::new(&script_path).exists() {
-            return Err(AppErr::NoCGI);
+        if !Path::new(&script).exists() {
+            return Err(HttpErr::from(AppErr::NoCGI));
         }
 
         let query_str = path
@@ -48,7 +49,7 @@ impl Handler for Cgi {
             .unwrap_or("");
 
         let output = Command::new(interpreter)
-            .arg(&script_path)
+            .arg(&script)
             .env("REQUEST_METHOD", req.method.to_string())
             .env("QUERY_STRING", query_str)
             .output()?;
@@ -57,7 +58,7 @@ impl Handler for Cgi {
 
         if output.status.success() {
             Ok(Response::new(
-                "200",
+                200,
                 Some(HashMap::from([(
                     "Content-Type",
                     "text/html",
@@ -66,10 +67,9 @@ impl Handler for Cgi {
             ))
         }
         else {
-            Err(AppErr::new(&format!(
-                "CGI error: {}",
-                String::from_utf8_lossy(&output.stderr)
-            )))
+            Err(HttpErr::from(
+                String::from_utf8_lossy(&output.stderr).to_string(),
+            ))
         }
     }
 }

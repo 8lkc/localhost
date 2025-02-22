@@ -6,12 +6,12 @@ use {
 #[test]
 fn test_response_struct_creation_200() {
     let response_actual = Response::new(
-        "200",
+        200,
         None,
         Some("Item was shipped on 21st Dec 2020".into()),
     );
 
-    assert_eq!(response_actual.status_code(), "200");
+    assert_eq!(response_actual.status_code(), 200);
     assert_eq!(response_actual.status_text(), "OK");
     assert_eq!(
         response_actual.headers(),
@@ -26,12 +26,12 @@ fn test_response_struct_creation_200() {
 #[test]
 fn test_response_struct_creation_404() {
     let response_actual = Response::new(
-        "404",
+        404,
         None,
         Some("Item was shipped on 21st Dec 2020".into()),
     );
 
-    assert_eq!(response_actual.status_code(), "404");
+    assert_eq!(response_actual.status_code(), 404);
     assert_eq!(response_actual.status_text(), "Not Found");
     assert_eq!(
         response_actual.headers(),
@@ -49,7 +49,7 @@ fn test_http_response_creation() {
     h.insert("Content-Type", "text/html");
 
     let response_expected = Response::new(
-        "404",
+        404,
         Some(h),
         Some("Item was shipped on 21st Dec 2020".into()),
     );

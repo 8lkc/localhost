@@ -8,7 +8,7 @@ use {
             Request,
             Response,
         },
-        utils::AppResult,
+        utils::HttpResult,
     },
     serde::{
         Deserialize,
@@ -26,7 +26,7 @@ pub use {
 };
 
 pub trait Handler {
-    fn handle(req: &Request) -> AppResult<Response>;
+    fn handle(req: &Request) -> HttpResult<Response>;
     fn load_file(file_name: &str) -> Option<String> {
         let default_path = format!(
             "{}/public/templates",
@@ -38,18 +38,6 @@ pub trait Handler {
         let contents = fs::read_to_string(full_path);
 
         contents.ok()
-    }
-}
-
-pub struct ErrorPage;
-
-impl Handler for ErrorPage {
-    fn handle(_req: &Request) -> AppResult<Response> {
-        Ok(Response::new(
-            "404",
-            None,
-            Self::load_file("error.html"),
-        ))
     }
 }
 

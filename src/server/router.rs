@@ -2,17 +2,15 @@ use {
     super::handler::{
         Api,
         Cgi,
-        ErrorPage,
         Handler,
         Http,
     },
     crate::{
         message::{
-            Method,
             Request,
             Resource,
         },
-        utils::AppResult,
+        Response,
     },
     serde::{
         Deserialize,
@@ -45,12 +43,9 @@ impl Route {
 pub struct Router;
 
 impl Router {
-    pub fn direct(
-        request: Request,
-        stream: &mut impl Write,
-    ) -> AppResult<()> {
-        let response = match (&request.method, &request.resource) {
-            (Method::GET, Resource::Path(s)) => {
+    pub fn direct(request: Request, stream: &mut impl Write) {
+        let response = match &request.resource {
+            Resource::Path(s) => {
                 let route: Vec<&str> = s.split("/").collect();
                 match route[1] {
                     "api" => Api::handle(&request),
@@ -58,8 +53,8 @@ impl Router {
                     _ => Http::handle(&request),
                 }
             }
-            _ => ErrorPage::handle(&request),
-        }?;
+        }
+        .unwrap_or_else(|e| Response::from(e));
 
         response.send(stream)
     }

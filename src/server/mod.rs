@@ -1,6 +1,10 @@
 mod handler;
 pub mod router;
 
+pub use handler::{
+    Handler,
+    Http,
+};
 use {
     crate::utils::AppResult,
     router::{
@@ -84,10 +88,7 @@ impl Server {
             .into();
 
             // Route request to appropriate handler
-            if Router::direct(req, &mut stream).is_err() {
-                dbg!("Failed to direct request!");
-                continue;
-            }
+            Router::direct(req, &mut stream)
         }
 
         Ok(())

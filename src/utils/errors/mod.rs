@@ -20,9 +20,11 @@ pub enum AppErr {
 }
 
 pub struct HttpErr {
-    status_code: u16,
-    message:     String,
+    pub status_code: u16,
+    pub message:     String,
 }
 
 /// Custom `Result` specific to this crate.
 pub type AppResult<T> = result::Result<T, AppErr>;
+
+pub type HttpResult<T> = result::Result<T, HttpErr>;

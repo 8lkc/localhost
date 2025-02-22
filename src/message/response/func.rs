@@ -1,6 +1,5 @@
 use {
     super::Response,
-    crate::utils::AppResult,
     std::{
         collections::HashMap,
         io::Write,
@@ -9,12 +8,12 @@ use {
 
 impl<'a> Response<'a> {
     pub fn new(
-        status_code: &'a str,
+        status_code: u16,
         headers: Option<HashMap<&'a str, &'a str>>,
         body: Option<String>,
     ) -> Response<'a> {
         let mut response = Response::default();
-        if status_code != "200" {
+        if status_code != 200 {
             response.status_code = status_code;
         };
 
@@ -28,31 +27,30 @@ impl<'a> Response<'a> {
         };
 
         response.status_text = match response.status_code {
-            "200" => "OK",
-            "400" => "Bad Request",
-            "404" => "Not Found",
-            "500" => "Internal Server Error",
-            _ => "Not Found",
-        };
+            200 => "OK",
+            400 => "Bad Request",
+            401 => "Unauthorized",
+            403 => "Forbidden",
+            404 => "Not Found",
+            405 => "Method Not Allowed",
+            _ => "Internal Server Error",
+        }
+        .to_string();
 
         response.body = body;
 
         response
     }
 
-    pub fn send(
-        &self,
-        write_stream: &mut impl Write,
-    ) -> AppResult<()> {
+    pub fn send(&self, write_stream: &mut impl Write) {
         let res = self.clone();
         let response_string: String = String::from(res);
         let _ = write!(write_stream, "{}", response_string);
-        Ok(())
     }
 
-    pub fn status_code(&self) -> &str { self.status_code }
+    pub fn status_code(&self) -> u16 { self.status_code }
 
-    pub fn status_text(&self) -> &str { self.status_text }
+    pub fn status_text(&self) -> &str { &self.status_text }
 
     pub fn headers(&self) -> String {
         let map: HashMap<&str, &str> = self.headers.clone().unwrap();

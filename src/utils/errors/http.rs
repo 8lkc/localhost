@@ -1,7 +1,14 @@
-use super::{
-    AppErr,
-    HttpErr,
+use {
+    super::{
+        AppErr,
+        HttpErr,
+    },
+    std::io,
 };
+
+impl From<io::Error> for HttpErr {
+    fn from(_error: io::Error) -> Self { Self::from(500) }
+}
 
 impl From<AppErr> for HttpErr {
     fn from(value: AppErr) -> Self {
@@ -34,18 +41,18 @@ impl From<String> for HttpErr {
 
 impl From<u16> for HttpErr {
     fn from(status_code: u16) -> Self {
-        let message = match status_code {
-            400 => "Bad Request".to_string(),
-            401 => "Unauthorized".to_string(),
-            403 => "Forbidden".to_string(),
-            404 => "Not Found".to_string(),
-            405 => "Method Not Allowed".to_string(),
-            _ => "Internal Server Error".to_string(),
+        let msg = match status_code {
+            400 => "Bad Request",
+            401 => "Unauthorized",
+            403 => "Forbidden",
+            404 => "Not Found",
+            405 => "Method Not Allowed",
+            _ => "Internal Server Error",
         };
 
         Self {
             status_code,
-            message,
+            message: msg.to_string(),
         }
     }
 }
