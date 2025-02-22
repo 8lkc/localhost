@@ -30,7 +30,7 @@ impl Multiplexer {
             let nfds = self //                      <-- Number of found descriptors.
                 .poll(&mut events)
                 .unwrap_or(0) as usize;
-
+            
             dbg!(nfds);
 
             for event in events.iter().take(nfds) {

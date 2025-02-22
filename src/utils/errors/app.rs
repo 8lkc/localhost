@@ -1,28 +1,12 @@
-use std::{
-    error,
-    fmt::Display,
-    io::{
-        self,
-        ErrorKind,
+use {
+    super::AppErr,
+    std::{
+        error,
+        fmt::Display,
+        io,
+        net::AddrParseError,
     },
-    net::AddrParseError,
-    result,
 };
-
-#[derive(Debug)]
-pub enum AppErr {
-    DeserializeTOML(toml::de::Error),
-    SerDeJSON(serde_json::Error),
-    NonBlocking(io::Error),
-    ParseAddr(AddrParseError),
-    Other(io::Error),
-    Custom(String),
-    ExtNotFound,
-    NoCGI,
-}
-
-/// Custom `Result` specific to this crate.
-pub type AppResult<T> = result::Result<T, AppErr>;
 
 impl Display for AppErr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -55,7 +39,7 @@ impl error::Error for AppErr {
 impl From<io::Error> for AppErr {
     fn from(value: io::Error) -> Self {
         match value.kind() {
-            ErrorKind::WouldBlock => Self::NonBlocking(value),
+            io::ErrorKind::WouldBlock => Self::NonBlocking(value),
             _ => Self::Other(value),
         }
     }

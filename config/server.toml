@@ -1,8 +1,7 @@
 [[servers]]
 host = "127.0.0.1"
 ports = [8080, 5500, 4000, 8000]
-# root = "/Users/ivan/Desktop/z01/localhost/public"
-root = "/home/fatima/Documents/branch_rust/localhost/public"
+root = "$CARGO_MANIFEST_DIR/public"
 error_pages = ["404.html", "400.html", "405.html", "403.html"]
 uploads_max_size = 10485760
 cgi = { "py" = "/python-cgi.py" }

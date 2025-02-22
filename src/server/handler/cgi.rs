@@ -33,7 +33,11 @@ impl Handler for Cgi {
             .get(ext)
             .ok_or(AppErr::NoCGI)?;
 
-        let script_path = format!("public{}", path);
+        let script_path = format!(
+            "{}/public{}",
+            env!("CARGO_MANIFEST_DIR"),
+            path
+        );
         if !Path::new(&script_path).exists() {
             return Err(AppErr::NoCGI);
         }
@@ -49,14 +53,16 @@ impl Handler for Cgi {
             .env("QUERY_STRING", query_str)
             .output()?;
 
+        let body = String::from_utf8_lossy(&output.stdout).to_string();
+
         if output.status.success() {
             Ok(Response::new(
                 "200",
                 Some(HashMap::from([(
                     "Content-Type",
-                    "text/plain",
+                    "text/html",
                 )])),
-                Some(String::from_utf8_lossy(&output.stdout).to_string()),
+                Some(body),
             ))
         }
         else {

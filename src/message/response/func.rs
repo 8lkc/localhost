@@ -40,7 +40,7 @@ impl<'a> Response<'a> {
         response
     }
 
-    pub fn send_response(
+    pub fn send(
         &self,
         write_stream: &mut impl Write,
     ) -> AppResult<()> {

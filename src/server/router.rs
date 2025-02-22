@@ -61,6 +61,6 @@ impl Router {
             _ => ErrorPage::handle(&request),
         }?;
 
-        response.send_response(stream)
+        response.send(stream)
     }
 }
