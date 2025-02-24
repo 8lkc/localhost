@@ -24,6 +24,6 @@ else
     # 'all' remote doesn't exist, check for origin and github
     echo "ERROR: 'all' remote not configured. Pushing to individual remotes..."
     echo "USAGE:\n\t\"git remote add all origin\"\n\"git remote set-url --add all <URL_of_mirror_repository>\""
+    exit 1
 fi
-
 echo "Changes committed successfully!"
