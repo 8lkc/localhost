@@ -12,18 +12,24 @@ COMMIT_MESSAGE="$1"
 
 # Stage all changes
 git add .
-
 # Commit with the provided message
 git commit -m "$COMMIT_MESSAGE"
 
-# Check if 'all' remote exists
-if git remote | grep -q "^all$"; then
-    # 'all' remote exists, push to it
-    git push all master
+# Check if origin exists and push to it
+if git remote | grep -q "^origin$"; then
+    echo "Pushing to origin..."
+    git push origin master
 else
-    # 'all' remote doesn't exist, check for origin and github
-    echo "ERROR: 'all' remote not configured. Pushing to individual remotes..."
-    echo "USAGE:\n\t\"git remote add all origin\"\n\"git remote set-url --add all <URL_of_mirror_repository>\""
+    echo "ERROR: origin remote not found"
+    exit 1
+fi
+
+# Check if github exists and push to it with branch mapping
+if git remote | grep -q "^github$"; then
+    echo "Pushing to github..."
+    git push github master:main
+else
+    echo "ERROR: github remote not found"
     exit 1
 fi
 echo "Changes committed successfully!"
