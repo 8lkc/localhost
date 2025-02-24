@@ -2,8 +2,8 @@
 
 # Check if commit message is provided
 if [ $# -eq 0 ]; then
-    echo "ERROR: Commit message is required"
-    echo "USAGE: ./gitify.sh \"Your commit message here\""
+    echo "Error: Commit message is required"
+    echo "Usage: ./gitify.sh \"Your commit message here\""
     exit 1
 fi
 
@@ -16,13 +16,29 @@ git add .
 # Commit with the provided message
 git commit -m "$COMMIT_MESSAGE"
 
-# Push to all remotes
-# This assumes you've set up the 'all' remote as described earlier
-# If not, you can push to individual remotes here
-git push all master
+# Check if 'all' remote exists
+if git remote | grep -q "^all$"; then
+    # 'all' remote exists, push to it
+    git push all master
+else
+    # 'all' remote doesn't exist, check for origin and github
+    echo "'all' remote not configured. Pushing to individual remotes..."
+    
+    # Check if origin exists and push to it
+    if git remote | grep -q "^origin$"; then
+        echo "Pushing to origin..."
+        git push origin master
+    fi
+    
+    # Check if github exists and push to it with branch mapping
+    if git remote | grep -q "^github$"; then
+        echo "Pushing to github..."
+        git push github master:main
+    fi
+    
+    echo "Consider setting up an 'all' remote with:"
+    echo "git remote add all origin"
+    echo "git remote set-url --add all https://github.com/8lkc/localhost.git"
+fi
 
-# If you need to handle the master/main branch difference for GitHub
-# Uncomment the line below and comment the line above
-# git push origin master && git push github master:main
-
-echo "Changes committed and pushed to all remotes successfully!"
+echo "Changes committed successfully!"
