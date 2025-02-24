@@ -32,4 +32,5 @@ else
     echo "ERROR: github remote not found"
     exit 1
 fi
+
 echo "Changes committed successfully!"
