@@ -50,12 +50,19 @@ The project will be designed with stress testing and memory safety in mind. This
     │     └──── tasks.todo
     ├──── src
     │     ├──── cgi-bin
+    │     ├──── handlers
+    │     │     ├──── errors.rs
+    │     │     ├──── mod.rs
+    │     │     └──── server.rs
+    │     ├──── http
+    │     │     └──── mod.rs
     │     ├──── server
     │     │     ├──── config.rs
-    │     │     ├──── handlers.rs
+    │     │     ├──── config.toml   # Configuration file
+    │     │     ├──── epoll.rs
     │     │     └──── mod.rs
     │     ├──── static
-    │     └──── main.rs
+    │     └──── main.rs             # Entry point
     ├──── .gitignore
     ├──── Cargo.lock
     ├──── Cargo.toml

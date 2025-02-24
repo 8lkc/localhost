@@ -1,4 +1,9 @@
 ____________________________________________________________________________________________________________________________________________________
+=== PROJECT UMPROVEMENT ===
+    Update the basic project structure:
+        ✔ `handlers` module @done(25-02-19 01:38 PM)
+        ✔ `http` module @done(25-02-19 01:38 PM)
+____________________________________________________________________________________________________________________________________________________
 === PROJECT INITIATION ===
     ✔ Create a new Rust project (`cargo new localhost`) @done(25-02-13 02:42 PM)
     ✔ Add the necessary dependencies (`libc` for `epoll`) @done(25-02-13 03:37 PM)
