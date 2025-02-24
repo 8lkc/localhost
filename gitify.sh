@@ -36,9 +36,9 @@ else
         git push github master:main
     fi
     
-    echo "Consider setting up an 'all' remote with:"
-    echo "git remote add all origin"
-    echo "git remote set-url --add all https://github.com/8lkc/localhost.git"
+    # echo "Consider setting up an 'all' remote with:"
+    # echo "git remote add all origin"
+    # echo "git remote set-url --add all https://github.com/8lkc/localhost.git"
 fi
 
 echo "Changes committed successfully!"
