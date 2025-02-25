@@ -19,7 +19,7 @@ ________________________________________________________________________________
     ✔ Set the socket to non-blocking mode @done(25-02-18 03:49 PM)
     ✔ Associate socket with `epoll` to manage multiple connections @done(25-02-25 10:44 AM)
     ✔ Main loop to accept incoming connections @done(25-02-25 10:44 AM)
-    ☐ Read data sent by client
+    ✔ Read data sent by client @done(25-02-25 04:06 PM)
     ✔ Close inactive connections cleanly @done(25-02-25 10:44 AM)
 ____________________________________________________________________________________________________________________________________________________
 === HTTP REQUEST PARSING AND HANDLING ===
@@ -30,26 +30,26 @@ ________________________________________________________________________________
         ☐ Manage chunked and non-chunked requests
         ☐ Extract request body (if present)
     Check validity of request:
-        ☐ Correct request (`200 OK`)
+        ✔ Correct request (`200 OK`) @done(25-02-25 04:06 PM)
         ☐ Invalid URL (`404 Not Found`)
         ☐ Method not supported (`405 Method Not Allowed`)
 ____________________________________________________________________________________________________________________________________________________
 === HTTP RESPONSE HANDLING ===
     ☐ Generate a well-formatted HTTP response
     Add the necessary HTTP headers:
-        ☐ `Content-Type`
-        ☐ `Content-Length`
+        ✔ `Content-Type` @done(25-02-25 04:17 PM)
+        ✔ `Content-Length` @done(25-02-25 04:17 PM)
         ☐ `Set-Cookie` (if needed)
     Manage common HTTP statuses:
-        ☐ `200 OK`
-        ☐ `400 Bad Request`
+        ✔ `200 OK` @done(25-02-25 04:19 PM)
+        ✔ `400 Bad Request` @done(25-02-25 04:19 PM)
         ☐ `403 Forbidden`
         ☐ `404 Not Found`
-        ☐ `405 Method Not Allowed`
+        ✔ `405 Method Not Allowed` @done(25-02-25 04:19 PM)
         ☐ `500 Internal Server Error`
     ☐ Send response to client via `epoll`
-    ☐ Test with a browser (`localhost:8080`)
-    ☐ Test with `curl` (`curl -X GET http://localhost:8080/`)
+    ✔ Test with a browser (`localhost:8080`) @done(25-02-25 07:49 PM)
+    ✔ Test with `curl` (`curl -X GET http://localhost:8080/`) @done(25-02-25 07:48 PM)
 ____________________________________________________________________________________________________________________________________________________
 === MANAGING STATIC FILES ===
     ☐ Define a static file folder (`/static/`)

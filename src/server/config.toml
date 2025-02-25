@@ -2,3 +2,7 @@
 name = "server01"
 host = "127.0.0.1"
 ports = [8080, 9090]
+default_version = "HTTP/1.1"
+path = "/"
+allowed_methods = ["GET", "POST", "PUT", "DELETE"]
+default_headers = { Server = "MyRustHTTPServer", "X-Powered-By" = "Rust" }

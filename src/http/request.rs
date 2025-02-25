@@ -1,62 +1,36 @@
-// src/http/request.rs
-
 use std::collections::HashMap;
 use std::str;
 
 #[derive(Debug)]
 pub enum HttpMethod {
-    GET,
-    POST,
-    PUT,
-    DELETE,
-    HEAD,
-    OPTIONS,
-    PATCH,
-    TRACE,
-    CONNECT,
-}
-
-impl HttpMethod {
-    pub fn from_str(s: &str) -> Option<HttpMethod> {
-        match s {
-            "GET"     => Some(HttpMethod::GET),
-            "POST"    => Some(HttpMethod::POST),
-            "PUT"     => Some(HttpMethod::PUT),
-            "DELETE"  => Some(HttpMethod::DELETE),
-            "HEAD"    => Some(HttpMethod::HEAD),
-            "OPTIONS" => Some(HttpMethod::OPTIONS),
-            "PATCH"   => Some(HttpMethod::PATCH),
-            "TRACE"   => Some(HttpMethod::TRACE),
-            "CONNECT" => Some(HttpMethod::CONNECT),
-            _         => None,
-        }
-    }
+    GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH, TRACE, CONNECT
+} impl HttpMethod {
+    pub fn from_str(method: &str) -> Option<HttpMethod> { match method {
+        "GET"     => Some(HttpMethod::GET),
+        "POST"    => Some(HttpMethod::POST),
+        "PUT"     => Some(HttpMethod::PUT),
+        "DELETE"  => Some(HttpMethod::DELETE),
+        "HEAD"    => Some(HttpMethod::HEAD),
+        "OPTIONS" => Some(HttpMethod::OPTIONS),
+        "PATCH"   => Some(HttpMethod::PATCH),
+        "TRACE"   => Some(HttpMethod::TRACE),
+        "CONNECT" => Some(HttpMethod::CONNECT),
+        _         => None,
+    }}
 }
 
 #[derive(Debug)]
 pub struct HttpRequest {
-    pub method: HttpMethod,
-    pub path: String,
-    pub version: String,
-    pub headers: HashMap<String, String>,
-    pub body: Option<Vec<u8>>,
-}
+    method: HttpMethod,
+    path: String,
+    version: String,
+    headers: HashMap<String, String>,
+    body: Option<Vec<u8>>,
+} impl HttpRequest {
+    // Getters
+    pub fn get_method(&self) -> &HttpMethod { &self.method }
 
-#[derive(Debug)]
-pub enum ParseError {
-    InvalidRequest,
-    InvalidMethod,
-    Utf8Error(std::str::Utf8Error),
-}
-
-impl From<std::str::Utf8Error> for ParseError {
-    fn from(err: std::str::Utf8Error) -> Self {
-        ParseError::Utf8Error(err)
-    }
-}
-
-impl HttpRequest {
-    /// Parse a raw HTTP request from a byte slice.
+    // Parse a raw HTTP request from a byte slice.
     pub fn parse(buffer: &[u8]) -> Result<HttpRequest, ParseError> {
         // Convert the byte slice to a string.
         let request_str = str::from_utf8(buffer)?;
@@ -72,19 +46,10 @@ impl HttpRequest {
         let request_line = lines.next().ok_or(ParseError::InvalidRequest)?;
         let mut request_line_parts = request_line.split_whitespace();
 
-        let method_str = request_line_parts
-            .next()
-            .ok_or(ParseError::InvalidRequest)?;
-        let path = request_line_parts
-            .next()
-            .ok_or(ParseError::InvalidRequest)?
-            .to_string();
-        let version = request_line_parts
-            .next()
-            .ok_or(ParseError::InvalidRequest)?
-            .to_string();
-
+        let method_str = request_line_parts.next().ok_or(ParseError::InvalidRequest)?;
         let method = HttpMethod::from_str(method_str).ok_or(ParseError::InvalidMethod)?;
+        let path = request_line_parts.next().ok_or(ParseError::InvalidRequest)?.to_string();
+        let version = request_line_parts.next().ok_or(ParseError::InvalidRequest)?.to_string();
 
         // Parse header lines into a HashMap.
         let mut headers = HashMap::new();
@@ -97,8 +62,7 @@ impl HttpRequest {
         }
 
         // Capture the body if available.
-        let body = body_part.map(|s| s.as_bytes().to_vec());
-
+        let body = body_part.map(|content| content.as_bytes().to_vec());
         Ok(HttpRequest {
             method,
             path,
@@ -107,4 +71,13 @@ impl HttpRequest {
             body,
         })
     }
+}
+
+#[derive(Debug)]
+pub enum ParseError {
+    InvalidRequest,
+    InvalidMethod,
+    Utf8Error(std::str::Utf8Error),
+} impl From<std::str::Utf8Error> for ParseError {
+    fn from(err: std::str::Utf8Error) -> Self { ParseError::Utf8Error(err) }
 }

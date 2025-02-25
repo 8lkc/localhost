@@ -26,7 +26,6 @@ pub struct Epoll {
     pub fn new(max_events: usize, timeout_ms: i32) -> io::Result<Self> {
         let fd = unsafe { libc::epoll_create1(0) };
         if fd < 0 { return Err(io::Error::last_os_error()); }
-
         Ok(Self {
             fd,
             events: vec![unsafe { std::mem::zeroed() }; max_events],
@@ -60,7 +59,6 @@ pub struct Epoll {
         let mut events = libc::EPOLLET as u32 | libc::EPOLLRDHUP as u32;
         if readable { events |= libc::EPOLLIN as u32; }
         if writable { events |= libc::EPOLLOUT as u32; }
-
         let event = libc::epoll_event {
             events,
             u64: fd as u64,
@@ -91,7 +89,6 @@ pub struct Epoll {
             let event = self.events[i];
             let fd = event.u64 as i32;
             let flags = event.events;
-
             ready_events.push((fd, Event {
                 is_readable: (flags & libc::EPOLLIN as u32) != 0,
                 is_writable: (flags & libc::EPOLLOUT as u32) != 0,
@@ -99,7 +96,6 @@ pub struct Epoll {
                 is_hangup: (flags & (libc::EPOLLRDHUP as u32 | libc::EPOLLHUP as u32)) != 0,
             }));
         }
-
         Ok(ready_events)
     }
 

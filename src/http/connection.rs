@@ -3,6 +3,8 @@ use mio::net::TcpStream;
 use std::io::{self, Read, Write};
 
 use crate::http::request::{HttpRequest, HttpMethod};
+use crate::http::response::HttpResponse;
+
 pub struct Connection {
     stream: TcpStream,
     last_activity: Instant,
@@ -79,29 +81,29 @@ pub struct Connection {
     }
 
     fn prepare_response(&mut self) -> io::Result<()> {
-        // Use the HTTP parser to convert the raw request into a structured HttpRequest.
         match HttpRequest::parse(&self.buffer) {
             Ok(request) => {
                 println!("Parsed HTTP request: {:#?}", request);
-                // Handle only GET requests for now.
-                match request.method {
+                let response = match request.get_method() {
                     HttpMethod::GET => {
-                        // Future improvement: serve different paths or static files.
-                        let response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, World!";
-                        self.write_buffer.extend_from_slice(response.as_bytes());
+                        // For GET requests, we respond with a simple message.
+                        HttpResponse::new(200, "OK")
+                            .set_header("Content-Type", "text/plain")
+                            .set_body(b"Hello, World!".to_vec())
                     }
                     _ => {
-                        // Return 405 for any method that is not GET.
-                        let response = "HTTP/1.1 405 Method Not Allowed\r\nContent-Length: 0\r\n\r\n";
-                        self.write_buffer.extend_from_slice(response.as_bytes());
+                        // For any non-GET requests, return a 405 Method Not Allowed.
+                        HttpResponse::new(405, "Method Not Allowed")
+                            .set_header("Content-Length", "0")
                     }
-                }
+                };
+                self.write_buffer.extend_from_slice(&response.to_bytes());
             }
             Err(err) => {
-                println!("Error parsing HTTP request: {:?}", err);
-                // Return 400 Bad Request on parsing failure.
-                let response = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
-                self.write_buffer.extend_from_slice(response.as_bytes());
+                println!("Error parsing HTTP request: {:#?}", err);
+                let response = HttpResponse::new(400, "Bad Request")
+                    .set_header("Content-Length", "0");
+                self.write_buffer.extend_from_slice(&response.to_bytes());
             }
         }
         Ok(())
