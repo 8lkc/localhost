@@ -1,22 +1,45 @@
-mod method;
-pub use method::{
-    Method,
-    Resource,
-};
 use {
+    super::{
+        Method,
+        Request,
+        Resource,
+    },
     crate::utils::{
         process_header_line,
         process_req_line,
     },
-    std::collections::HashMap,
+    std::{
+        collections::HashMap,
+        fmt,
+    },
 };
 
-#[derive(Debug)]
-pub struct Request {
-    pub method:   Method,
-    pub resource: Resource,
-    pub headers:  HashMap<String, String>,
-    pub msg_body: String,
+impl From<&str> for Method {
+    fn from(s: &str) -> Self {
+        match s {
+            "GET" => Self::GET,
+            "POST" => Self::POST,
+            _ => Self::Uninitialized,
+        }
+    }
+}
+
+impl fmt::Display for Method {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Method::GET => write!(f, "GET"),
+            Method::POST => write!(f, "POST"),
+            Method::Uninitialized => write!(f, "Uninitialized"),
+        }
+    }
+}
+
+impl Resource {
+    pub fn path(&self) -> &str {
+        match self {
+            Resource::Path(path) => path.as_str(),
+        }
+    }
 }
 
 impl From<String> for Request {

@@ -1,13 +1,12 @@
 mod getters;
 mod handler;
+mod middleware;
 mod router;
 mod run;
-mod middleware;
 
 pub(super) use router::Router;
-use crate::Request;
-
 use {
+    crate::Request,
     router::Route,
     serde::{
         Deserialize,

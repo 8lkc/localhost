@@ -24,7 +24,7 @@ impl Handler for Api {
         Middleware::check(req)
             .logger()?
             .method(Method::GET)?;
-        
+
         let Resource::Path(path) = &req.resource;
 
         let default_path = format!(

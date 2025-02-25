@@ -26,7 +26,7 @@ impl Handler for Http {
         Middleware::check(req)
             .logger()?
             .method(Method::GET)?;
-        
+
         // Get the path of static page resource being requested
         let Resource::Path(s) = &req.resource;
 

@@ -27,7 +27,7 @@ impl Handler for Cgi {
         Middleware::check(req)
             .logger()?
             .method(Method::GET)?;
-        
+
         let Resource::Path(path) = &req.resource;
 
         let ext = path
