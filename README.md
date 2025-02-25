@@ -62,6 +62,7 @@ The project will be designed with stress testing and memory safety in mind. This
     │     │     ├──── epoll.rs
     │     │     └──── mod.rs
     │     ├──── static
+    │     ├──── lib.rs
     │     └──── main.rs               # Entry point
     ├──── .gitignore
     ├──── Cargo.lock
