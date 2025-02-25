@@ -51,10 +51,8 @@ The project will be designed with stress testing and memory safety in mind. This
     ├──── src
     │     ├──── cgi-bin
     │     ├──── handlers
-    │     │     ├──── errors.rs
-    │     │     ├──── mod.rs
-    │     │     └──── server.rs
     │     ├──── http
+    │     │     ├──── connection.rs
     │     │     └──── mod.rs
     │     ├──── server
     │     │     ├──── config.rs

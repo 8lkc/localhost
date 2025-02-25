@@ -16,11 +16,11 @@ ________________________________________________________________________________
 ____________________________________________________________________________________________________________________________________________________
 === TCP SERVER CREATION ===
     ✔ Create a listening socket on an address and port @done(25-02-13 09:35 PM)
-    ☐ Set the socket to non-blocking mode
-    ☐ Associate socket with `epoll` to manage multiple connections
-    ☐ Main loop to accept incoming connections
+    ✔ Set the socket to non-blocking mode @done(25-02-18 03:49 PM)
+    ✔ Associate socket with `epoll` to manage multiple connections @done(25-02-25 10:44 AM)
+    ✔ Main loop to accept incoming connections @done(25-02-25 10:44 AM)
     ☐ Read data sent by client
-    ☐ Close inactive connections cleanly
+    ✔ Close inactive connections cleanly @done(25-02-25 10:44 AM)
 ____________________________________________________________________________________________________________________________________________________
 === HTTP REQUEST PARSING AND HANDLING ===
     Read and analyze incoming requests:

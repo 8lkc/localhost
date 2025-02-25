@@ -1,4 +1,10 @@
 mod http;
 mod server;
 
-pub use {server::{Localhost, config::Config}, http::connection::Connection};
+pub use {
+    http::connection::Connection,
+    server::{
+        Localhost,
+        config::Config
+    }
+};

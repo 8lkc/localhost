@@ -8,17 +8,9 @@ pub struct Config {
 } impl Config {
     pub fn from_file(path: &str) -> Result<Self, Box<dyn Error>> {
         let content = fs::read_to_string(path)?;
-        // Parse the content into a Config struct
-        // For example, using toml crate:
         let config: Config = toml::from_str(&content)?;
         Ok(config)
     }
-
-    // pub fn from_file<P: AsRef<Path>>(path: P) -> Self {
-    //     let config = std::fs::read_to_string(path).unwrap();
-    //     toml::from_str(&config).expect("ERROR")
-    // }
-
     pub fn get_servers(&self) -> &[Server] { &self.servers }
 }
 
