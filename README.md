@@ -66,6 +66,7 @@ The project will be designed with stress testing and memory safety in mind. This
     ├──── .gitignore
     ├──── Cargo.lock
     ├──── Cargo.toml
+    ├──── gitify.sh                 # to commit and push Changes to all remotes
     ├──── makefile
     └──── README.md
 ```
