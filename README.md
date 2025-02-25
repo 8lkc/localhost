@@ -53,18 +53,20 @@ The project will be designed with stress testing and memory safety in mind. This
     │     ├──── handlers
     │     ├──── http
     │     │     ├──── connection.rs
-    │     │     └──── mod.rs
+    │     │     ├──── mod.rs
+    │     │     ├──── request.rs
+    │     │     └──── response.rs
     │     ├──── server
     │     │     ├──── config.rs
-    │     │     ├──── config.toml   # Configuration file
+    │     │     ├──── config.toml     # Configuration file
     │     │     ├──── epoll.rs
     │     │     └──── mod.rs
     │     ├──── static
-    │     └──── main.rs             # Entry point
+    │     └──── main.rs               # Entry point
     ├──── .gitignore
     ├──── Cargo.lock
     ├──── Cargo.toml
-    ├──── gitify.sh                 # to commit and push Changes to all remotes
+    ├──── gitify.sh                   # to commit and push Changes to all remotes
     ├──── makefile
     └──── README.md
 ```
