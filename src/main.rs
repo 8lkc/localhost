@@ -1,4 +1,2 @@
-mod server;
-
 fn main() {
 }
