@@ -1,42 +1,28 @@
 use {
     super::Response,
+    crate::message::Headers,
     std::{
         collections::HashMap,
         io::Write,
     },
 };
 
-impl<'a> Response<'a> {
-    pub fn new(
-        status_code: u16,
-        headers: Option<HashMap<&'a str, &'a str>>,
-        body: Option<String>,
-    ) -> Response<'a> {
+impl Response {
+    pub fn ok(headers: Option<Headers>, body: Option<String>) -> Response {
         let mut response = Response::default();
-        if status_code != 200 {
-            response.status_code = status_code;
-        };
 
         response.headers = match &headers {
             Some(_h) => headers,
             None => {
                 let mut h = HashMap::new();
-                h.insert("Content-Type", "text/html");
+                h.insert(
+                    "Content-Type".to_string(),
+                    "text/html".to_string(),
+                );
                 Some(h)
             }
         };
-
-        response.status_text = match response.status_code {
-            200 => "OK",
-            400 => "Bad Request",
-            401 => "Unauthorized",
-            403 => "Forbidden",
-            404 => "Not Found",
-            405 => "Method Not Allowed",
-            _ => "Internal Server Error",
-        }
-        .to_string();
-
+        response.status_text = "OK".to_string();
         response.body = body;
 
         response
@@ -48,12 +34,16 @@ impl<'a> Response<'a> {
         let _ = write!(write_stream, "{}", response_string);
     }
 
-    pub fn status_code(&self) -> u16 { self.status_code }
+    pub fn status_code(&self) -> u16 {
+        self.status_code
+    }
 
-    pub fn status_text(&self) -> &str { &self.status_text }
+    pub fn status_text(&self) -> &str {
+        &self.status_text
+    }
 
     pub fn headers(&self) -> String {
-        let map: HashMap<&str, &str> = self.headers.clone().unwrap();
+        let map = self.headers.clone().unwrap();
         let mut header_string: String = "".into();
         for (k, v) in map.iter() {
             header_string = format!("{}{}:{}\r\n", header_string, k, v);

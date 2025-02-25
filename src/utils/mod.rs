@@ -21,6 +21,7 @@ pub(super) use {
     },
     globals::{
         INTERPRETERS,
+        TEMPLATES,
         TIMEOUT,
     },
 };

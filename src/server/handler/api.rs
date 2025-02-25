@@ -6,7 +6,9 @@ use {
             Resource,
             Response,
         },
+        server::Middleware,
         utils::HttpResult,
+        Method,
     },
     std::{
         collections::HashMap,
@@ -19,6 +21,10 @@ pub struct Api;
 
 impl Handler for Api {
     fn handle(req: &Request) -> HttpResult<Response> {
+        Middleware::check(req)
+            .logger()?
+            .method(Method::GET)?;
+        
         let Resource::Path(path) = &req.resource;
 
         let default_path = format!(
@@ -29,11 +35,10 @@ impl Handler for Api {
         let file_path = env::var("JSON_PATH").unwrap_or(default_path);
         let json_contents = fs::read_to_string(file_path)?;
 
-        Ok(Response::new(
-            200,
+        Ok(Response::ok(
             Some(HashMap::from([(
-                "Content-Type",
-                "application/json",
+                "Content-Type".to_string(),
+                "application/json".to_string(),
             )])),
             Some(json_contents),
         ))

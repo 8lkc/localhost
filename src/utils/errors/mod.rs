@@ -13,10 +13,13 @@ pub enum AppErr {
     SerDeJSON(serde_json::Error),
     NonBlocking(io::Error),
     ParseAddr(AddrParseError),
+    TmplNotFound(tera::Error),
+    NotFound(io::Error),
     Other(io::Error),
-    Custom(String),
+    NoServer,
     ExtNotFound,
     NoCGI,
+    Custom(String),
 }
 
 pub struct HttpErr {

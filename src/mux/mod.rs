@@ -12,6 +12,7 @@ use {
         syscall,
         utils::{
             get_listeners,
+            AppErr,
             AppResult,
         },
     },
@@ -46,7 +47,10 @@ impl Multiplexer {
     /// Initializes a new `Multiplexer` from the given loaded
     /// configuration file.
     pub fn new(config: Config) -> AppResult<Self> {
-        let servers = config.servers(); //                  <--- Retrieves servers from the configuration.
+        let servers = match config.servers() {
+            Some(servers) => servers,
+            None => return Err(AppErr::NoServer),
+        };
 
         // Creates a new kernel event queue.
         #[cfg(target_os = "linux")]

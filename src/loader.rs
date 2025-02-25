@@ -24,7 +24,14 @@ pub struct Config {
 impl Config {
     /// Returns the ownership of the
     /// server configurations as an unwraping.
-    pub fn servers(self) -> Vec<Server> { self.servers }
+    pub fn servers(self) -> Option<Vec<Server>> {
+        if self.servers.is_empty() {
+            None
+        }
+        else {
+            Some(self.servers)
+        }
+    }
 
     /// Removes any invalid server configuration from the list.
     ///

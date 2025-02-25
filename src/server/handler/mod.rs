@@ -10,10 +10,6 @@ use {
         },
         utils::HttpResult,
     },
-    serde::{
-        Deserialize,
-        Serialize,
-    },
     std::{
         env,
         fs,
@@ -28,10 +24,8 @@ pub use {
 pub trait Handler {
     fn handle(req: &Request) -> HttpResult<Response>;
     fn load_file(file_name: &str) -> Option<String> {
-        let default_path = format!(
-            "{}/public/templates",
-            env!("CARGO_MANIFEST_DIR")
-        );
+        let default_path =
+            format!("{}/public", env!("CARGO_MANIFEST_DIR"));
         let templates_path =
             env::var("PUBLIC_VAR").unwrap_or(default_path);
         let full_path = format!("{templates_path}/{file_name}");
@@ -39,11 +33,4 @@ pub trait Handler {
 
         contents.ok()
     }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Data {
-    id:     i32,
-    data:   String,
-    status: String,
 }

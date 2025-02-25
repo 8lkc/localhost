@@ -4,7 +4,7 @@ use {
         OsEvent,
     },
     crate::{
-        server::router::Router,
+        server::Router,
         utils::read_buffer,
         Request,
     },
@@ -22,7 +22,7 @@ impl Multiplexer {
     /// listener and makes the stream asynchronous. Then from the stream
     /// buffer, gets the request, adds the stream file desriptor to the
     /// `Multiplexer` and finally sends the `Request` to the `Router`.
-    pub fn run(&self) -> ! {
+    pub fn run(&self) {
         let mut events: Vec<OsEvent> = Vec::with_capacity(32);
         unsafe { events.set_len(32) };
 
@@ -30,8 +30,6 @@ impl Multiplexer {
             let nfds = self //                      <-- Number of found descriptors.
                 .poll(&mut events)
                 .unwrap_or(0) as usize;
-
-            dbg!(nfds);
 
             for event in events.iter().take(nfds) {
                 let event = unsafe { event.assume_init() };

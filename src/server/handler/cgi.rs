@@ -2,17 +2,18 @@ use {
     super::Handler,
     crate::{
         message::Request,
+        server::Middleware,
         utils::{
             AppErr,
             HttpErr,
             HttpResult,
             INTERPRETERS,
         },
+        Method,
         Resource,
         Response,
     },
     std::{
-        collections::HashMap,
         path::Path,
         process::Command,
     },
@@ -23,6 +24,10 @@ pub struct Cgi;
 
 impl Handler for Cgi {
     fn handle(req: &Request) -> HttpResult<Response> {
+        Middleware::check(req)
+            .logger()?
+            .method(Method::GET)?;
+        
         let Resource::Path(path) = &req.resource;
 
         let ext = path
@@ -57,14 +62,7 @@ impl Handler for Cgi {
         let body = String::from_utf8_lossy(&output.stdout).to_string();
 
         if output.status.success() {
-            Ok(Response::new(
-                200,
-                Some(HashMap::from([(
-                    "Content-Type",
-                    "text/html",
-                )])),
-                Some(body),
-            ))
+            Ok(Response::ok(None, Some(body)))
         }
         else {
             Err(HttpErr::from(

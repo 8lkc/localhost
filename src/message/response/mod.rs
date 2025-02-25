@@ -1,25 +1,24 @@
 mod func;
 
 use {
-    crate::{
-        server::{
-            Handler,
-            Http,
-        },
-        utils::HttpErr,
+    super::Headers,
+    crate::utils::{
+        HttpErr,
+        TEMPLATES,
     },
     std::collections::HashMap,
+    tera::Context,
 };
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Response<'a> {
+pub struct Response {
     status_code: u16,
     status_text: String,
-    headers:     Option<HashMap<&'a str, &'a str>>,
+    headers:     Option<Headers>,
     body:        Option<String>,
 }
 
-impl Default for Response<'_> {
+impl Default for Response {
     fn default() -> Self {
         Self {
             status_code: 200,
@@ -30,12 +29,12 @@ impl Default for Response<'_> {
     }
 }
 
-impl From<Response<'_>> for String {
+impl From<Response> for String {
     fn from(res: Response) -> String {
         format!(
             "HTTP/1.1 {} {}\r\n{}Content-Length: {}\r\n\r\n{}",
-            &res.status_code(),
-            &res.status_text(),
+            &res.status_code,
+            &res.status_text,
             &res.headers(),
             &res.body().len(),
             &res.body()
@@ -43,16 +42,29 @@ impl From<Response<'_>> for String {
     }
 }
 
-impl From<HttpErr> for Response<'_> {
+impl From<HttpErr> for Response {
     fn from(err: HttpErr) -> Self {
+        let mut ctx = Context::new();
+        ctx.insert("status_code", &err.status_code);
+        ctx.insert("status_text", &err.message);
+
+        let page = TEMPLATES
+            .render("error.html", &ctx)
+            .unwrap_or_else(|_| {
+                format!(
+                    "<h1>Error {}</h1><p>{}</p>",
+                    err.status_code, err.message
+                )
+            });
+
         Self {
             status_code: err.status_code,
             status_text: err.message,
             headers:     Some(HashMap::from([(
-                "Content-Type",
-                "text/html",
+                "Content-Type".to_string(),
+                "text/html".to_string(),
             )])),
-            body:        Http::load_file("error.html"),
+            body:        Some(page),
         }
     }
 }
