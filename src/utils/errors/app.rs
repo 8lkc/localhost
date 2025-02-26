@@ -19,6 +19,7 @@ impl Display for AppErr {
             Self::TmplNotFound(e) => writeln!(f, "Template: {e}."),
             Self::NotFound(e) => writeln!(f, "Not Found: {e}."),
             Self::Other(e) => writeln!(f, "ERROR: {e}."),
+            Self::EmptyBuffer => writeln!(f, "Empty buffer"),
             Self::NoServer => writeln!(f, "No server to connect"),
             Self::ExtNotFound => writeln!(f, "File extension not found"),
             Self::NoCGI => writeln!(f, "No Common Gateway Interface!"),

@@ -101,7 +101,7 @@ use_try_shorthand = true
 
 # Maximum length of comments
 # Default: 80
-comment_width = 100
+comment_width = 75
 
 # Wrap comments at maximum width
 # Default: false

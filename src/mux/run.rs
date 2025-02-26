@@ -4,13 +4,17 @@ use {
         OsEvent,
     },
     crate::{
+        debug,
         server::Router,
         utils::read_buffer,
         Request,
     },
-    std::os::fd::{
-        AsRawFd,
-        RawFd,
+    std::{
+        net::Shutdown,
+        os::fd::{
+            AsRawFd,
+            RawFd,
+        },
     },
 };
 
@@ -47,23 +51,35 @@ impl Multiplexer {
                 let (mut stream, _addr) = match fd_listener.accept() {
                     Ok((stream, addr)) => (stream, addr),
                     Err(e) => {
-                        dbg!(e);
+                        debug!(e);
                         continue;
                     }
                 };
 
                 if let Err(e) = stream.set_nonblocking(true) {
-                    dbg!(e);
+                    debug!(e);
+                    if let Err(e) = stream.shutdown(Shutdown::Both) {
+                        debug!(e);
+                    };
                     continue;
                 };
 
                 let request = match read_buffer(&stream) {
-                    Some(req_str) => Request::from(req_str),
-                    None => continue,
+                    Ok(req_str) => Request::from(req_str),
+                    Err(e) => {
+                        debug!(e);
+                        if let Err(e) = stream.shutdown(Shutdown::Both) {
+                            debug!(e);
+                        };
+                        continue;
+                    }
                 };
 
                 if let Err(e) = self.register(stream.as_raw_fd()) {
-                    dbg!(e);
+                    debug!(e);
+                    if let Err(e) = stream.shutdown(Shutdown::Both) {
+                        debug!(e);
+                    };
                     continue;
                 };
 

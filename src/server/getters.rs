@@ -3,7 +3,10 @@ use {
         router::Route,
         Server,
     },
-    crate::utils::AppResult,
+    crate::{
+        debug,
+        utils::AppResult,
+    },
     std::{
         collections::HashMap,
         net::{
@@ -16,7 +19,7 @@ use {
 
 impl Server {
     pub fn host(&self) -> &str {
-        dbg!(self.host.as_ref());
+        debug!(self.host.as_ref());
         self.host.as_ref().unwrap()
     }
 

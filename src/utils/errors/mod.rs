@@ -16,12 +16,14 @@ pub enum AppErr {
     TmplNotFound(tera::Error),
     NotFound(io::Error),
     Other(io::Error),
+    EmptyBuffer,
     NoServer,
     ExtNotFound,
     NoCGI,
     Custom(String),
 }
 
+#[derive(Debug)]
 pub struct HttpErr {
     pub status_code: u16,
     pub message:     String,

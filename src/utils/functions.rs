@@ -1,5 +1,8 @@
 use {
-    super::AppResult,
+    super::{
+        AppErr,
+        AppResult,
+    },
     crate::{
         message::{
             Method,
@@ -85,7 +88,7 @@ pub fn get_listeners(
         .collect())
 }
 
-pub fn read_buffer(stream: &TcpStream) -> Option<String> {
+pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
     let mut buf_reader = BufReader::new(stream);
     let mut req_str = String::new();
 
@@ -100,15 +103,15 @@ pub fn read_buffer(stream: &TcpStream) -> Option<String> {
                     break;
                 }
             }
-            Err(ref e) if e.kind() == ErrorKind::WouldBlock => continue,
-            Err(_) => break,
+            Err(e) if e.kind() == ErrorKind::WouldBlock => continue,
+            Err(e) => return Err(e.into()),
         }
     }
 
     if req_str.is_empty() {
-        None
+        Err(AppErr::EmptyBuffer)
     }
     else {
-        Some(req_str)
+        Ok(req_str)
     }
 }

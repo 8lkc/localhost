@@ -6,6 +6,7 @@ use {
         Http,
     },
     crate::{
+        debug,
         message::{
             Request,
             Resource,
@@ -54,7 +55,10 @@ impl Router {
                 }
             }
         }
-        .unwrap_or_else(|e| Response::from(e));
+        .unwrap_or_else(|e| {
+            debug!(e);
+            Response::from(e)
+        });
 
         response.send(stream)
     }

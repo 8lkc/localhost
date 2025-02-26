@@ -14,6 +14,8 @@ use {
     tera::Context,
 };
 
+/// Set the default value of the `Response` that
+/// will be equivalent to a successful response.
 impl Default for Response {
     fn default() -> Self {
         Self {
@@ -25,6 +27,8 @@ impl Default for Response {
     }
 }
 
+/// Converts the `Response into a `String` when
+/// sending it.
 impl From<Response> for String {
     fn from(res: Response) -> String {
         format!(
@@ -38,6 +42,7 @@ impl From<Response> for String {
     }
 }
 
+/// Converts
 impl From<HttpErr> for Response {
     fn from(err: HttpErr) -> Self {
         let mut ctx = Context::new();
@@ -92,21 +97,20 @@ impl Response {
         let _ = write!(write_stream, "{}", response_string);
     }
 
-    pub fn status_code(&self) -> u16 {
-        self.status_code
-    }
-
-    pub fn status_text(&self) -> &str {
-        &self.status_text
-    }
-
     pub fn headers(&self) -> String {
-        let map = self.headers.clone().unwrap();
-        let mut header_string: String = "".into();
-        for (k, v) in map.iter() {
-            header_string = format!("{}{}:{}\r\n", header_string, k, v);
+        match &self.headers {
+            Some(h) => {
+                let mut header_string: String = "".into();
+
+                for (k, v) in h.iter() {
+                    header_string =
+                        format!("{}{}:{}\r\n", header_string, k, v);
+                }
+
+                header_string
+            }
+            None => "".into(),
         }
-        header_string
     }
 
     pub fn body(&self) -> &str {

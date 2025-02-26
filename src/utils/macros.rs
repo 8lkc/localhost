@@ -19,3 +19,17 @@ macro_rules! syscall {
         $crate::check!(result)
     }};
 }
+
+#[macro_export]
+macro_rules! debug {
+    ($val:expr) => {{
+        let now = chrono::Local::now();
+        eprintln!(
+            "[{}]\n{}:{}\n{:#?}\n\n",
+            now.format("%Y/%m/%d %H:%M:%S"),
+            file!(),
+            line!(),
+            $val
+        )
+    }};
+}
