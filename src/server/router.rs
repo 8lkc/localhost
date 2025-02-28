@@ -55,7 +55,7 @@ impl Router {
                         return Http::serve_auth(&auth_page)
                             .unwrap_or_else(|e| e.into())
                             .send(stream);
-                    } 
+                    }
                 }
                 match route[1] {
                     "api" => Api::handle(&request),
@@ -96,18 +96,29 @@ impl Router {
     }
 
     pub fn redirect(&self, path: &str) -> Option<String> {
+        let reforme_path = if path.starts_with('/') {
+            path.to_string()
+        } else {
+            format!("/{}", path)
+        };
         if let Some(routes) = &self.routes {
             for route in routes {
                 if let Some(route_path) = &route.path {
-                    if route_path == path {
+                    let reforme_route_path = if route_path.starts_with('/')
+                    {
+                        route_path.to_string()
+                    } else {
+                        format!("/{}", route_path)
+                    };
+
+                    if reforme_route_path == reforme_path {
                         if let Some(redirects) = &route.redirect {
                             return redirects
                                 .get("/auth")
                                 .cloned();
                         }
-                        
-                        if let Some(_default_file) = &route.default_file {
-                            return route.default_file.clone();
+                        if let Some(default_file) = &route.default_file {
+                            return Some(default_file.clone());
                         }
                     }
                 }

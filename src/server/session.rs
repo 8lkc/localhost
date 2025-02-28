@@ -6,7 +6,6 @@ use crate::utils::generate_session_id;
 
 #[derive(Clone)]
 pub struct Session {
-    pub id: String,
     pub created_at: Instant,
 }
 
@@ -26,7 +25,6 @@ impl SessionStore {
     pub fn create_session(&self) -> String {
         let session_id = generate_session_id();
         let session = Session {
-            id: session_id.clone(),
             created_at: Instant::now(),
         };
 
