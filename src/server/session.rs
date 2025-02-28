@@ -51,5 +51,5 @@ impl SessionStore {
 
 // Singleton pour accéder au store globalement
 lazy_static! {
-    pub static ref SESSION_STORE: SessionStore = SessionStore::new(1); // 30 minutes timeout
+    pub static ref SESSION_STORE: SessionStore = SessionStore::new(1); // 1 minute timeout
 }
