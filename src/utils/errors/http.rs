@@ -7,9 +7,7 @@ use {
 };
 
 impl From<io::Error> for HttpErr {
-    fn from(_error: io::Error) -> Self {
-        Self::from(500)
-    }
+    fn from(_error: io::Error) -> Self { Self::from(500) }
 }
 
 impl From<AppErr> for HttpErr {

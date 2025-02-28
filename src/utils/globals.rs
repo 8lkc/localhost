@@ -1,4 +1,6 @@
 use {
+    crate::server::SessionStore,
+    lazy_static::lazy_static,
     std::{
         collections::HashMap,
         sync::LazyLock,
@@ -24,3 +26,7 @@ pub static TEMPLATES: LazyLock<Tera> = LazyLock::new(|| {
     tera.autoescape_on(vec!["html"]);
     tera
 });
+
+lazy_static! {
+    pub static ref SESSION_STORE: SessionStore = SessionStore::new(1); // 1 minute timeout
+}

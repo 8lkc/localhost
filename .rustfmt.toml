@@ -46,7 +46,7 @@ group_imports = "StdExternalCrate"
 
 # Allow functions to be formatted on a single line
 # Default: false
-# fn_single_line = true
+fn_single_line = true
 
 
 # ----- Layout & Style Controls -----

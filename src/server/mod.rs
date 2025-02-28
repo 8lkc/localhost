@@ -4,26 +4,36 @@ mod middleware;
 mod router;
 mod run;
 mod session;
-pub use session::SESSION_STORE;
+mod validation;
+
 use {
     crate::Request,
     serde::{
         Deserialize,
         Serialize,
     },
-    std::collections::HashMap,
-   
+    std::{
+        collections::HashMap,
+        sync::{
+            Arc,
+            Mutex,
+        },
+        time::{
+            Duration,
+            Instant,
+        },
+    },
 };
 
 #[derive(Serialize, Deserialize)]
 pub struct Server {
-    host:             Option<String>,
-    ports:            Option<Vec<usize>>,
-    root:             Option<String>,
-    error_pages:      Option<HashMap<String, String>>,
-    uploads_max_size: Option<u64>,
-    listing:          Option<bool>,
-    router:           Option<Router>,
+    host:    Option<String>,
+    ports:   Option<Vec<usize>>,
+    root:    Option<String>,
+    errors:  Option<HashMap<String, String>>,
+    uploads: Option<u64>,
+    listing: Option<bool>,
+    router:  Option<Router>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,14 +44,14 @@ pub struct Router {
 
 #[derive(Serialize, Deserialize)]
 pub struct Route {
-    path:          Option<String>,
-    methods:       Option<Vec<String>>,
-    default_file:  Option<String>,
-    check_session: Option<bool>,
-    redirect:      Option<HashMap<String, String>>,
+    path:         Option<String>,
+    methods:      Option<Vec<String>>,
+    default_file: Option<String>,
+    session:      Option<bool>,
+    redirect:     Option<HashMap<String, String>>,
 }
 
-pub struct Middleware<'a> {
+pub(super) struct Middleware<'a> {
     request: &'a Request,
 }
 
@@ -50,4 +60,14 @@ pub struct Data {
     id:     i32,
     data:   String,
     status: String,
+}
+
+#[derive(Clone)]
+pub struct Session {
+    pub created_at: Instant,
+}
+
+pub struct SessionStore {
+    sessions: Arc<Mutex<HashMap<String, Session>>>,
+    timeout:  Duration,
 }

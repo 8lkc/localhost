@@ -60,15 +60,11 @@ impl From<toml::de::Error> for AppErr {
 }
 
 impl From<AddrParseError> for AppErr {
-    fn from(value: AddrParseError) -> Self {
-        Self::ParseAddr(value)
-    }
+    fn from(value: AddrParseError) -> Self { Self::ParseAddr(value) }
 }
 
 impl From<serde_json::Error> for AppErr {
-    fn from(value: serde_json::Error) -> Self {
-        Self::SerDeJSON(value)
-    }
+    fn from(value: serde_json::Error) -> Self { Self::SerDeJSON(value) }
 }
 
 impl From<tera::Error> for AppErr {
@@ -83,9 +79,7 @@ impl From<tera::Error> for AppErr {
 }
 
 impl AppErr {
-    pub fn new(msg: &str) -> Self {
-        Self::Custom(msg.to_string())
-    }
+    pub fn new(msg: &str) -> Self { Self::Custom(msg.to_string()) }
 
     pub fn last_os_error() -> Self {
         Self::Other(io::Error::last_os_error())

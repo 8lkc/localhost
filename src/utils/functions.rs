@@ -1,11 +1,27 @@
+#[cfg(target_os = "macos")]
+use libc::{
+    c_long,
+    time_t,
+    timespec,
+};
 use {
     super::{
         AppErr,
         AppResult,
-    }, crate::{message::{
-        Method,
-        Resource,
-    }, server::SESSION_STORE}, rand::{distributions::Alphanumeric, Rng}, std::{
+        SESSION_STORE,
+    },
+    crate::{
+        message::{
+            Method,
+            Resource,
+        },
+        Request,
+    },
+    rand::{
+        distributions::Alphanumeric,
+        Rng,
+    },
+    std::{
         io::{
             BufRead,
             BufReader,
@@ -13,17 +29,8 @@ use {
         },
         net::TcpStream,
         thread,
-        time::Duration
-    }
-};
-#[cfg(target_os = "macos")]
-use {
-    libc::{
-        c_long,
-        time_t,
-        timespec,
+        time::Duration,
     },
-    std::time::Duration,
 };
 
 #[cfg(target_os = "macos")]
@@ -66,6 +73,7 @@ pub fn process_header_line(s: &str) -> (String, String) {
 
     (key, value)
 }
+
 pub fn generate_session_id() -> String {
     rand::thread_rng()
         .sample_iter(&Alphanumeric)
@@ -73,6 +81,26 @@ pub fn generate_session_id() -> String {
         .map(char::from)
         .collect()
 }
+
+pub fn get_session_id(cookie: &str) -> Option<String> {
+    cookie
+        .split(';')
+        .find(|s| {
+            s.trim()
+                .starts_with("session_id=")
+        })
+        .map(|s| s.trim()["session_id=".len()..].to_string())
+}
+
+pub fn has_valid_session(req: &Request) -> bool {
+    if let Some(cookie) = req.headers.get("Cookie") {
+        if let Some(session_id) = get_session_id(cookie) {
+            return SESSION_STORE.validate_session(&session_id);
+        }
+    }
+    false
+}
+
 pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
     let mut buf_reader = BufReader::new(stream);
     let mut req_str = String::new();
@@ -100,8 +128,6 @@ pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
         Ok(req_str)
     }
 }
-
-
 
 pub fn cleanup_sessions() {
     loop {

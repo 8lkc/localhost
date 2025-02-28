@@ -11,9 +11,7 @@ use {
 };
 
 impl<'a> Middleware<'a> {
-    pub fn check(request: &'a Request) -> Self {
-        Self { request }
-    }
+    pub fn check(request: &'a Request) -> Self { Self { request } }
 
     pub fn method(&self, method: Method) -> HttpResult<&Self> {
         if self.request.method != method {

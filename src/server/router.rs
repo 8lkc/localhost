@@ -1,49 +1,24 @@
 use {
     super::{
-        handler::{Api, Cgi, Handler, Http},
-        Route, Router, SESSION_STORE,
+        handler::{
+            Api,
+            Cgi,
+            Handler,
+            Http,
+        },
+        Route,
+        Router,
     },
-    crate::message::{Request, Resource},
+    crate::message::{
+        Request,
+        Resource,
+    },
     std::io::Write,
 };
 
-impl Route {
-    pub fn has_valid_config(&self) -> bool {
-        self.path.is_some()
-            && self.methods.is_some()
-            && self.check_session.is_some()
-    }
-}
+impl Route {}
 
 impl Router {
-    pub fn has_validate_config(&self) -> bool {
-        self.routes.is_some()
-            && self
-                .routes
-                .as_ref()
-                .unwrap()
-                .iter()
-                .all(|route| route.has_valid_config())
-    }
-
-    fn is_valid_session(req: &Request) -> bool {
-        if let Some(cookie) = req.headers.get("Cookie") {
-            if let Some(session_id) = Self::get_session_id(cookie) {
-                return SESSION_STORE.validate_session(&session_id);
-            }
-        }
-        false
-    }
-    fn get_session_id(cookie: &str) -> Option<String> {
-        cookie
-            .split(';')
-            .find(|s| {
-                s.trim()
-                    .starts_with("session_id=")
-            })
-            .map(|s| s.trim()["session_id=".len()..].to_string())
-    }
-
     pub fn direct(&self, request: Request, stream: &mut impl Write) {
         let response = match &request.resource {
             Resource::Path(s) => {
@@ -72,33 +47,11 @@ impl Router {
         response.send(stream)
     }
 
-    pub fn get_session(&self, path: &str) -> bool {
-        if let Some(routes) = &self.routes {
-            for route in routes {
-                if let Some(path_route) = &route.path {
-                    if path_route == path {
-                        return route
-                            .check_session
-                            .unwrap_or(false);
-                    }
-                }
-            }
-        }
-        false
-    }
-
-    pub fn check_session(&self, path: &str, req: &Request) -> bool {
-        if self.get_session(path) {
-            Self::is_valid_session(req)
-        } else {
-            true
-        }
-    }
-
     pub fn redirect(&self, path: &str) -> Option<String> {
         let reforme_path = if path.starts_with('/') {
             path.to_string()
-        } else {
+        }
+        else {
             format!("/{}", path)
         };
         if let Some(routes) = &self.routes {
@@ -107,7 +60,8 @@ impl Router {
                     let reforme_route_path = if route_path.starts_with('/')
                     {
                         route_path.to_string()
-                    } else {
+                    }
+                    else {
                         format!("/{}", route_path)
                     };
 

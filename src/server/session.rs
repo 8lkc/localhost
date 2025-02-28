@@ -1,24 +1,27 @@
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant};
-use lazy_static::lazy_static;
-use crate::utils::generate_session_id;
-
-#[derive(Clone)]
-pub struct Session {
-    pub created_at: Instant,
-}
-
-pub struct SessionStore {
-    sessions: Arc<Mutex<HashMap<String, Session>>>,
-    timeout: Duration,
-}
+use {
+    super::{
+        Session,
+        SessionStore,
+    },
+    crate::utils::generate_session_id,
+    std::{
+        collections::HashMap,
+        sync::{
+            Arc,
+            Mutex,
+        },
+        time::{
+            Duration,
+            Instant,
+        },
+    },
+};
 
 impl SessionStore {
     pub fn new(timeout_minutes: u64) -> Self {
         Self {
             sessions: Arc::new(Mutex::new(HashMap::new())),
-            timeout: Duration::from_secs(timeout_minutes * 60),
+            timeout:  Duration::from_secs(timeout_minutes * 60),
         }
     }
 
@@ -30,7 +33,7 @@ impl SessionStore {
 
         let mut sessions = self.sessions.lock().unwrap();
         sessions.insert(session_id.clone(), session);
-        
+
         session_id
     }
 
@@ -38,18 +41,16 @@ impl SessionStore {
         let sessions = self.sessions.lock().unwrap();
         if let Some(session) = sessions.get(session_id) {
             session.created_at.elapsed() < self.timeout
-        } else {
+        }
+        else {
             false
         }
     }
 
     pub fn cleanup_expired_sessions(&self) {
         let mut sessions = self.sessions.lock().unwrap();
-        sessions.retain(|_, session| session.created_at.elapsed() < self.timeout);
+        sessions.retain(|_, session| {
+            session.created_at.elapsed() < self.timeout
+        });
     }
-}
-
-// Singleton pour accéder au store globalement
-lazy_static! {
-    pub static ref SESSION_STORE: SessionStore = SessionStore::new(1); // 1 minute timeout
 }
