@@ -51,14 +51,11 @@ impl Router {
                 let path =
                     if route[1].is_empty() { "/" } else { route[1] };
                 if !self.check_session(path, &request) || path == "auth" {
-                    dbg!("trouver");
                     if let Some(auth_page) = self.redirect(path) {
                         return Http::serve_auth(&auth_page)
                             .unwrap_or_else(|e| e.into())
                             .send(stream);
-                    } else {
-                        dbg!("non trouver", self.redirect(path));
-                    }
+                    } 
                 }
                 match route[1] {
                     "api" => Api::handle(&request),
