@@ -6,6 +6,7 @@ mod globals;
 
 #[cfg(target_os = "macos")]
 pub(super) use functions::timeout;
+pub use functions::cleanup_sessions;
 pub(super) use {
     errors::{
         AppErr,
@@ -17,6 +18,7 @@ pub(super) use {
         process_header_line,
         process_req_line,
         read_buffer,
+        generate_session_id,
     },
     globals::{
         INTERPRETERS,

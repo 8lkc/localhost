@@ -1,18 +1,10 @@
 use {
     super::Handler,
     crate::{
-        message::{
-            Headers,
-            Request,
-            Resource,
-            Response,
-        },
-        server::Middleware,
+        message::{Headers, Request, Resource, Response},
+        server::{Middleware, SESSION_STORE},
         utils::{
-            AppErr,
-            HttpErr,
-            HttpResult,
-            TEMPLATES,
+             AppErr, HttpErr, HttpResult, TEMPLATES,
         },
         Method,
     },
@@ -32,6 +24,7 @@ impl Handler for Http {
 
         // Parse the URI
         let route: Vec<&str> = s.split("/").collect();
+
         match route[1] {
             "" => Self::serve_index("index.html"),
             path => Self::serve_static(path),
@@ -61,14 +54,12 @@ impl Http {
                 "Content-Type".to_string(),
                 "text/css".to_string(),
             );
-        }
-        else if path.ends_with(".js") {
+        } else if path.ends_with(".js") {
             headers.insert(
                 "Content-Type".to_string(),
                 "text/javascript".to_string(),
             );
-        }
-        else {
+        } else {
             let tmpl = format!("{}.html", path);
             let ctx = Context::new();
             let page = TEMPLATES
@@ -79,5 +70,33 @@ impl Http {
 
         let content = Self::load_file(path).ok_or(HttpErr::from(404))?;
         Ok(Response::ok(Some(headers), Some(content)))
+    }
+    pub fn serve_auth(path: &str) -> HttpResult<Response> {
+        let session_id = SESSION_STORE.create_session();
+        let mut headers = Headers::new();
+
+        headers.insert(
+            "Set-Cookie".to_string(),
+            format!("session_id={}; Path=/; HttpOnly", session_id),
+        );
+
+        headers.insert(
+            "Content-Type".to_string(),
+            "text/html".to_string(),
+        );
+
+        let mut ctx = Context::new();
+        ctx.insert("title", "Authentication");
+
+        let page = TEMPLATES
+            .render(&path, &ctx)
+            .map_err(|e| {
+                println!("Template error: {:?}", e); 
+                println!("Template path: {}", path); 
+                println!("Context: {:?}", ctx); 
+                AppErr::from(e)
+            })?;
+
+        Ok(Response::ok(Some(headers), Some(page)))
     }
 }

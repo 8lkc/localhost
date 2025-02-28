@@ -1,5 +1,5 @@
-use localhost::{debug, Loader};
-
+use localhost::{cleanup_sessions, debug, Loader};
+use std::thread;
 /// Performs the following steps:
 /// 1. Loading the server configuration from the specified TOML file.
 /// 2. Initializing a `Multiplexer` with the loaded configuration.
@@ -14,6 +14,7 @@ use localhost::{debug, Loader};
 /// * An error occurs while adding the listening socket to the
 ///   `Multiplexer`.
 fn main() {
+     thread::spawn(cleanup_sessions);
     let mut mux = match Loader::load("./config/server.toml") {
         Ok(multiplexer) => multiplexer,
         Err(e) => {

@@ -2,19 +2,19 @@ use {
     super::{
         AppErr,
         AppResult,
-    },
-    crate::message::{
+    }, crate::{message::{
         Method,
         Resource,
-    },
-    std::{
+    }, server::SESSION_STORE}, rand::{distributions::Alphanumeric, Rng}, std::{
         io::{
             BufRead,
             BufReader,
             ErrorKind,
         },
         net::TcpStream,
-    },
+        thread,
+        time::Duration
+    }
 };
 #[cfg(target_os = "macos")]
 use {
@@ -66,7 +66,13 @@ pub fn process_header_line(s: &str) -> (String, String) {
 
     (key, value)
 }
-
+pub fn generate_session_id() -> String {
+    rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(32)
+        .map(char::from)
+        .collect()
+}
 pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
     let mut buf_reader = BufReader::new(stream);
     let mut req_str = String::new();
@@ -92,5 +98,14 @@ pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
     }
     else {
         Ok(req_str)
+    }
+}
+
+
+
+pub fn cleanup_sessions() {
+    loop {
+        thread::sleep(Duration::from_secs(2)); // Toutes les 2 minutes
+        SESSION_STORE.cleanup_expired_sessions();
     }
 }

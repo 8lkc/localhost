@@ -3,7 +3,8 @@ mod handler;
 mod middleware;
 mod router;
 mod run;
-
+mod session;
+pub use session::SESSION_STORE;
 use {
     crate::Request,
     serde::{
@@ -11,6 +12,7 @@ use {
         Serialize,
     },
     std::collections::HashMap,
+   
 };
 
 #[derive(Serialize, Deserialize)]
@@ -31,7 +33,7 @@ pub struct Router {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Route {
+pub struct Route {
     path:          Option<String>,
     methods:       Option<Vec<String>>,
     default_file:  Option<String>,
