@@ -9,9 +9,8 @@ use libc::{
 use windows::Win32::System::IO::{
     CreateIoCompletionPort,
     GetQueuedCompletionStatus,
-    PostQueuedCompletionStatus,
-    ReadFile,
-    WriteFile,
+    INVALID_HANDLE_VALUE,
+    OVERLAPPED,
 };
 use {
     super::{
@@ -82,6 +81,16 @@ impl Multiplexer {
                 null(),
             )
         }
+        #[cfg(target_os = "windows")]
+        {
+            syscall!(
+                CreateIoCompletionPort,
+                fd as HANDLE,
+                self.file_descriptor,
+                0,
+                0
+            )
+        }
     }
 
     pub(super) fn poll(
@@ -108,6 +117,21 @@ impl Multiplexer {
                 events.as_mut_ptr() as *mut kevent,
                 events.len() as i32,
                 timeout(TIMEOUT)
+            )
+        }
+        #[cfg(target_os = "windows")]
+        {
+            let mut bytes_transferred = 0;
+            let mut completion_key = 0;
+            let mut overlapped = null_mut();
+
+            syscall!(
+                GetQueuedCompletionStatus,
+                self.file_descriptor,
+                &mut bytes_transferred,
+                &mut completion_key,
+                &mut overlapped,
+                TIMEOUT
             )
         }
     }

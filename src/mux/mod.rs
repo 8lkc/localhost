@@ -5,6 +5,8 @@ mod run;
 use libc::epoll_event;
 #[cfg(target_os = "macos")]
 use libc::kevent;
+#[cfg(target_os = "windows")]
+use windows::Win32::System::IO::OVERLAPPED;
 use {
     crate::{
         loader::Config,
@@ -30,6 +32,8 @@ use {
 pub type OsEvent = MaybeUninit<epoll_event>;
 #[cfg(target_os = "macos")]
 pub type OsEvent = MaybeUninit<kevent>;
+#[cfg(target_os = "windows")]
+pub type OsEvent = MaybeUninit<OVERLAPPED>;
 
 //------------------------------------------------------------------
 
@@ -67,6 +71,13 @@ impl Multiplexer {
         let file_descriptor = syscall!(epoll_create1, 0)?;
         #[cfg(target_os = "macos")]
         let file_descriptor = syscall!(kqueue)?;
+        #[cfg(target_os = "windows")]
+        let file_descriptor = syscall!(
+            CreateIoCompletionPort,
+            INVALID_HANDLE_VALUE,
+            0,
+            0
+        )?;
 
         Ok(Self {
             file_descriptor,
