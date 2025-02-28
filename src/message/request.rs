@@ -29,7 +29,8 @@ impl fmt::Display for Method {
         match self {
             Method::GET => write!(f, "GET"),
             Method::POST => write!(f, "POST"),
-            Method::Uninitialized => write!(f, "Uninitialized"),
+            Method::DELETE => writeln!(f, "DELETE"),
+            Method::Uninitialized => write!(f, "Uninitialized Method"),
         }
     }
 }

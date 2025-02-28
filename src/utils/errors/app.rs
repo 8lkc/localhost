@@ -5,11 +5,14 @@ use {
         fmt::Display,
         io,
         net::AddrParseError,
+        panic::Location,
     },
 };
 
 impl Display for AppErr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let loc = Location::caller();
+        write!(f, "[{}:{}] - ", loc.file(), loc.line())?;
         match self {
             Self::Custom(msg) => writeln!(f, "Error: {msg}."),
             Self::DeserializeTOML(e) => writeln!(f, "TOML: {e}."),

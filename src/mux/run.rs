@@ -5,7 +5,6 @@ use {
     },
     crate::{
         debug,
-        server::Router,
         utils::read_buffer,
         Request,
     },
@@ -21,17 +20,18 @@ use {
 impl Multiplexer {
     /// Starts the main process by setting a vector of potentially
     /// uninitialized events with a specified capacity. Then gets the file
-    /// descriptor from the event, finds the listener associated with the
-    /// file descriptor, gets the stream and address from the associated
-    /// listener and makes the stream asynchronous. Then from the stream
-    /// buffer, gets the request, adds the stream file desriptor to the
-    /// `Multiplexer` and finally sends the `Request` to the `Router`.
+    /// descriptor from the event through the number of found descriptors
+    /// (nfds), finds the listener associated with the file descriptor,
+    /// gets the stream and address from the associated listener and makes
+    /// the stream asynchronous. Then from the stream buffer, gets
+    /// therequest, adds the stream file desriptor to the `Multiplexer`and
+    /// finally sends the `Request` to the `Router`.
     pub fn run(&self) {
         let mut events: Vec<OsEvent> = Vec::with_capacity(32);
         unsafe { events.set_len(32) };
 
         loop {
-            let nfds = self //                      <-- Number of found descriptors.
+            let nfds = self
                 .poll(&mut events)
                 .unwrap_or(0) as usize;
 
@@ -43,8 +43,9 @@ impl Multiplexer {
                 #[cfg(target_os = "macos")]
                 let event_fd = event.ident as RawFd;
 
-                let fd_listener = match self.find_listener(event_fd) {
-                    Some(listener) => listener,
+                let (fd_listener, idx) = match self.find_listener(event_fd)
+                {
+                    Some(pair) => pair,
                     None => continue,
                 };
 
@@ -83,7 +84,9 @@ impl Multiplexer {
                     continue;
                 };
 
-                Router::direct(request, &mut stream)
+                self.servers[*idx]
+                    .router()
+                    .direct(request, &mut stream)
             }
         }
     }

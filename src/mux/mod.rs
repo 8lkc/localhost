@@ -11,17 +11,13 @@ use {
         server::Server,
         syscall,
         utils::{
-            get_listeners,
             AppErr,
             AppResult,
         },
     },
     std::{
         mem::MaybeUninit,
-        net::{
-            TcpListener,
-            TcpStream,
-        },
+        net::TcpListener,
         os::fd::{
             AsRawFd,
             RawFd,
@@ -45,8 +41,7 @@ pub type OsEvent = MaybeUninit<kevent>;
 pub struct Multiplexer {
     file_descriptor: RawFd,
     servers:         Vec<Server>,
-    listeners:       Vec<TcpListener>,
-    streams:         Vec<TcpStream>,
+    listeners:       Vec<(TcpListener, usize)>,
 }
 
 impl Multiplexer {
@@ -73,30 +68,39 @@ impl Multiplexer {
         #[cfg(target_os = "macos")]
         let file_descriptor = syscall!(kqueue)?;
 
-        let listeners = get_listeners(&servers)?;
-
         Ok(Self {
             file_descriptor,
             servers,
-            listeners,
-            streams: vec![],
+            listeners: vec![],
         })
     }
 
     /// Adds a new file descriptor for each
     /// listener.
-    pub fn register_listeners(&self) -> AppResult<()> {
-        for listener in self.listeners.iter() {
-            let fd = listener.as_raw_fd(); //----                        ---> Extracts the raw file descriptor.
-            listener.set_nonblocking(true)?; //----                  ---> Moves each socket into nonblocking mode.
-            self.register(fd)?;
+    pub fn register_listeners(&mut self) -> AppResult<()> {
+        for (idx, server) in self
+            .servers
+            .iter()
+            .enumerate()
+        {
+            let listeners = server.listeners()?;
+            for listener in listeners {
+                let fd = listener.as_raw_fd(); //----                        ---> Extracts the raw file descriptor.
+                listener.set_nonblocking(true)?; //----                  ---> Moves each socket into nonblocking mode.
+                self.register(fd)?;
+                self.listeners.push((listener, idx));
+            }
         }
+
         Ok(())
     }
 
-    pub fn find_listener(&self, fd: RawFd) -> Option<&TcpListener> {
+    pub fn find_listener(
+        &self,
+        fd: RawFd,
+    ) -> Option<&(TcpListener, usize)> {
         self.listeners
             .iter()
-            .find(|listener| listener.as_raw_fd() == fd)
+            .find(|(listener, _)| listener.as_raw_fd() == fd)
     }
 }

@@ -7,28 +7,28 @@ Functional:
 `Is the student able to justify his choices and explain the following:`
 `Ask the student to show you the implementation in the source code when necessary.`
 
-☐ How does an HTTP server works?
+✔ How does an HTTP server works? @done(25-02-26 13:42)
 
-☐ Which function was used for I/O Multiplexing and how does it works?
+✔ Which function was used for I/O Multiplexing and how does it works? @done(25-02-26 13:42)
 
-☐ Is the server using only one select (or equivalent) to read the client requests and write answers?
+✔ Is the server using only one select (or equivalent) to read the client requests and write answers? @done(25-02-26 13:42)
 
-☐ Why is it important to use only one select and how was it achieved?
+✔ Why is it important to use only one select and how was it achieved? @done(25-02-26 13:42)
 
-☐ Read the code that goes from the select (or equivalent) to the read and write of a client, is there only one read or write per client per select (or equivalent)?
+✔ Read the code that goes from the select (or equivalent) to the read and write of a client, is there only one read or write per client per select (or equivalent)? @done(25-02-26 13:42)
 
-☐ Are the return values for I/O functions checked properly?
+✔ Are the return values for I/O functions checked properly? @done(25-02-26 13:42)
 
-☐ If an error is returned by the previous functions on a socket, is the client removed?
+✔ If an error is returned by the previous functions on a socket, is the client removed? @done(25-02-26 13:42)
 
-☐ Is writing and reading ALWAYS done through a select (or equivalent)?
+✔ Is writing and reading ALWAYS done through a select (or equivalent)? @done(25-02-26 13:43)
 
 Configuration file:
 
 `Check the configuration file and modify it if necessary.`
 `Are the following configurations working properly:`
 
-☐ Setup a single server with a single port.
+✔ Setup a single server with a single port. @done(25-02-26 13:46)
 
 ☐ Setup multiple servers with different port.
 

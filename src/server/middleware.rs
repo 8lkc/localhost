@@ -1,7 +1,6 @@
 use {
     super::Middleware,
     crate::{
-        debug,
         utils::{
             HttpErr,
             HttpResult,
@@ -26,7 +25,7 @@ impl<'a> Middleware<'a> {
     }
 
     pub fn logger(&self) -> HttpResult<&Self> {
-        debug!(self.request);
+        println!("{:?}", self.request);
         Ok(self)
     }
 

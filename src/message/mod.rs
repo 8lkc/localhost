@@ -9,6 +9,7 @@ pub(super) type Headers = HashMap<String, String>;
 pub enum Method {
     GET,
     POST,
+    DELETE,
     Uninitialized,
 }
 
@@ -21,13 +22,13 @@ pub enum Resource {
 pub struct Request {
     pub method:   Method,
     pub resource: Resource,
-    pub headers:  HashMap<String, String>,
+    pub headers:  Headers,
     pub msg_body: String,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Response {
-    status_code: u16,
+    status_code: u32,
     status_text: String,
     headers:     Option<Headers>,
     body:        Option<String>,

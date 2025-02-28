@@ -1,14 +1,10 @@
 use {
     super::{
-        router::Route,
+        Router,
         Server,
     },
-    crate::{
-        debug,
-        utils::AppResult,
-    },
+    crate::utils::AppResult,
     std::{
-        collections::HashMap,
         net::{
             SocketAddr,
             TcpListener,
@@ -18,8 +14,23 @@ use {
 };
 
 impl Server {
+    pub fn has_valid_config(&self) -> bool {
+        self.host.is_some()
+            && self.ports.is_some()
+            && self.root.is_some()
+            && self.listing.is_some()
+            && self
+                .uploads_max_size
+                .is_some()
+            && self.router.is_some()
+            && self
+                .router
+                .as_ref()
+                .unwrap()
+                .has_validate_config()
+    }
+
     pub fn host(&self) -> &str {
-        debug!(self.host.as_ref());
         self.host.as_ref().unwrap()
     }
 
@@ -31,27 +42,16 @@ impl Server {
         self.root.as_ref().unwrap()
     }
 
-    pub fn error_pages(&self) -> &Vec<String> {
-        self.error_pages
-            .as_ref()
-            .unwrap()
-    }
-
     pub fn uploads_max_size(&self) -> u64 {
         self.uploads_max_size.unwrap()
-    }
-
-    /// Common Gateway Interface
-    pub fn cgi(&self) -> &HashMap<String, String> {
-        self.cgi.as_ref().unwrap()
     }
 
     pub fn listing(&self) -> bool {
         self.listing.unwrap()
     }
 
-    pub fn routes(&self) -> &Vec<Route> {
-        self.routes.as_ref().unwrap()
+    pub fn router(&self) -> &Router {
+        self.router.as_ref().unwrap()
     }
 
     pub fn listeners(&self) -> AppResult<Vec<TcpListener>> {

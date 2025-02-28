@@ -82,7 +82,7 @@ impl Loader {
     /// * The configuration file cannot be opened or read.
     /// * The configuration file contains invalid TOML syntax.
     /// * An error occurs during the creation of the `Multiplexer`.
-    pub fn load(path: &'static str) -> AppResult<Multiplexer> {
+    pub fn load(path: &str) -> AppResult<Multiplexer> {
         let mut file = File::open(path)?;
         let mut contents = String::new();
 

@@ -1,9 +1,6 @@
 use {
     super::Server,
-    crate::{
-        server::Router,
-        utils::AppResult,
-    },
+    crate::utils::AppResult,
     std::{
         io::Read,
         net::TcpListener,
@@ -11,24 +8,6 @@ use {
 };
 
 impl Server {
-    pub fn has_valid_config(&self) -> bool {
-        self.host.is_some()
-            && self.host.is_some()
-            && self.ports.is_some()
-            && self.root.is_some()
-            && self.error_pages.is_some()
-            && self.listing.is_some()
-            && self.routes.is_some()
-            && self.cgi.is_some()
-            && self
-                .uploads_max_size
-                .is_some()
-        // && self
-        //     .routes()
-        //     .iter()
-        //     .all(|route| route.has_valid_config())
-    }
-
     pub fn run(&self) -> AppResult<()> {
         // Start a server listening on socket address
         let listener = TcpListener::bind(self.host())?;
@@ -60,7 +39,8 @@ impl Server {
             .into();
 
             // Route request to appropriate handler
-            Router::direct(req, &mut stream)
+            self.router()
+                .direct(req, &mut stream)
         }
 
         Ok(())

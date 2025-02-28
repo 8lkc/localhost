@@ -14,7 +14,6 @@ pub(super) use {
         HttpResult,
     },
     functions::{
-        get_listeners,
         process_header_line,
         process_req_line,
         read_buffer,

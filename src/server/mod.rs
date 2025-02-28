@@ -4,10 +4,8 @@ mod middleware;
 mod router;
 mod run;
 
-pub(super) use router::Router;
 use {
     crate::Request,
-    router::Route,
     serde::{
         Deserialize,
         Serialize,
@@ -20,11 +18,25 @@ pub struct Server {
     host:             Option<String>,
     ports:            Option<Vec<usize>>,
     root:             Option<String>,
-    error_pages:      Option<Vec<String>>,
+    error_pages:      Option<HashMap<String, String>>,
     uploads_max_size: Option<u64>,
-    cgi:              Option<HashMap<String, String>>,
     listing:          Option<bool>,
-    routes:           Option<Vec<Route>>,
+    router:           Option<Router>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Router {
+    routes: Option<Vec<Route>>,
+    cgi:    Option<HashMap<String, String>>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Route {
+    path:          Option<String>,
+    methods:       Option<Vec<String>>,
+    default_file:  Option<String>,
+    check_session: Option<bool>,
+    redirect:      Option<HashMap<String, String>>,
 }
 
 pub struct Middleware<'a> {

@@ -1,38 +1,47 @@
 [[servers]]
-host = "127.0.0.1"
-ports = [8080, 5500, 4000, 8000]
+dns = "localhost"
+host = "0.0.0.0"
+ports = [8080]
 root = "$CARGO_MANIFEST_DIR/public"
-error_pages = ["404.html", "400.html", "405.html", "403.html"]
 uploads_max_size = 10485760
-cgi = { "py" = "/python-cgi.py" }
 listing = true
 
-[[servers.routes]]
+[servers.router]
+cgi = { ".py" = "explorer" }
+
+[[servers.router.routes]]
+path = "/"
+methods = ["GET"]
+check_session = true
+redirect = { "/auth" = "auth.html" }
+
+[[servers.router.routes]]
+path = "/auth"
+methods = ["GET"]
+default_file = "auth.html"
+check_session = false
+
+
+[[servers]]
+dns = "public-web-server"
+host = "0.0.0.0"
+ports = [80]
+root = "$CARGO_MANIFEST_DIR/public"
+error_pages = {400 = "400.html", 403 = "403.html", 404 = "404.html", 405 = "405.html"}
+uploads_max_size = 10485760
+listing = true
+
+[server.router]
+
+[[servers.router.routes]]
 path = "/"
 methods = ["GET"]
 default_file = "index.html"
 check_session = true
-redirect = { "/login/" = "signin.html" }
+redirect = { auth = "auth.html" }
 
-[[servers.routes]]
-path = "/login/"
-methods = ["GET", "POST"]
-default_file = "signin.html"
+[[servers.router.routes]]
+path = "/auth"
+methods = ["GET"]
+default_file = "auth.html"
 check_session = false
-
-[[servers.routes]]
-path = "/register/"
-methods = ["GET", "POST"]
-default_file = "signup.html"
-check_session = false
-
-[[servers.routes]]
-path = "/logout/"
-methods = ["POST", "DELETE"]
-default_file = "signout.html"
-check_session = false
-
-# [[servers]]
-# host = "127.0.1.1"
-# ports = [8080, 3000]
-# timeout = 3000

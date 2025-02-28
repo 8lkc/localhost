@@ -1,4 +1,4 @@
-use localhost::Loader;
+use localhost::{debug, Loader};
 
 /// Performs the following steps:
 /// 1. Loading the server configuration from the specified TOML file.
@@ -14,17 +14,17 @@ use localhost::Loader;
 /// * An error occurs while adding the listening socket to the
 ///   `Multiplexer`.
 fn main() {
-    let mux = match Loader::load("./config/server.toml") {
+    let mut mux = match Loader::load("./config/server.toml") {
         Ok(multiplexer) => multiplexer,
         Err(e) => {
-            dbg!(e);
+            debug!(e);
             return;
         }
     };
 
     if let Err(e) = mux.register_listeners() {
-        dbg!(e);
-    }
+        debug!(e);
+    };
 
     mux.run()
 }

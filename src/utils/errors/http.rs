@@ -31,10 +31,10 @@ impl From<String> for HttpErr {
 
         let status_code = match msg {
             _ if msg.contains("bad request") => 400,
-            _ if msg.contains("unauthorized") => 401,
             _ if msg.contains("forbidden") => 403,
             _ if msg.contains("not found") => 404,
             _ if msg.contains("method not allowed") => 405,
+            _ if msg.contains("too large") => 413,
             _ => 500,
         };
 
@@ -45,14 +45,14 @@ impl From<String> for HttpErr {
     }
 }
 
-impl From<u16> for HttpErr {
-    fn from(status_code: u16) -> Self {
+impl From<u32> for HttpErr {
+    fn from(status_code: u32) -> Self {
         let msg = match status_code {
             400 => "Bad Request",
-            401 => "Unauthorized",
             403 => "Forbidden",
             404 => "Not Found",
             405 => "Method Not Allowed",
+            413 => "Request Entity Too Large",
             _ => "Internal Server Error",
         };
 

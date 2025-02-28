@@ -3,12 +3,9 @@ use {
         AppErr,
         AppResult,
     },
-    crate::{
-        message::{
-            Method,
-            Resource,
-        },
-        server::Server,
+    crate::message::{
+        Method,
+        Resource,
     },
     std::{
         io::{
@@ -16,10 +13,7 @@ use {
             BufReader,
             ErrorKind,
         },
-        net::{
-            TcpListener,
-            TcpStream,
-        },
+        net::TcpStream,
     },
 };
 #[cfg(target_os = "macos")]
@@ -71,21 +65,6 @@ pub fn process_header_line(s: &str) -> (String, String) {
         .to_string();
 
     (key, value)
-}
-
-pub fn get_listeners(
-    servers: &Vec<Server>,
-) -> AppResult<Vec<TcpListener>> {
-    let mut mux_listeners = vec![];
-    for server in servers {
-        mux_listeners.push(server.listeners()?);
-    }
-
-    // Flattens all listeners.
-    Ok(mux_listeners
-        .into_iter()
-        .flatten()
-        .collect())
 }
 
 pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
