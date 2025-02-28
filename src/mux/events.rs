@@ -5,6 +5,14 @@ use libc::{
     EPOLLIN,
     EPOLL_CTL_ADD,
 };
+#[cfg(target_os = "windows")]
+use windows::Win32::System::IO::{
+    CreateIoCompletionPort,
+    GetQueuedCompletionStatus,
+    PostQueuedCompletionStatus,
+    ReadFile,
+    WriteFile,
+};
 use {
     super::{
         Multiplexer,
