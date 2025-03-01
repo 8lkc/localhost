@@ -13,4 +13,4 @@ libc = "0.2.160"
 kqueue = { version = "1.0.8", optional = true }
 rand = "0.8"
 lazy_static = "1.4"
-windows = {version = "0.47.0", features = ["Win32"], optional = true}
+windows = {version = "0.60.0", features = ["Win32"], optional = true}

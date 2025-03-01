@@ -84,31 +84,26 @@ impl Http {
     }
 
     pub fn serve_auth(path: &str) -> HttpResult<Response> {
-        let session_id = SESSION_STORE.create_session();
+        let session_id = SESSION_STORE.create_session()?;
         let mut headers = Headers::new();
-
+    
         headers.insert(
             "Set-Cookie".to_string(),
             format!("session_id={}; Path=/; HttpOnly", session_id),
         );
-
+    
         headers.insert(
             "Content-Type".to_string(),
             "text/html".to_string(),
         );
-
+    
         let mut ctx = Context::new();
         ctx.insert("title", "Authentication");
-
+    
         let page = TEMPLATES
             .render(&path, &ctx)
-            .map_err(|e| {
-                println!("Template error: {:?}", e);
-                println!("Template path: {}", path);
-                println!("Context: {:?}", ctx);
-                AppErr::from(e)
-            })?;
-
+            .map_err(|e| AppErr::from(e))?;
+    
         Ok(Response::ok(Some(headers), Some(page)))
     }
 }

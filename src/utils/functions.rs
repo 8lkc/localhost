@@ -5,32 +5,21 @@ use libc::{
     timespec,
 };
 use {
-    super::{
-        AppErr,
-        AppResult,
-        SESSION_STORE,
-    },
-    crate::{
-        message::{
-            Method,
-            Resource,
-        },
-        Request,
-    },
-    rand::{
-        distributions::Alphanumeric,
-        Rng,
-    },
+    super::{AppErr, AppResult},
+    crate::message::{Method, Resource},
+    rand::{distributions::Alphanumeric, Rng},
     std::{
-        io::{
-            BufRead,
-            BufReader,
-            ErrorKind,
-        },
+        fs::{self, File},
+        io::{BufRead, BufReader, ErrorKind, Write},
         net::TcpStream,
-        thread,
-        time::Duration,
+        time::{SystemTime, UNIX_EPOCH},
     },
+};
+use crate::{utils::SESSION_STORE, Request};
+#[cfg(target_os = "macos")]
+use {
+    libc::{c_long, time_t, timespec},
+    std::time::Duration,
 };
 
 #[cfg(target_os = "macos")]
@@ -40,7 +29,7 @@ pub fn timeout(timeout_in_ms: u64) -> *const timespec {
     let nanos = duration.subsec_nanos() as c_long;
 
     &timespec {
-        tv_sec:  secs,
+        tv_sec: secs,
         tv_nsec: nanos,
     }
 }
@@ -123,15 +112,70 @@ pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
 
     if req_str.is_empty() {
         Err(AppErr::EmptyBuffer)
-    }
-    else {
+    } else {
         Ok(req_str)
     }
 }
+pub const SESSION_FILE: &str = "sessions.txt";
+pub const CLEANUP_FILE: &str = "last_cleanup.txt";
 
-pub fn cleanup_sessions() {
-    loop {
-        thread::sleep(Duration::from_secs(2)); // Toutes les 2 minutes
-        SESSION_STORE.cleanup_expired_sessions();
+pub fn get_current_timestamp() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
+
+pub fn init_files(timestamp: u64) -> Result<(), String> {
+    if !std::path::Path::new(SESSION_FILE).exists() {
+        File::create(SESSION_FILE).map_err(|e| e.to_string())?;
     }
+    if !std::path::Path::new(CLEANUP_FILE).exists() {
+        let mut file =
+            File::create(CLEANUP_FILE).map_err(|e| e.to_string())?;
+        writeln!(file, "{}", timestamp).map_err(|e| {
+            format!(
+                "Impossible d'écrire le timestamp initial: {}",
+                e
+            )
+        })?;
+    }
+    Ok(())
+}
+
+pub fn read_sessions() -> Result<Vec<String>, String> {
+    let file = File::open(SESSION_FILE).map_err(|e| e.to_string())?;
+    let reader = BufReader::new(file);
+    Ok(reader
+        .lines()
+        .filter_map(Result::ok)
+        .collect())
+}
+
+pub fn write_sessions(sessions: &[String]) -> Result<(), String> {
+    let mut file =
+        File::create(SESSION_FILE).map_err(|e| e.to_string())?;
+    for session in sessions {
+        writeln!(file, "{}", session)
+            .map_err(|_| "Impossible d'écrire la session")?;
+    }
+    Ok(())
+}
+
+pub fn get_last_cleanup() -> u64 {
+    fs::read_to_string(CLEANUP_FILE)
+        .ok()
+        .and_then(|content| content.trim().parse().ok())
+        .unwrap_or(0)
+}
+
+pub fn update_last_cleanup(timestamp: u64) -> Result<(), String> {
+    File::create(CLEANUP_FILE)
+        .map_err(|e| e.to_string())?
+        .write_all(
+            timestamp
+                .to_string()
+                .as_bytes(),
+        )
+        .map_err(|e| e.to_string())
 }

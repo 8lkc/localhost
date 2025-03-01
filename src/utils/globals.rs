@@ -1,12 +1,12 @@
 use {
-    crate::server::SessionStore,
     lazy_static::lazy_static,
     std::{
         collections::HashMap,
-        sync::LazyLock,
+        sync::LazyLock, time::Duration,
     },
     tera::Tera,
 };
+use crate::server::session::SessionStore; 
 
 pub const TIMEOUT: u64 = 1000;
 
@@ -28,5 +28,18 @@ pub static TEMPLATES: LazyLock<Tera> = LazyLock::new(|| {
 });
 
 lazy_static! {
-    pub static ref SESSION_STORE: SessionStore = SessionStore::new(1); // 1 minute timeout
+    pub static ref SESSION_STORE: SessionStore = match SessionStore::new(1)
+    {
+        Ok(store) => store,
+        Err(err) => {
+            dbg!(
+                "Impossible de créer le store de session",
+                err
+            );
+            SessionStore {
+                timeout: Duration::from_secs(60),
+                cleanup_interval: 120,
+            }
+        }
+    };
 }

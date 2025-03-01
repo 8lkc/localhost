@@ -4,7 +4,6 @@ mod errors;
 mod functions;
 mod globals;
 
-pub use functions::cleanup_sessions;
 #[cfg(target_os = "macos")]
 pub(super) use functions::timeout;
 pub(super) use {
@@ -20,6 +19,12 @@ pub(super) use {
         process_header_line,
         process_req_line,
         read_buffer,
+        get_current_timestamp,
+        init_files,
+        read_sessions,
+        write_sessions,
+        get_last_cleanup,
+        update_last_cleanup
     },
     globals::{
         INTERPRETERS,

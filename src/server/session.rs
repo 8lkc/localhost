@@ -1,56 +1,108 @@
-use {
-    super::{
-        Session,
-        SessionStore,
-    },
-    crate::utils::generate_session_id,
-    std::{
-        collections::HashMap,
-        sync::{
-            Arc,
-            Mutex,
-        },
-        time::{
-            Duration,
-            Instant,
-        },
-    },
+use crate::utils::{
+    generate_session_id, get_current_timestamp, get_last_cleanup,
+    init_files, read_sessions, update_last_cleanup, write_sessions,
 };
+use lazy_static::lazy_static;
+use std::time::Duration;
+
+pub struct SessionStore {
+    pub timeout: Duration,
+    pub cleanup_interval: u64,
+}
 
 impl SessionStore {
-    pub fn new(timeout_minutes: u64) -> Self {
-        Self {
-            sessions: Arc::new(Mutex::new(HashMap::new())),
-            timeout:  Duration::from_secs(timeout_minutes * 60),
-        }
+    pub fn new(timeout_minutes: u64) -> Result<Self, String> {
+        let current_time = get_current_timestamp();
+        init_files(current_time)?;
+        Ok(Self {
+            timeout: Duration::from_secs(timeout_minutes * 60),
+            cleanup_interval: 120,
+        })
     }
 
-    pub fn create_session(&self) -> String {
+    pub fn create_session(&self) -> Result<String, String> {
+        if let Err(e) = self.clean() {
+            dbg!("Erreur lors du nettoyage des sessions :", e);
+        }
+
         let session_id = generate_session_id();
-        let session = Session {
-            created_at: Instant::now(),
-        };
+        let timestamp = get_current_timestamp();
 
-        let mut sessions = self.sessions.lock().unwrap();
-        sessions.insert(session_id.clone(), session);
+        let mut sessions = read_sessions()?;
+        sessions.push(format!("{}:{}", session_id, timestamp));
 
-        session_id
+        write_sessions(&sessions)?;
+
+        Ok(session_id)
     }
 
     pub fn validate_session(&self, session_id: &str) -> bool {
-        let sessions = self.sessions.lock().unwrap();
-        if let Some(session) = sessions.get(session_id) {
-            session.created_at.elapsed() < self.timeout
+        if let Err(e) = self.clean() {
+            dbg!("Erreur lors du nettoyage de la session", e);
         }
-        else {
-            false
+
+        if let Ok(sessions) = read_sessions() {
+            let current_time = get_current_timestamp();
+
+            for line in sessions {
+                let parts: Vec<&str> = line.split(':').collect();
+                if parts.len() == 2 {
+                    let (id, timestamp_str) = (parts[0], parts[1]);
+                    if id == session_id {
+                        if let Ok(timestamp) = timestamp_str.parse::<u64>()
+                        {
+                            return current_time - timestamp
+                                < self.timeout.as_secs();
+                        }
+                    }
+                }
+            }
         }
+        false
     }
 
-    pub fn cleanup_expired_sessions(&self) {
-        let mut sessions = self.sessions.lock().unwrap();
-        sessions.retain(|_, session| {
-            session.created_at.elapsed() < self.timeout
-        });
+    pub fn clean(&self) -> Result<(), String> {
+        let current_time = get_current_timestamp();
+        let last_cleanup = get_last_cleanup();
+
+        if current_time - last_cleanup >= self.cleanup_interval {
+            update_last_cleanup(current_time)?;
+            if let Ok(sessions) = read_sessions() {
+                let valid_sessions: Vec<String> = sessions
+                    .into_iter()
+                    .filter(|line| {
+                        let parts: Vec<&str> = line.split(':').collect();
+                        if parts.len() == 2 {
+                            if let Ok(timestamp) = parts[1].parse::<u64>()
+                            {
+                                return current_time - timestamp
+                                    < self.timeout.as_secs();
+                            }
+                        }
+                        false
+                    })
+                    .collect();
+
+                write_sessions(&valid_sessions)?;
+            }
+        }
+        Ok(())
     }
+}
+
+lazy_static! {
+    pub static ref SESSION_STORE: SessionStore = match SessionStore::new(1)
+    {
+        Ok(store) => store,
+        Err(err) => {
+            dbg!(
+                "Impossible de créer le store de session",
+                err
+            );
+            SessionStore {
+                timeout: Duration::from_secs(60),
+                cleanup_interval: 120,
+            }
+        }
+    };
 }

@@ -12,5 +12,4 @@ pub use {
         Resource,
         Response,
     },
-    utils::cleanup_sessions,
 };
