@@ -1,57 +1,41 @@
 #!/usr/bin/env python3
 import os
-import datetime
 import html
+import datetime
+import sys
 
-# CGI needs to print headers first, followed by blank line
+# Set the base path to the public directory
+base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+current_path = os.path.join(base_path, os.environ.get('QUERY_STRING', '').lstrip('/'))
+
+# Ensure the current path is within the base path for security
+if not current_path.startswith(base_path):
+    current_path = base_path
+
 print("Content-Type: text/html\n")
 
-# Get current directory or from query string
-base_path = "public"
-current_path = os.path.join(base_path, os.environ.get('QUERY_STRING', '').strip('/'))
-
-print("""
+print(f"""
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Explorer</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background: #f5f5f5;
-        }
-        .explorer {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .item {
-            display: flex;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .name { flex: 2; }
-        .size, .date { flex: 1; }
-        .directory { color: #2c5282; font-weight: bold; }
-        .file { color: #444; }
-        a { text-decoration: none; color: inherit; }
-        .header {
-            font-weight: bold;
-            background: #f8f9fa;
-            padding: 10px;
-        }
+        body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; }}
+        .item {{ display: flex; padding: 10px; border-bottom: 1px solid #eee; }}
+        .name {{ flex: 1; }}
+        .size, .date {{ width: 100px; text-align: right; }}
+        .directory {{ font-weight: bold; }}
     </style>
 </head>
 <body>
-    <div class="explorer">
-        <h1>File Explorer</h1>
-        <div class="item header">
-            <div class="name">Name</div>
-            <div class="size">Size</div>
-            <div class="date">Modified</div>
-        </div>
+    <h1>Directory Listing: {os.path.relpath(current_path, base_path)}</h1>
+    <div class="item">
+        <div class="name"><strong>Name</strong></div>
+        <div class="size"><strong>Size</strong></div>
+        <div class="date"><strong>Last Modified</strong></div>
+    </div>
 """)
 
 try:
