@@ -45,17 +45,18 @@ impl Resource {
 
 impl From<String> for Request {
     fn from(req: String) -> Self {
-        let mut parsed_method = Method::Uninitialized;
-        let mut parsed_resource = Resource::Path("".to_string());
-        let mut parsed_headers = HashMap::new();
-        let mut parsed_msg_body = String::new();
+        let mut resource = Resource::Path("".to_string());
+        let mut method = Method::Uninitialized;
+        let mut headers = HashMap::new();
+        let mut body = String::new();
 
         let mut lines = req.lines();
         if let Some(first_line) = lines.next() {
             if first_line.contains("HTTP") {
-                let (method, resource) = process_req_line(first_line);
-                parsed_method = method;
-                parsed_resource = resource;
+                let (parsed_method, parsed_resource) =
+                    process_req_line(first_line);
+                method = parsed_method;
+                resource = parsed_resource;
             }
         }
 
@@ -70,24 +71,24 @@ impl From<String> for Request {
             if !reached_body {
                 if line.contains(":") {
                     let (key, value) = process_header_line(line);
-                    parsed_headers.insert(key, value);
+                    headers.insert(key, value);
                 }
                 else {
                     // Append to body (with new line if not first
                     // line)
-                    if !parsed_msg_body.is_empty() {
-                        parsed_msg_body.push('\n');
+                    if !body.is_empty() {
+                        body.push('\n');
                     }
-                    parsed_msg_body.push_str(line);
+                    body.push_str(line);
                 }
             }
         }
         // Parse the incoming HTTP request into HttpRequest struct
         Request {
-            method:   parsed_method,
-            resource: parsed_resource,
-            headers:  parsed_headers,
-            msg_body: parsed_msg_body,
+            resource,
+            method,
+            headers,
+            body,
         }
     }
 }

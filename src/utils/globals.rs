@@ -1,12 +1,13 @@
 use {
+    crate::server::SessionStore,
     lazy_static::lazy_static,
     std::{
         collections::HashMap,
-        sync::LazyLock, time::Duration,
+        sync::LazyLock,
+        time::Duration,
     },
     tera::Tera,
 };
-use crate::server::session::SessionStore; 
 
 pub const TIMEOUT: u64 = 1000;
 
@@ -37,9 +38,12 @@ lazy_static! {
                 err
             );
             SessionStore {
-                timeout: Duration::from_secs(60),
+                timeout:          Duration::from_secs(60),
                 cleanup_interval: 120,
             }
         }
     };
 }
+
+pub const SESSION_FILE: &str = "sessions.txt";
+pub const CLEANUP_FILE: &str = "last_cleanup.txt";

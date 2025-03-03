@@ -25,7 +25,7 @@ pub enum AppErr {
 
 #[derive(Debug)]
 pub struct HttpErr {
-    pub status_code: u32,
+    pub status_code: u16,
     pub message:     String,
 }
 

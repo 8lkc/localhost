@@ -1,4 +1,7 @@
-use localhost::{ debug, Loader};
+use localhost::{
+    debug,
+    Loader,
+};
 /// Performs the following steps:
 /// 1. Loading the server configuration from the specified TOML file.
 /// 2. Initializing a `Multiplexer` with the loaded configuration.

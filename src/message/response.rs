@@ -20,7 +20,7 @@ impl Default for Response {
     fn default() -> Self {
         Self {
             status_code: 200,
-            status_text: String::from("OK"),
+            status_txt:  String::from("OK"),
             headers:     None,
             body:        None,
         }
@@ -34,7 +34,7 @@ impl From<Response> for String {
         format!(
             "HTTP/1.1 {} {}\r\n{}Content-Length: {}\r\n\r\n{}",
             &res.status_code,
-            &res.status_text,
+            &res.status_txt,
             &res.headers(),
             &res.body().len(),
             &res.body()
@@ -60,7 +60,7 @@ impl From<HttpErr> for Response {
 
         Self {
             status_code: err.status_code,
-            status_text: err.message,
+            status_txt:  err.message,
             headers:     Some(HashMap::from([(
                 "Content-Type".to_string(),
                 "text/html".to_string(),
@@ -85,7 +85,7 @@ impl Response {
                 Some(h)
             }
         };
-        response.status_text = "OK".to_string();
+        response.status_txt = "OK".to_string();
         response.body = body;
 
         response
@@ -95,6 +95,14 @@ impl Response {
         let res = self.clone();
         let response_string: String = String::from(res);
         let _ = write!(write_stream, "{}", response_string);
+    }
+
+    pub fn set_status_code(&mut self, status_code: u16) {
+        self.status_code = status_code;
+    }
+
+    pub fn set_status_txt(&mut self, status_txt: String) {
+        self.status_txt = status_txt;
     }
 
     pub fn headers(&self) -> String {

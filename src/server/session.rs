@@ -1,21 +1,24 @@
-use crate::utils::{
-    generate_session_id, get_current_timestamp, get_last_cleanup,
-    init_files, read_sessions, update_last_cleanup, write_sessions,
+use {
+    super::SessionStore,
+    crate::utils::{
+        generate_session_id,
+        get_current_timestamp,
+        get_last_cleanup,
+        init_files,
+        read_sessions,
+        update_last_cleanup,
+        write_sessions,
+    },
+    lazy_static::lazy_static,
+    std::time::Duration,
 };
-use lazy_static::lazy_static;
-use std::time::Duration;
-
-pub struct SessionStore {
-    pub timeout: Duration,
-    pub cleanup_interval: u64,
-}
 
 impl SessionStore {
     pub fn new(timeout_minutes: u64) -> Result<Self, String> {
         let current_time = get_current_timestamp();
         init_files(current_time)?;
         Ok(Self {
-            timeout: Duration::from_secs(timeout_minutes * 60),
+            timeout:          Duration::from_secs(timeout_minutes * 60),
             cleanup_interval: 120,
         })
     }
@@ -100,7 +103,7 @@ lazy_static! {
                 err
             );
             SessionStore {
-                timeout: Duration::from_secs(60),
+                timeout:          Duration::from_secs(60),
                 cleanup_interval: 120,
             }
         }

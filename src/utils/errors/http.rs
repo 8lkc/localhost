@@ -43,8 +43,8 @@ impl From<String> for HttpErr {
     }
 }
 
-impl From<u32> for HttpErr {
-    fn from(status_code: u32) -> Self {
+impl From<u16> for HttpErr {
+    fn from(status_code: u16) -> Self {
         let msg = match status_code {
             400 => "Bad Request",
             403 => "Forbidden",

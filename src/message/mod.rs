@@ -20,16 +20,16 @@ pub enum Resource {
 
 #[derive(Debug)]
 pub struct Request {
-    pub method:   Method,
     pub resource: Resource,
+    pub method:   Method,
     pub headers:  Headers,
-    pub msg_body: String,
+    pub body:     String,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Response {
-    status_code: u32,
-    status_text: String,
+    status_code: u16,
+    status_txt:  String,
     headers:     Option<Headers>,
     body:        Option<String>,
 }

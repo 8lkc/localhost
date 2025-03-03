@@ -2,7 +2,6 @@
 import os
 import html
 import datetime
-import sys
 
 # Set the base path to the public directory
 base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

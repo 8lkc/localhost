@@ -23,7 +23,7 @@ impl<'a> Middleware<'a> {
     }
 
     pub fn logger(&self) -> HttpResult<&Self> {
-        println!("{:?}", self.request);
+        println!("{:#?}", self.request);
         Ok(self)
     }
 

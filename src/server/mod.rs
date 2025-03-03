@@ -3,39 +3,45 @@ mod handler;
 mod middleware;
 mod router;
 mod run;
-pub mod session;
+mod session;
 mod validation;
 
 use {
     crate::Request,
-    serde::{Deserialize, Serialize},
-    std::collections::HashMap,
+    serde::{
+        Deserialize,
+        Serialize,
+    },
+    std::{
+        collections::HashMap,
+        time::Duration,
+    },
 };
 
 #[derive(Serialize, Deserialize)]
 pub struct Server {
-    host: Option<String>,
-    ports: Option<Vec<usize>>,
-    root: Option<String>,
-    errors: Option<HashMap<String, String>>,
+    host:    Option<String>,
+    ports:   Option<Vec<usize>>,
+    root:    Option<String>,
+    errors:  Option<HashMap<String, String>>,
     uploads: Option<u64>,
     listing: Option<bool>,
-    router: Option<Router>,
+    router:  Option<Router>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Router {
     routes: Option<Vec<Route>>,
-    cgi: Option<HashMap<String, String>>,
+    cgi:    Option<HashMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Route {
-    path: Option<String>,
-    methods: Option<Vec<String>>,
+    path:         Option<String>,
+    methods:      Option<Vec<String>>,
     default_file: Option<String>,
-    session: Option<bool>,
-    redirect: Option<HashMap<String, String>>,
+    session:      Option<bool>,
+    redirect:     Option<HashMap<String, String>>,
 }
 
 pub(super) struct Middleware<'a> {
@@ -44,7 +50,12 @@ pub(super) struct Middleware<'a> {
 
 #[derive(Serialize, Deserialize)]
 pub struct Data {
-    id: i32,
-    data: String,
+    id:     i32,
+    data:   String,
     status: String,
+}
+
+pub struct SessionStore {
+    pub timeout:          Duration,
+    pub cleanup_interval: u64,
 }
