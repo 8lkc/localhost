@@ -1,25 +1,17 @@
 mod api;
 mod cgi;
+mod http;
+mod upload;
 pub mod http;
 
 use {
     crate::{
-        message::{
-            Request,
-            Response,
-        },
+        message::{Request, Response},
         utils::HttpResult,
     },
-    std::{
-        env,
-        fs,
-    },
+    std::{env, fs},
 };
-pub use {
-    api::Api,
-    cgi::Cgi,
-    http::Http,
-};
+pub use {api::Api, cgi::Cgi, http::Http, upload::Upload};
 
 pub trait Handler {
     fn handle(req: &Request) -> HttpResult<Response>;

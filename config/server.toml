@@ -21,13 +21,17 @@ methods = ["GET"]
 default_file = "auth.html"
 session = false
 
+[[servers.router.routes]]
+path = "/upload"
+methods = ["GET", "POST"]
+session = false
 
 [[servers]]
 dns = "public-web-server"
 host = "0.0.0.0"
 ports = [8081]
 root = "$CARGO_MANIFEST_DIR/public"
-errors = {400 = "400.html", 403 = "403.html", 404 = "404.html", 405 = "405.html"}
+errors = { 400 = "400.html", 403 = "403.html", 404 = "404.html", 405 = "405.html" }
 uploads = 10485760
 listing = false
 

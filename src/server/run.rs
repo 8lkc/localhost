@@ -9,6 +9,7 @@ use {
 
 impl Server {
     pub fn run(&self) -> AppResult<()> {
+        
         // Start a server listening on socket address
         let listener = TcpListener::bind(self.host())?;
         println!("Running on {:?}", self.host);
