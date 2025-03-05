@@ -1,6 +1,5 @@
 mod api;
 mod cgi;
-mod http;
 mod upload;
 pub mod http;
 
