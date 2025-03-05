@@ -1,12 +1,22 @@
 use {
-    super::Handler,
-    crate::{
-        message::{Headers, Request, Resource, Response},
-        server::{Middleware, SessionStore},
-        utils::{get_session_id, AppErr, HttpErr, HttpResult, HTTP, TEMPLATES},
+    super::{FileSystem, Handler}, crate::{
+        message::{
+            Headers,
+            Request,
+            Resource,
+            Response,
+        },
+        server::Middleware,
+        utils::{
+            AppErr,
+            HttpErr,
+            HttpResult,
+            SESSION_STORE,
+            TEMPLATES,
+        },
         Method,
     },
-    tera::Context,
+    tera::Context
 };
 
 pub struct Http {
@@ -41,10 +51,9 @@ impl Http {
     fn serve_index(tmpl: &str) -> HttpResult<Response> {
         let mut ctx = Context::new();
         ctx.insert("title", "Rust");
-        ctx.insert(
-            "description",
-            "A safe, concurrent, practical language",
-        );
+
+        let items = FileSystem::listing("public")?;
+        ctx.insert("list", &items);
 
         let page = TEMPLATES
             .render(&tmpl, &ctx)

@@ -1,15 +1,75 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <!-- <title>{{ title }}</title> -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Rust</title>
-        <link rel="stylesheet" href="/styles.css" />
+        <link rel="stylesheet" href="/styles.css">
+        <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 1.6rem; }
+            h1, h3 { margin: 0; padding: 0; }
+            li { cursor: pointer; }
+            .directory { font-weight: bold; }
+            .item { display: flex; padding: 0.7rem; border-bottom: 1px solid #eee; }
+            .name { flex: 1; }
+            .size, .date { width: 9rem; text-align: right; }
+        </style>
     </head>
+
     <body>
-        <!-- <h1>Welcome to {{ title }}</h1> -->
-        <h1>Welcome to the Rust Programming Language</h1>
-        <!-- <p>{{ description }}</p> -->
-        <!-- More content -->
-        <a href="/upload">Upload Files</a>
+        <h1>File explorer</h1>
+        <h3 id="current_path"></h3>
+        <div class="item">
+            <div class="name"><strong>Name</strong></div>
+            <div class="size"><strong>Size</strong></div>
+            <div class="date"><strong>Last Modified</strong></div>
+        </div>
+        {% for item in list %}
+            <div class="item">
+                <div class="name {% if item.is_dir %}directory{% endif %}">
+                    <li data-value="{{ item.name }}">{{ item.name }}</li>
+                </div>
+                <div class="size">{{ item.size }}</div>
+                <!-- <div class="date">{{ item.modified_at | date(format="%Y-%m-%d %H:%M:%S") }}</div> -->
+            </div>
+        {% endfor %}
+
+        <script>
+            // let currentPath = window.location.href.toString();
+            // if (currentPath.startsWith('http://')) currentPath = currentPath.slice('http://'.length);
+            // console.log(currentPath);
+
+            // let partsOfPath = currentPath.split('/');
+            // console.log(partsOfPath);
+
+            // let listOfItems;
+            // if (partsOfPath[1].length != 0) {
+            //     if (partsOfPath[1].startsWith('?selected=')) partsOfPath[1] = partsOfPath[1].slice('?selected='.length);
+            //     listOfItems = partsOfPath[1].split('%26');
+            // } listOfItems = [];
+            // console.log(listOfItems);
+
+            // // if (localStorage.getItem('list_of_items') == undefined) {
+            // //     localStorage.setItem('list_of_items', JSON.stringify([]));
+            // // } else { listOfItems = JSON.parse(localStorage.getItem("list_of_items")); }
+
+            // currentPath = "💠";
+            // listOfItems.forEach(item => {currentPath += " > " + item});
+            // document.querySelector('#current_path').textContent = currentPath;
+
+            document.addEventListener('DOMContentLoaded', event => {
+                const items = document.querySelectorAll('li');
+                items.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const value = item.getAttribute('data-value');
+                        console.log(value);
+                        // listOfItems.push(value);
+                        // localStorage.setItem('list_of_items', JSON.stringify(listOfItems));
+                        // Navigate to the same page with a query parameter
+                        // window.location.href = `/?selected=${encodeURIComponent(listOfItems.join('&'))}`;
+                    });
+                });
+            });
+        </script>
     </body>
 </html>
