@@ -13,22 +13,15 @@ use windows::Win32::System::IO::{
     OVERLAPPED,
 };
 use {
-    super::{
-        Multiplexer,
-        OsEvent,
-    },
     crate::{
+        mux::Multiplexer,
         syscall,
-        utils::{
-            AppResult,
-            TIMEOUT,
-        },
+        utils::AppResult,
     },
     std::os::fd::RawFd,
 };
 #[cfg(target_os = "macos")]
 use {
-    crate::utils::timeout,
     libc::{
         kevent,
         EVFILT_READ,
@@ -44,7 +37,7 @@ use {
 };
 
 impl Multiplexer {
-    pub(super) fn register(&self, fd: RawFd) -> AppResult<i32> {
+    pub(in crate::mux) fn add(&self, fd: RawFd) -> AppResult<i32> {
         #[cfg(target_os = "linux")]
         {
             let mut event = epoll_event {
@@ -89,49 +82,6 @@ impl Multiplexer {
                 self.file_descriptor,
                 0,
                 0
-            )
-        }
-    }
-
-    pub(super) fn poll(
-        &self,
-        events: &mut Vec<OsEvent>,
-    ) -> AppResult<i32> {
-        #[cfg(target_os = "linux")]
-        {
-            syscall!(
-                epoll_wait,
-                self.file_descriptor,
-                events.as_mut_ptr() as *mut epoll_event,
-                events.len() as i32,
-                TIMEOUT as i32,
-            )
-        }
-        #[cfg(target_os = "macos")]
-        {
-            syscall!(
-                kevent,
-                self.file_descriptor,
-                null(),
-                0,
-                events.as_mut_ptr() as *mut kevent,
-                events.len() as i32,
-                timeout(TIMEOUT)
-            )
-        }
-        #[cfg(target_os = "windows")]
-        {
-            let mut bytes_transferred = 0;
-            let mut completion_key = 0;
-            let mut overlapped = null_mut();
-
-            syscall!(
-                GetQueuedCompletionStatus,
-                self.file_descriptor,
-                &mut bytes_transferred,
-                &mut completion_key,
-                &mut overlapped,
-                TIMEOUT
             )
         }
     }

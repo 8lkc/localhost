@@ -1,7 +1,9 @@
 use crate::{
-    message::Headers,
+    message::{
+        Headers,
+        Response,
+    },
     utils::HttpResult,
-    Response,
 };
 
 pub fn process_cgi_output(output: &str) -> HttpResult<Response> {

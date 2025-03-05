@@ -1,9 +1,20 @@
-use std::{fs::{self, ReadDir}, io, path::Path, time::SystemTime};
-use serde::Serialize;
+use {
+    crate::utils::AppResult,
+    serde::Serialize,
+    std::{
+        fs::{
+            self,
+            ReadDir,
+        },
+        io,
+        path::Path,
+        time::SystemTime,
+    },
+};
 
 #[derive(Serialize)]
 pub(super) struct FileSystem {
-    items: Vec<Item>
+    items: Vec<Item>,
 }
 
 impl FileSystem {
@@ -11,17 +22,26 @@ impl FileSystem {
         fs::read_dir(path)
     }
 
-    pub(super) fn listing<P: AsRef<Path>>(path: P) -> Result<Vec<Item>, io::Error> {
+    pub(super) fn listing<P: AsRef<Path>>(
+        path: P,
+    ) -> AppResult<Vec<Item>> {
         let mut items = Vec::new();
         let content = Self::get_content(path)?;
 
         for entry in content {
             let entry = entry?;
-            let name = entry.file_name().into_string().unwrap();
+            let name = entry
+                .file_name()
+                .into_string()
+                .unwrap();
             let metadata = entry.metadata()?;
             let size = metadata.len();
             let modified_at = metadata.modified()?;
-            let item = Item { name, size, modified_at };
+            let item = Item {
+                name,
+                size,
+                modified_at,
+            };
 
             items.push(item);
         }
@@ -32,9 +52,9 @@ impl FileSystem {
 
 #[derive(Serialize)]
 pub(super) struct Item {
-    name: String,
-    size: u64,
-    modified_at: SystemTime
+    name:        String,
+    size:        u64,
+    modified_at: SystemTime,
 }
 
 // impl Item {

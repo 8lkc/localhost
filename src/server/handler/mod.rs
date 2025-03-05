@@ -1,20 +1,29 @@
 mod api;
 mod cgi;
-mod directory_listing;
-mod http;
+mod file_system;
+pub mod http;
+mod upload;
 
 use {
+    super::SessionStore,
     crate::{
-        message::{Request, Response},
+        message::{
+            Request,
+            Response,
+        },
         utils::HttpResult,
     },
-    directory_listing::FileSystem,
+    file_system::FileSystem,
+    serde::{
+        Deserialize,
+        Serialize,
+    },
     std::{
+        collections::HashMap,
         env,
         fs,
     },
 };
-pub use {api::Api, cgi::Cgi, http::Http, upload::Upload};
 
 pub trait Handler {
     fn handle(req: &Request) -> HttpResult<Response>;
@@ -29,3 +38,20 @@ pub trait Handler {
         contents.ok()
     }
 }
+
+pub struct Http {
+    pub session_store: SessionStore,
+}
+
+type Interpreters = HashMap<String, String>;
+
+/// Common Gateway Interface
+#[derive(Serialize, Deserialize)]
+pub struct Cgi {
+    interpreters: Option<Interpreters>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Api;
+
+pub struct Upload;

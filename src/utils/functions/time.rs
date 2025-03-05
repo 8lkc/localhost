@@ -1,7 +1,8 @@
 use std::time::{
-            SystemTime,
-            UNIX_EPOCH,
-        };
+    SystemTime,
+    UNIX_EPOCH,
+};
+
 #[cfg(target_os = "macos")]
 use {
     libc::{
@@ -30,4 +31,3 @@ pub fn get_current_timestamp() -> u64 {
         .unwrap()
         .as_secs()
 }
-

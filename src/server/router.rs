@@ -1,43 +1,93 @@
 use {
     super::{
-        handler::{Api, Cgi, Handler, Http, Upload},
-        Route, Router,
+        handler::{
+            Api,
+            Cgi,
+            Handler,
+            Http,
+            Upload,
+        },
+        Route,
+        Router,
     },
     crate::{
-        message::{Request, Resource},
-        utils::HttpErr,
-        Method,
+        message::{
+            Method,
+            Request,
+            Resource,
+            Response,
+        },
+        utils::{
+            HttpErr,
+            HTTP,
+        },
     },
-    std::io::Write,
 };
 
-impl Route {}
-impl Router {
-    pub fn direct(&self, request: Request, stream: &mut impl Write) {
-        // Debug print for incoming request
-        println!("Full request details:");
-        println!(
-            "Content-Length: {}",
-            request
-                .headers
-                .get("Content-Length")
-                .unwrap_or(&"N/A".to_string())
-        );
-        println!("Actual body length: {}", request.body.len());
-        println!(
-            "Body first 100 chars: {}",
-            &request.body[..100.min(request.body.len())]
-        );
+impl Route {
+    pub fn has_valid_config(&self) -> bool {
+        self.path.is_some()
+            && self.methods.is_some()
+            && self.session.is_some()
+    }
 
-        let response = match &request.resource {
+    pub fn path(&self) -> &str { self.path.as_ref().unwrap() }
+
+    pub fn allowed_methods(&self) -> &Vec<String> {
+        self.methods.as_ref().unwrap()
+    }
+
+    pub fn check_session(&self) -> bool { self.session.unwrap() }
+}
+
+impl Router {
+    pub fn has_validate_config(&self) -> bool {
+        if let Some(cgi) = &self.cgi {
+            if !cgi.has_valid_config() {
+                return false;
+            }
+        }
+        self.routes.is_some()
+            && self
+                .routes
+                .as_ref()
+                .unwrap()
+                .iter()
+                .all(|route| route.has_valid_config())
+    }
+
+    pub fn get_session(&self, path: &str) -> bool {
+        for route in self.routes() {
+            if let Some(path_route) = &route.path {
+                if path_route == path {
+                    return route.check_session();
+                }
+            }
+        }
+        false
+    }
+
+    fn check_session(&self, path: &str, req: &Request) -> bool {
+        if self.get_session(path) {
+            if let Ok(mut http) = HTTP.write() {
+                http.has_valid_session(req)
+            }
+            else {
+                false
+            }
+        }
+        else {
+            true
+        }
+    }
+
+    pub(crate) fn direct(&self, request: Request) -> Response {
+        match &request.resource {
             Resource::Path(s) => {
                 let route: Vec<&str> = s
                     .split("/")
                     .filter(|&x| !x.is_empty())
                     .collect();
-
-                // Debug print routes
-                println!("Parsed Routes: {:?}", route);
 
                 // More flexible routing logic
                 let path = route.first().unwrap_or(&"");
@@ -45,53 +95,30 @@ impl Router {
                 if !self.check_session(path, &request) || *path == "auth" {
                     if let Some(auth_page) = self.redirect(path) {
                         return Http::serve_auth(&auth_page)
-                            .unwrap_or_else(|e| e.into())
-                            .send(stream);
-                    }
-                }
+                            .unwrap_or_else(|e| e.into());
+                    };
+                };
 
                 match *path {
                     "api" => Api::handle(&request),
                     "cgi" => Cgi::handle(&request),
-                    "upload" => {
-                        // Explicit debug for upload
-                        println!(
-                            "Upload Request - Method: {:?}",
-                            request.method
-                        );
-
-                        match request.method {
-                            Method::GET => Upload::serve_form(),
-                            Method::POST => Upload::handle(&request),
-                            _ => {
-                                println!("Unsupported method for upload");
-                                Err(HttpErr::from(405)) // Method Not Allowed
-                            }
-                        }
-                    }
-                    _ => {
-                        println!(
-                            "Default route handling for path: {}",
-                            path
-                        );
-                        Http::handle(&request)
-                    }
+                    "upload" => match request.method {
+                        Method::GET => Upload::serve_form(),
+                        Method::POST => Upload::handle(&request),
+                        _ => Err(HttpErr::from(405)),
+                    },
+                    _ => Http::handle(&request),
                 }
             }
         }
-        .unwrap_or_else(|e| {
-            // More detailed error logging
-            println!("Request handling error: {:?}", e);
-            e.into()
-        });
-
-        response.send(stream)
+        .unwrap_or_else(|e| e.into())
     }
 
     pub fn redirect(&self, path: &str) -> Option<String> {
         let reforme_path = if path.starts_with('/') {
             path.to_string()
-        } else {
+        }
+        else {
             format!("/{}", path)
         };
 
@@ -101,7 +128,8 @@ impl Router {
                     let reforme_route_path = if route_path.starts_with('/')
                     {
                         route_path.to_string()
-                    } else {
+                    }
+                    else {
                         format!("/{}", route_path)
                     };
 
@@ -120,4 +148,6 @@ impl Router {
         }
         None
     }
+
+    fn routes(&self) -> &Vec<Route> { self.routes.as_ref().unwrap() }
 }

@@ -29,7 +29,10 @@ impl Default for Response {
 
 /// Converts the `Response into a `String` when
 /// sending it.
-impl From<Response> for String {
+impl From<Response> for String
+where
+    Response: Sized,
+{
     fn from(res: Response) -> String {
         format!(
             "HTTP/1.1 {} {}\r\n{}Content-Length: {}\r\n\r\n{}",

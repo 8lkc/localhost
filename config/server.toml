@@ -7,7 +7,9 @@ uploads = 10485760
 listing = true
 
 [servers.router]
-cgi = { ".py" = "explorer" }
+
+[servers.router.cgi]
+interpreters = { ".py" = "python3" }
 
 [[servers.router.routes]]
 path = "/"
@@ -31,11 +33,11 @@ dns = "public-web-server"
 host = "0.0.0.0"
 ports = [8081]
 root = "$CARGO_MANIFEST_DIR/public"
-errors = { 400 = "400.html", 403 = "403.html", 404 = "404.html", 405 = "405.html" }
 uploads = 10485760
 listing = false
 
-# [server.router]
+[server.router]
+error_pages = { 400 = "400.html", 403 = "403.html", 404 = "404.html", 405 = "405.html" }
 
 [[servers.router.routes]]
 path = "/"

@@ -3,23 +3,23 @@ mod response;
 
 use std::collections::HashMap;
 
-pub(super) type Headers = HashMap<String, String>;
+#[derive(Debug, PartialEq)]
+pub(super) enum Resource {
+    Path(String),
+}
 
 #[derive(Debug, PartialEq)]
-pub enum Method {
+pub(super) enum Method {
     GET,
     POST,
     DELETE,
     Uninitialized,
 }
 
-#[derive(Debug, PartialEq)]
-pub enum Resource {
-    Path(String),
-}
+pub(super) type Headers = HashMap<String, String>;
 
 #[derive(Debug)]
-pub struct Request {
+pub(super) struct Request {
     pub resource: Resource,
     pub method:   Method,
     pub headers:  Headers,
@@ -27,7 +27,7 @@ pub struct Request {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Response {
+pub(super) struct Response {
     status_code: u16,
     status_txt:  String,
     headers:     Option<Headers>,

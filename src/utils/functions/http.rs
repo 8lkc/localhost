@@ -1,17 +1,20 @@
 use {
     crate::{
+        message::{
+            Method,
+            Resource,
+        },
         utils::{
             AppErr,
             AppResult,
         },
-        Method,
-        Resource,
     },
     std::{
         io::{
             BufRead,
             BufReader,
-            ErrorKind, Read,
+            ErrorKind,
+            Read,
         },
         net::TcpStream,
     },
@@ -61,9 +64,15 @@ pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
                 req_str.push_str(&line);
 
                 // Check for Content-Length header
-                if line.to_lowercase().starts_with("content-length:") {
+                if line
+                    .to_lowercase()
+                    .starts_with("content-length:")
+                {
                     if let Some(len_str) = line.split(':').nth(1) {
-                        if let Ok(len) = len_str.trim().parse::<usize>() {
+                        if let Ok(len) = len_str
+                            .trim()
+                            .parse::<usize>()
+                        {
                             content_length = len;
                         }
                     }
@@ -103,7 +112,8 @@ pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
 
     if req_str.is_empty() {
         Err(AppErr::EmptyBuffer)
-    } else {
+    }
+    else {
         Ok(req_str)
     }
 }

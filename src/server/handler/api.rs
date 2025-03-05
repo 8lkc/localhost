@@ -1,14 +1,17 @@
 use {
-    super::Handler,
+    super::{
+        Api,
+        Handler,
+    },
     crate::{
         message::{
+            Method,
             Request,
             Resource,
             Response,
         },
         server::Middleware,
         utils::HttpResult,
-        Method,
     },
     std::{
         collections::HashMap,
@@ -16,8 +19,6 @@ use {
         fs,
     },
 };
-
-pub struct Api;
 
 impl Handler for Api {
     fn handle(req: &Request) -> HttpResult<Response> {

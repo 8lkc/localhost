@@ -1,18 +1,23 @@
-mod getters;
 pub mod handler;
 mod middleware;
 mod router;
-mod run;
+mod server;
 mod session;
-mod validation;
 
 use {
-    crate::Request,
+    crate::message::Request,
+    handler::{
+        Api,
+        Cgi,
+    },
     serde::{
         Deserialize,
         Serialize,
     },
-    std::{collections::HashMap, time::Duration},
+    std::{
+        collections::HashMap,
+        time::Duration,
+    },
 };
 
 #[derive(Serialize, Deserialize)]
@@ -20,7 +25,6 @@ pub struct Server {
     host:    Option<String>,
     ports:   Option<Vec<usize>>,
     root:    Option<String>,
-    errors:  Option<HashMap<String, String>>,
     uploads: Option<u64>,
     listing: Option<bool>,
     router:  Option<Router>,
@@ -28,8 +32,10 @@ pub struct Server {
 
 #[derive(Serialize, Deserialize)]
 pub struct Router {
-    routes: Option<Vec<Route>>,
-    cgi:    Option<HashMap<String, String>>,
+    routes:      Option<Vec<Route>>,
+    error_pages: Option<HashMap<String, String>>,
+    cgi:         Option<Cgi>,
+    api:         Option<Api>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -45,14 +51,7 @@ pub(super) struct Middleware<'a> {
     request: &'a Request,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Data {
-    id:     i32,
-    data:   String,
-    status: String,
-}
-
 pub struct SessionStore {
-    pub  sessions: HashMap<String, u64>,
-    pub timeout: Duration,
+    pub sessions: HashMap<String, u64>,
+    pub timeout:  Duration,
 }

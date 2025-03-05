@@ -1,12 +1,15 @@
 use {
     super::Middleware,
     crate::{
+        debug,
+        message::{
+            Method,
+            Request,
+        },
         utils::{
             HttpErr,
             HttpResult,
         },
-        Method,
-        Request,
     },
 };
 
@@ -15,7 +18,7 @@ impl<'a> Middleware<'a> {
 
     pub fn method(&self, method: Method) -> HttpResult<&Self> {
         if self.request.method != method {
-            Err(HttpErr::from(405))
+            Err(debug!(HttpErr::from(405)))
         }
         else {
             Ok(self)
@@ -23,7 +26,7 @@ impl<'a> Middleware<'a> {
     }
 
     pub fn logger(&self) -> HttpResult<&Self> {
-        println!("{:#?}", self.request);
+        debug!(self.request);
         Ok(self)
     }
 

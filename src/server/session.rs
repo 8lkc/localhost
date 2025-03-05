@@ -1,12 +1,20 @@
-use super::SessionStore;
-use crate::utils::{generate_session_id, get_current_timestamp};
-use std::{collections::HashMap, time::Duration};
+use {
+    super::SessionStore,
+    crate::utils::{
+        generate_session_id,
+        get_current_timestamp,
+    },
+    std::{
+        collections::HashMap,
+        time::Duration,
+    },
+};
 
 impl SessionStore {
     pub fn new(timeout_minutes: u64) -> Self {
         Self {
             sessions: HashMap::new(),
-            timeout: Duration::from_secs(timeout_minutes * 60),
+            timeout:  Duration::from_secs(timeout_minutes * 60),
         }
     }
 

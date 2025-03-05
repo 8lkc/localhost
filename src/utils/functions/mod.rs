@@ -7,7 +7,6 @@ mod time;
 pub use time::timeout;
 pub use {
     cgi::process_cgi_output,
- 
     http::{
         process_header_line,
         process_req_line,
@@ -18,5 +17,4 @@ pub use {
         get_session_id,
     },
     time::get_current_timestamp,
-  
 };

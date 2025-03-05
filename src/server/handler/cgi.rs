@@ -1,7 +1,16 @@
 use {
-    super::Handler,
+    super::{
+        Cgi,
+        Handler,
+        Interpreters,
+    },
     crate::{
-        message::Request,
+        message::{
+            Method,
+            Request,
+            Resource,
+            Response,
+        },
         server::Middleware,
         utils::{
             process_cgi_output,
@@ -10,8 +19,6 @@ use {
             HttpResult,
             INTERPRETERS,
         },
-        Resource,
-        Response,
     },
     libc::{
         _exit,
@@ -40,8 +47,15 @@ use {
     },
 };
 
-/// Common Gateway Interface
-pub struct Cgi;
+impl Cgi {
+    pub fn has_valid_config(&self) -> bool { self.interpreters.is_some() }
+
+    pub fn interpreters(&self) -> &Interpreters {
+        self.interpreters
+            .as_ref()
+            .unwrap()
+    }
+}
 
 impl Handler for Cgi {
     /// Extracts the extension from the path and checks if it's a valid CGI
@@ -57,12 +71,11 @@ impl Handler for Cgi {
             .split('.')
             .next_back()
             .ok_or(AppErr::ExtNotFound)?;
-        
 
         let interpreter = INTERPRETERS
             .get(ext)
             .ok_or(AppErr::NoCGI)?;
-       
+
         let script = format!(
             "{}/public{}",
             env!("CARGO_MANIFEST_DIR"),
@@ -71,7 +84,7 @@ impl Handler for Cgi {
         if !Path::new(&script).exists() {
             return Err(HttpErr::from(AppErr::NoCGI));
         }
-         dbg!("ok");
+        dbg!("ok");
 
         let script_buf = PathBuf::from(&script);
         let script_dir = script_buf
@@ -108,21 +121,20 @@ impl Handler for Cgi {
                 close(stdout_pipe[1]);
 
                 // Send request body to child.
-                // match req.method {
-                //     Method::POST => {
+                match req.method {
+                    Method::POST => {
                         let mut writer = File::from_raw_fd(stdin_pipe[1]);
                         writer.write_all(&req.body.as_bytes())?;
                         // Signal EOF
                         drop(writer);
-                       
-                //     }
-                //     Method::GET => {
-                //         close(stdin_pipe[1]);
-                //     }
-                //     _ => {
-                //         return Err(HttpErr::from(405));
-                //     }
-                // };
+                    }
+                    Method::GET => {
+                        close(stdin_pipe[1]);
+                    }
+                    _ => {
+                        return Err(HttpErr::from(405));
+                    }
+                };
 
                 // Read CGI ouput
                 let mut reader = File::from_raw_fd(stdout_pipe[0]);
@@ -132,15 +144,14 @@ impl Handler for Cgi {
                 // Wait for child to avoid zombies
                 let mut status = 0;
                 waitpid(pid, &mut status, 0);
-            
+
                 if WIFEXITED(status) && WEXITSTATUS(status) != 0 {
                     return Err(HttpErr::from(format!(
                         "CGI process exited with status {}",
                         WEXITSTATUS(status)
                     )));
                 }
-              
-                
+
                 // Parse CGI response
                 process_cgi_output(&output)
             }

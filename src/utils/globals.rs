@@ -1,10 +1,13 @@
 use {
-     crate::server::handler::Http, 
+    crate::server::handler::Http,
     lazy_static::lazy_static,
+    regex::Regex,
     std::{
         collections::HashMap,
-        sync::{LazyLock, RwLock},
-       
+        sync::{
+            LazyLock,
+            RwLock,
+        },
     },
     tera::Tera,
 };
@@ -30,4 +33,13 @@ pub static TEMPLATES: LazyLock<Tera> = LazyLock::new(|| {
 
 lazy_static! {
     pub static ref HTTP: RwLock<Http> = RwLock::new(Http::new(5));
+
+    // Improved regex definitions
+    pub static ref BOUNDARY_REGEX: Regex = Regex::new(r"boundary=(.+)$").unwrap();
+
+    pub static ref CONTENT_DISPOSITION_REGEX: Regex =
+        Regex::new(r#"Content-Disposition: form-data; name="([^"]+)"(; filename="([^"]+)")?"#).unwrap();
+
+    pub static ref CONTENT_TYPE_REGEX: Regex =
+        Regex::new(r"Content-Type: (.+)\r\n").unwrap();
 }

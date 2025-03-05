@@ -1,7 +1,7 @@
 use rand::{
-        distributions::Alphanumeric,
-        Rng,
-    };
+    distributions::Alphanumeric,
+    Rng,
+};
 
 pub fn generate_session_id() -> String {
     rand::thread_rng()
@@ -20,5 +20,3 @@ pub fn get_session_id(cookie: &str) -> Option<String> {
         })
         .map(|s| s.trim()["session_id=".len()..].to_string())
 }
-
-

@@ -18,8 +18,12 @@ use {
         },
     },
     std::{
+        collections::HashMap,
         mem::MaybeUninit,
-        net::TcpListener,
+        net::{
+            TcpListener,
+            TcpStream,
+        },
         os::fd::{
             AsRawFd,
             RawFd,
@@ -46,6 +50,7 @@ pub struct Multiplexer {
     file_descriptor: RawFd,
     servers:         Vec<Server>,
     listeners:       Vec<(TcpListener, usize)>,
+    streams:         HashMap<RawFd, TcpStream>,
 }
 
 impl Multiplexer {
@@ -53,13 +58,14 @@ impl Multiplexer {
     /// given loaded configuration file.
     /// Creates a new kernel event queue using:
     ///
-    /// - `kqueue` for macOS
     /// - `epoll` for Linux
+    /// - `kqueue` for macOS
+    /// - `IoCompletionPort` for Windows
     ///
     /// These are event notification interfaces
     /// that monitor multiple file descriptors to
     /// see if I/O is possible, allowing efficient
-    /// handling of multiple connections.
+    /// handling of multiple connections simultaneously.
     pub fn new(config: Config) -> AppResult<Self> {
         let servers = match config.servers() {
             Some(servers) => servers,
@@ -83,6 +89,7 @@ impl Multiplexer {
             file_descriptor,
             servers,
             listeners: vec![],
+            streams: HashMap::new(),
         })
     }
 
@@ -98,7 +105,7 @@ impl Multiplexer {
             for listener in listeners {
                 let fd = listener.as_raw_fd(); //----                        ---> Extracts the raw file descriptor.
                 listener.set_nonblocking(true)?; //----                  ---> Moves each socket into nonblocking mode.
-                self.register(fd)?;
+                self.add(fd)?;
                 self.listeners.push((listener, idx));
             }
         }
