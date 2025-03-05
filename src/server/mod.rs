@@ -1,5 +1,5 @@
 mod getters;
-mod handler;
+pub mod handler;
 mod middleware;
 mod router;
 mod run;
@@ -12,10 +12,7 @@ use {
         Deserialize,
         Serialize,
     },
-    std::{
-        collections::HashMap,
-        time::Duration,
-    },
+    std::{collections::HashMap, time::Duration},
 };
 
 #[derive(Serialize, Deserialize)]
@@ -56,6 +53,6 @@ pub struct Data {
 }
 
 pub struct SessionStore {
-    pub timeout:          Duration,
-    pub cleanup_interval: u64,
+    pub  sessions: HashMap<String, u64>,
+    pub timeout: Duration,
 }

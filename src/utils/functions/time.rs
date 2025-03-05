@@ -1,17 +1,7 @@
-use {
-    crate::utils::globals::CLEANUP_FILE,
-    std::{
-        fs::{
-            read_to_string,
-            File,
-        },
-        io::Write,
-        time::{
+use std::time::{
             SystemTime,
             UNIX_EPOCH,
-        },
-    },
-};
+        };
 #[cfg(target_os = "macos")]
 use {
     libc::{
@@ -41,20 +31,3 @@ pub fn get_current_timestamp() -> u64 {
         .as_secs()
 }
 
-pub fn get_last_cleanup() -> u64 {
-    read_to_string(CLEANUP_FILE)
-        .ok()
-        .and_then(|content| content.trim().parse().ok())
-        .unwrap_or(0)
-}
-
-pub fn update_last_cleanup(timestamp: u64) -> Result<(), String> {
-    File::create(CLEANUP_FILE)
-        .map_err(|e| e.to_string())?
-        .write_all(
-            timestamp
-                .to_string()
-                .as_bytes(),
-        )
-        .map_err(|e| e.to_string())
-}

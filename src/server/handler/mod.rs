@@ -1,6 +1,6 @@
 mod api;
 mod cgi;
-mod http;
+pub mod http;
 
 use {
     crate::{

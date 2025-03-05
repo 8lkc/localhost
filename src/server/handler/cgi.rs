@@ -10,7 +10,6 @@ use {
             HttpResult,
             INTERPRETERS,
         },
-        Method,
         Resource,
         Response,
     },
@@ -58,11 +57,12 @@ impl Handler for Cgi {
             .split('.')
             .next_back()
             .ok_or(AppErr::ExtNotFound)?;
+        
 
         let interpreter = INTERPRETERS
             .get(ext)
             .ok_or(AppErr::NoCGI)?;
-
+       
         let script = format!(
             "{}/public{}",
             env!("CARGO_MANIFEST_DIR"),
@@ -71,6 +71,7 @@ impl Handler for Cgi {
         if !Path::new(&script).exists() {
             return Err(HttpErr::from(AppErr::NoCGI));
         }
+         dbg!("ok");
 
         let script_buf = PathBuf::from(&script);
         let script_dir = script_buf
@@ -113,6 +114,7 @@ impl Handler for Cgi {
                         writer.write_all(&req.body.as_bytes())?;
                         // Signal EOF
                         drop(writer);
+                       
                 //     }
                 //     Method::GET => {
                 //         close(stdin_pipe[1]);
@@ -130,14 +132,15 @@ impl Handler for Cgi {
                 // Wait for child to avoid zombies
                 let mut status = 0;
                 waitpid(pid, &mut status, 0);
-
+            
                 if WIFEXITED(status) && WEXITSTATUS(status) != 0 {
                     return Err(HttpErr::from(format!(
                         "CGI process exited with status {}",
                         WEXITSTATUS(status)
                     )));
                 }
-
+              
+                
                 // Parse CGI response
                 process_cgi_output(&output)
             }

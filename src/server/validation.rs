@@ -1,13 +1,6 @@
 use {
-    super::{
-        Route,
-        Router,
-        Server,
-    },
-    crate::{
-        utils::has_valid_session,
-        Request,
-    },
+    super::{Route, Router, Server},
+    crate::{utils:: HTTP, Request},
 };
 
 impl Server {
@@ -39,9 +32,12 @@ impl Router {
 
     pub fn check_session(&self, path: &str, req: &Request) -> bool {
         if self.get_session(path) {
-            has_valid_session(req)
-        }
-        else {
+            if let Ok(mut http) = HTTP.write() {  
+                http.has_valid_session(req)
+            } else {
+                false
+            }
+        } else {
             true
         }
     }

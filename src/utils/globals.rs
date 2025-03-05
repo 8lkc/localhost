@@ -1,10 +1,10 @@
 use {
-    crate::server::SessionStore,
+     crate::server::handler::Http, 
     lazy_static::lazy_static,
     std::{
         collections::HashMap,
-        sync::LazyLock,
-        time::Duration,
+        sync::{LazyLock, RwLock},
+       
     },
     tera::Tera,
 };
@@ -29,21 +29,5 @@ pub static TEMPLATES: LazyLock<Tera> = LazyLock::new(|| {
 });
 
 lazy_static! {
-    pub static ref SESSION_STORE: SessionStore = match SessionStore::new(1)
-    {
-        Ok(store) => store,
-        Err(err) => {
-            dbg!(
-                "Impossible de créer le store de session",
-                err
-            );
-            SessionStore {
-                timeout:          Duration::from_secs(60),
-                cleanup_interval: 120,
-            }
-        }
-    };
+    pub static ref HTTP: RwLock<Http> = RwLock::new(Http::new(5));
 }
-
-pub const SESSION_FILE: &str = "sessions.txt";
-pub const CLEANUP_FILE: &str = "last_cleanup.txt";
