@@ -1,14 +1,18 @@
 mod api;
 mod cgi;
-mod upload;
-pub mod http;
+mod directory_listing;
+mod http;
 
 use {
     crate::{
         message::{Request, Response},
         utils::HttpResult,
     },
-    std::{env, fs},
+    directory_listing::FileSystem,
+    std::{
+        env,
+        fs,
+    },
 };
 pub use {api::Api, cgi::Cgi, http::Http, upload::Upload};
 
