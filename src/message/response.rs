@@ -100,13 +100,9 @@ impl Response {
         let _ = write!(write_stream, "{}", response_string);
     }
 
-    pub fn set_status_code(&mut self, status_code: u16) {
-        self.status_code = status_code;
-    }
+    pub fn set_status_code(&mut self, status_code: u16) { self.status_code = status_code; }
 
-    pub fn set_status_txt(&mut self, status_txt: String) {
-        self.status_txt = status_txt;
-    }
+    pub fn set_status_txt(&mut self, status_txt: String) { self.status_txt = status_txt; }
 
     pub fn headers(&self) -> String {
         match &self.headers {
@@ -114,8 +110,7 @@ impl Response {
                 let mut header_string: String = "".into();
 
                 for (k, v) in h.iter() {
-                    header_string =
-                        format!("{}{}:{}\r\n", header_string, k, v);
+                    header_string = format!("{}{}:{}\r\n", header_string, k, v);
                 }
 
                 header_string

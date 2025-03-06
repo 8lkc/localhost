@@ -18,13 +18,9 @@ pub(super) struct FileSystem {
 }
 
 impl FileSystem {
-    fn get_content<P: AsRef<Path>>(path: P) -> Result<ReadDir, io::Error> {
-        fs::read_dir(path)
-    }
+    fn get_content<P: AsRef<Path>>(path: P) -> Result<ReadDir, io::Error> { fs::read_dir(path) }
 
-    pub(super) fn listing<P: AsRef<Path>>(
-        path: P,
-    ) -> AppResult<Vec<Item>> {
+    pub(super) fn listing<P: AsRef<Path>>(path: P) -> AppResult<Vec<Item>> {
         let mut items = Vec::new();
         let content = Self::get_content(path)?;
 

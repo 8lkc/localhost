@@ -9,7 +9,7 @@ edition = "2021"
 
 # Maximum width of each line
 # Default: 100
-max_width = 75
+# max_width = 75
 
 
 # ----- Width & Alignment Controls -----

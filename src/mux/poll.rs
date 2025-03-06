@@ -18,24 +18,23 @@ use {
     libc::kevent,
     std::ptr::null,
 };
-
-use crate::{
-    mux::{
-        Multiplexer,
-        OsEvent,
+use {
+    crate::{
+        mux::{
+            Multiplexer,
+            OsEvent,
+        },
+        syscall,
+        utils::{
+            AppResult,
+            TIMEOUT,
+        },
     },
-    syscall,
-    utils::{
-        AppResult,
-        TIMEOUT,
-    },
+    std::mem::MaybeUninit,
 };
 
 impl Multiplexer {
-    pub(in crate::mux) fn poll(
-        &self,
-        events: &mut Vec<OsEvent>,
-    ) -> AppResult<i32> {
+    pub(in crate::mux) fn poll(&self, events: &mut Vec<MaybeUninit<OsEvent>>) -> AppResult<i32> {
         #[cfg(target_os = "linux")]
         {
             syscall!(

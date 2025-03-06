@@ -100,9 +100,7 @@ impl Handler for Cgi {
         let mut stdout_pipe = [0; 2];
 
         unsafe {
-            if pipe(stdin_pipe.as_mut_ptr()) < 0
-                || pipe(stdout_pipe.as_mut_ptr()) < 0
-            {
+            if pipe(stdin_pipe.as_mut_ptr()) < 0 || pipe(stdout_pipe.as_mut_ptr()) < 0 {
                 return Err(HttpErr::from(AppErr::last_os_error()));
             }
         }
@@ -204,11 +202,7 @@ impl Handler for Cgi {
                 // Execute CGI script
                 let interpreter_c = CString::new(*interpreter).unwrap();
                 let script_c = CString::new(script).unwrap();
-                let args = vec![
-                    interpreter_c.clone(),
-                    script_c,
-                    CString::new("").unwrap(),
-                ];
+                let args = vec![interpreter_c.clone(), script_c, CString::new("").unwrap()];
 
                 execvp(
                     interpreter_c.as_ptr(),

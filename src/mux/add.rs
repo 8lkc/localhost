@@ -8,9 +8,7 @@ use libc::{
 #[cfg(target_os = "windows")]
 use windows::Win32::System::IO::{
     CreateIoCompletionPort,
-    GetQueuedCompletionStatus,
     INVALID_HANDLE_VALUE,
-    OVERLAPPED,
 };
 use {
     crate::{

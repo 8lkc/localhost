@@ -54,9 +54,7 @@ impl From<io::Error> for AppErr {
 }
 
 impl From<toml::de::Error> for AppErr {
-    fn from(value: toml::de::Error) -> Self {
-        Self::DeserializeTOML(value)
-    }
+    fn from(value: toml::de::Error) -> Self { Self::DeserializeTOML(value) }
 }
 
 impl From<AddrParseError> for AppErr {
@@ -70,9 +68,7 @@ impl From<serde_json::Error> for AppErr {
 impl From<tera::Error> for AppErr {
     fn from(value: tera::Error) -> Self {
         match value.kind {
-            tera::ErrorKind::TemplateNotFound(_) => {
-                Self::TmplNotFound(value)
-            }
+            tera::ErrorKind::TemplateNotFound(_) => Self::TmplNotFound(value),
             _ => Self::new(value.to_string().as_str()),
         }
     }
@@ -81,7 +77,5 @@ impl From<tera::Error> for AppErr {
 impl AppErr {
     pub fn new(msg: &str) -> Self { Self::Custom(msg.to_string()) }
 
-    pub fn last_os_error() -> Self {
-        Self::Other(io::Error::last_os_error())
-    }
+    pub fn last_os_error() -> Self { Self::Other(io::Error::last_os_error()) }
 }

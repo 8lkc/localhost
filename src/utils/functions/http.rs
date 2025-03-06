@@ -1,22 +1,11 @@
 use {
-    crate::{
-        message::{
-            Method,
-            Resource,
-        },
-        utils::{
-            AppErr,
-            AppResult,
-        },
+    crate::message::{
+        Method,
+        Resource,
     },
-    std::{
-        io::{
-            BufRead,
-            BufReader,
-            ErrorKind,
-            Read,
-        },
-        net::TcpStream,
+    rand::{
+        distributions::Alphanumeric,
+        Rng,
     },
 };
 
@@ -49,71 +38,20 @@ pub fn process_header_line(s: &str) -> (String, String) {
     (key, value)
 }
 
-pub fn read_buffer(stream: &TcpStream) -> AppResult<String> {
-    let mut buf_reader = BufReader::new(stream);
-    let mut req_str = String::new();
-    let mut headers_complete = false;
-    let mut content_length: usize = 0;
+pub fn generate_session_id() -> String {
+    rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(32)
+        .map(char::from)
+        .collect()
+}
 
-    // First read headers
-    loop {
-        let mut line = String::new();
-        match buf_reader.read_line(&mut line) {
-            Ok(0) => break,
-            Ok(_) => {
-                req_str.push_str(&line);
-
-                // Check for Content-Length header
-                if line
-                    .to_lowercase()
-                    .starts_with("content-length:")
-                {
-                    if let Some(len_str) = line.split(':').nth(1) {
-                        if let Ok(len) = len_str
-                            .trim()
-                            .parse::<usize>()
-                        {
-                            content_length = len;
-                        }
-                    }
-                }
-
-                // End of headers
-                if line == "\r\n" || line == "\n" {
-                    headers_complete = true;
-                    break;
-                }
-            }
-            Err(e) if e.kind() == ErrorKind::WouldBlock => continue,
-            Err(e) => return Err(e.into()),
-        }
-    }
-
-    // If we have a content length and headers are complete, read the body
-    if headers_complete && content_length > 0 {
-        let mut body = vec![0; content_length];
-        match buf_reader.read_exact(&mut body) {
-            Ok(_) => {
-                if let Ok(body_str) = String::from_utf8(body) {
-                    req_str.push_str(&body_str);
-                }
-            }
-            Err(e) if e.kind() == ErrorKind::WouldBlock => {
-                // Try to read at least some data in non-blocking mode
-                let mut partial_body = Vec::new();
-                let _ = buf_reader.read_to_end(&mut partial_body);
-                if let Ok(body_str) = String::from_utf8(partial_body) {
-                    req_str.push_str(&body_str);
-                }
-            }
-            Err(e) => return Err(e.into()),
-        }
-    }
-
-    if req_str.is_empty() {
-        Err(AppErr::EmptyBuffer)
-    }
-    else {
-        Ok(req_str)
-    }
+pub fn get_session_id(cookie: &str) -> Option<String> {
+    cookie
+        .split(';')
+        .find(|s| {
+            s.trim()
+                .starts_with("session_id=")
+        })
+        .map(|s| s.trim()["session_id=".len()..].to_string())
 }

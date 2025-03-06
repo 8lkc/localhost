@@ -1,4 +1,8 @@
-mod events;
+mod add;
+mod core;
+mod poll;
+mod read;
+mod remove;
 mod run;
 
 #[cfg(target_os = "linux")]
@@ -8,38 +12,23 @@ use libc::kevent;
 #[cfg(target_os = "windows")]
 use windows::Win32::System::IO::OVERLAPPED;
 use {
-    crate::{
-        loader::Config,
-        server::Server,
-        syscall,
-        utils::{
-            AppErr,
-            AppResult,
-        },
-    },
+    crate::server::Server,
     std::{
         collections::HashMap,
-        mem::MaybeUninit,
         net::{
             TcpListener,
             TcpStream,
         },
-        os::fd::{
-            AsRawFd,
-            RawFd,
-        },
+        os::fd::RawFd,
     },
 };
 
-//
 #[cfg(target_os = "linux")]
-pub type OsEvent = MaybeUninit<epoll_event>;
+pub type OsEvent = epoll_event;
 #[cfg(target_os = "macos")]
-pub type OsEvent = MaybeUninit<kevent>;
+pub type OsEvent = kevent;
 #[cfg(target_os = "windows")]
-pub type OsEvent = MaybeUninit<OVERLAPPED>;
-
-//------------------------------------------------------------------
+pub type OsEvent = OVERLAPPED;
 
 /// Manages connection:
 /// - Accepts incoming connections through TCP listeners
@@ -50,75 +39,21 @@ pub struct Multiplexer {
     file_descriptor: RawFd,
     servers:         Vec<Server>,
     listeners:       Vec<(TcpListener, usize)>,
-    streams:         HashMap<RawFd, TcpStream>,
+    streams:         HashMap<RawFd, ClientConnectionState>,
 }
 
-impl Multiplexer {
-    /// Initializes a new `Multiplexer` from the
-    /// given loaded configuration file.
-    /// Creates a new kernel event queue using:
-    ///
-    /// - `epoll` for Linux
-    /// - `kqueue` for macOS
-    /// - `IoCompletionPort` for Windows
-    ///
-    /// These are event notification interfaces
-    /// that monitor multiple file descriptors to
-    /// see if I/O is possible, allowing efficient
-    /// handling of multiple connections simultaneously.
-    pub fn new(config: Config) -> AppResult<Self> {
-        let servers = match config.servers() {
-            Some(servers) => servers,
-            None => return Err(AppErr::NoServer),
-        };
+pub(self) struct ClientConnectionState {
+    stream:     TcpStream,
+    req_buf:    Vec<u8>,
+    server_idx: usize,
+}
 
-        // Creates a new kernel event queue.
-        #[cfg(target_os = "linux")]
-        let file_descriptor = syscall!(epoll_create1, 0)?;
-        #[cfg(target_os = "macos")]
-        let file_descriptor = syscall!(kqueue)?;
-        #[cfg(target_os = "windows")]
-        let file_descriptor = syscall!(
-            CreateIoCompletionPort,
-            INVALID_HANDLE_VALUE,
-            0,
-            0
-        )?;
-
-        Ok(Self {
-            file_descriptor,
-            servers,
-            listeners: vec![],
-            streams: HashMap::new(),
-        })
-    }
-
-    /// Adds a new file descriptor for each
-    /// listener.
-    pub fn register_listeners(&mut self) -> AppResult<()> {
-        for (idx, server) in self
-            .servers
-            .iter()
-            .enumerate()
-        {
-            let listeners = server.listeners()?;
-            for listener in listeners {
-                let fd = listener.as_raw_fd(); //----                        ---> Extracts the raw file descriptor.
-                listener.set_nonblocking(true)?; //----                  ---> Moves each socket into nonblocking mode.
-                self.add(fd)?;
-                self.listeners.push((listener, idx));
-            }
+impl ClientConnectionState {
+    pub fn new(stream: TcpStream, server_idx: usize) -> Self {
+        Self {
+            stream,
+            req_buf: Vec::new(),
+            server_idx,
         }
-
-        Ok(())
-    }
-
-    pub fn find_listener(
-        &self,
-        fd: RawFd,
-    ) -> Option<&(TcpListener, usize)> {
-        self.listeners
-            .iter()
-            .find(|(listener, _)| listener.as_raw_fd() == fd)
     }
 }

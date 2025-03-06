@@ -1,11 +1,12 @@
 use {
     super::{
+        ClientConnectionState,
         Multiplexer,
-        OsEvent,
     },
     crate::debug,
     std::{
         io::{
+            ErrorKind,
             Read,
             Write,
         },
@@ -26,8 +27,8 @@ impl Multiplexer {
     /// the stream asynchronous. Then from the stream buffer, gets
     /// the request, adds the stream file descriptor to the
     /// `Multiplexer`and finally sends the `Request` to the `Router`.
-    pub fn run(&self) {
-        let mut events: Vec<OsEvent> = Vec::with_capacity(32);
+    pub fn run(&mut self) {
+        let mut events = Vec::with_capacity(32);
         unsafe { events.set_len(32) };
 
         loop {
@@ -41,7 +42,6 @@ impl Multiplexer {
 
             for event in events.iter().take(nfds) {
                 let event = unsafe { event.assume_init() };
-                let mut buf = [0u8; 1024];
 
                 #[cfg(target_os = "linux")]
                 let event_fd = event.u64 as RawFd;
@@ -50,59 +50,103 @@ impl Multiplexer {
                 #[cfg(target_os = "windows")]
                 let event_fd = event.fd as RawFd;
 
-                let (fd_listener, server_idx) =
-                    match self.find_listener(event_fd) {
-                        Some(pair) => pair,
-                        None => continue,
-                    };
-
-                let (mut stream, _addr) = match fd_listener.accept() {
-                    Ok((stream, addr)) => (stream, addr),
-                    Err(e) => {
-                        debug!(e);
-                        continue;
-                    }
-                };
-
-                if let Err(e) = stream.set_nonblocking(true) {
-                    debug!(e);
-                    if let Err(e) = stream.shutdown(Shutdown::Both) {
-                        debug!(e);
-                    };
-                    continue;
-                };
-
-                if let Err(e) = self.add(stream.as_raw_fd()) {
-                    debug!(e);
-                    if let Err(e) = stream.shutdown(Shutdown::Both) {
-                        debug!(e);
-                    };
-                    continue;
-                };
-
-                let request = match stream.read(&mut buf) {
-                    Ok(_) => String::from_utf8_lossy(&buf[..])
-                        .to_string()
-                        .into(),
-                    Err(e) => {
-                        debug!(e);
-                        if let Err(e) = stream.shutdown(Shutdown::Both) {
-                            debug!(e);
+                match self.find_listener(event_fd) {
+                    Some((listener, server_idx)) => {
+                        let (stream, _addr) = match listener.accept() {
+                            Ok((stream, addr)) => (stream, addr),
+                            Err(e) => {
+                                debug!(e);
+                                continue;
+                            }
                         };
+
+                        if let Err(e) = stream.set_nonblocking(true) {
+                            debug!(e);
+                            if let Err(e) = stream.shutdown(Shutdown::Both) {
+                                debug!(e);
+                            };
+                            continue;
+                        };
+
+                        let stream_fd = stream.as_raw_fd();
+                        if let Err(e) = self.add(stream_fd) {
+                            debug!(e);
+                            if let Err(e) = stream.shutdown(Shutdown::Both) {
+                                debug!(e);
+                            };
+                            continue;
+                        };
+
+                        let client_state = ClientConnectionState::new(stream, *server_idx);
+                        self.streams
+                            .insert(stream_fd, client_state);
+                    }
+                    None => {
+                        if let Some(mut client_state) = self.streams.remove(&event_fd) {
+                            let client_fd = event_fd;
+                            if self.can_read(&event) {
+                                let mut buf = [0u8; 1024];
+                                match client_state
+                                    .stream
+                                    .read(&mut buf)
+                                {
+                                    Ok(..=0) => {
+                                        if let Err(e) = self.remove(client_fd) {
+                                            debug!(e);
+                                            continue;
+                                        }
+                                    }
+                                    Ok(bytes) => {
+                                        client_state
+                                            .req_buf
+                                            .extend_from_slice(&buf[..bytes]);
+
+                                        let request =
+                                            String::from_utf8_lossy(&client_state.req_buf)
+                                                .to_string()
+                                                .into();
+
+                                        let response: String = self.servers
+                                            [client_state.server_idx]
+                                            .router()
+                                            .direct(request)
+                                            .into();
+
+                                        if let Err(e) = client_state
+                                            .stream
+                                            .write(response.as_bytes())
+                                        {
+                                            debug!(e);
+                                            if let Err(e) = client_state
+                                                .stream
+                                                .shutdown(Shutdown::Both)
+                                            {
+                                                debug!(e);
+                                            };
+                                        };
+                                    }
+                                    Err(e) if e.kind() == ErrorKind::WouldBlock => {
+                                        self.streams
+                                            .insert(client_fd, client_state);
+                                    }
+                                    Err(e) => {
+                                        debug!(e);
+                                        if let Err(e) = client_state
+                                            .stream
+                                            .shutdown(Shutdown::Both)
+                                        {
+                                            debug!(e);
+                                        }
+                                        if let Err(e) = self.remove(client_fd) {
+                                            debug!(e);
+                                        }
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
                         continue;
                     }
-                };
-
-                let response: String = self.servers[*server_idx]
-                    .router()
-                    .direct(request)
-                    .into();
-
-                if let Err(e) = stream.write(response.as_bytes()) {
-                    debug!(e);
-                    if let Err(e) = stream.shutdown(Shutdown::Both) {
-                        debug!(e);
-                    };
                 };
             }
         }

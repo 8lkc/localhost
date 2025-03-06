@@ -32,16 +32,13 @@ impl SessionStore {
         self.sessions
             .get(session_id)
             .map_or(false, |&timestamp| {
-                get_current_timestamp() - timestamp
-                    < self.timeout.as_secs()
+                get_current_timestamp() - timestamp < self.timeout.as_secs()
             })
     }
 
     pub fn clean(&mut self) {
         let current_time = get_current_timestamp();
         self.sessions
-            .retain(|_, &mut timestamp| {
-                current_time - timestamp < self.timeout.as_secs()
-            });
+            .retain(|_, &mut timestamp| current_time - timestamp < self.timeout.as_secs());
     }
 }

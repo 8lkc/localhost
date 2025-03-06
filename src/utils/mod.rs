@@ -3,6 +3,7 @@ mod macros;
 mod errors;
 mod functions;
 mod globals;
+// mod chunk;
 
 #[cfg(target_os = "macos")]
 pub(super) use functions::timeout;
@@ -20,7 +21,6 @@ pub(super) use {
         process_cgi_output,
         process_header_line,
         process_req_line,
-        read_buffer,
     },
     globals::{
         BOUNDARY_REGEX,

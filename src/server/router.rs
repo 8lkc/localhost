@@ -26,16 +26,12 @@ use {
 
 impl Route {
     pub fn has_valid_config(&self) -> bool {
-        self.path.is_some()
-            && self.methods.is_some()
-            && self.session.is_some()
+        self.path.is_some() && self.methods.is_some() && self.session.is_some()
     }
 
     pub fn path(&self) -> &str { self.path.as_ref().unwrap() }
 
-    pub fn allowed_methods(&self) -> &Vec<String> {
-        self.methods.as_ref().unwrap()
-    }
+    pub fn allowed_methods(&self) -> &Vec<String> { self.methods.as_ref().unwrap() }
 
     pub fn check_session(&self) -> bool { self.session.unwrap() }
 }
@@ -94,8 +90,7 @@ impl Router {
 
                 if !self.check_session(path, &request) || *path == "auth" {
                     if let Some(auth_page) = self.redirect(path) {
-                        return Http::serve_auth(&auth_page)
-                            .unwrap_or_else(|e| e.into());
+                        return Http::serve_auth(&auth_page).unwrap_or_else(|e| e.into());
                     };
                 };
 
@@ -125,8 +120,7 @@ impl Router {
         if let Some(routes) = &self.routes {
             for route in routes {
                 if let Some(route_path) = &route.path {
-                    let reforme_route_path = if route_path.starts_with('/')
-                    {
+                    let reforme_route_path = if route_path.starts_with('/') {
                         route_path.to_string()
                     }
                     else {

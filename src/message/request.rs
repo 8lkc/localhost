@@ -53,8 +53,7 @@ impl From<String> for Request {
         let mut lines = req.lines();
         if let Some(first_line) = lines.next() {
             if first_line.contains("HTTP") {
-                let (parsed_method, parsed_resource) =
-                    process_req_line(first_line);
+                let (parsed_method, parsed_resource) = process_req_line(first_line);
                 method = parsed_method;
                 resource = parsed_resource;
             }

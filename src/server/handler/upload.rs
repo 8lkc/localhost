@@ -52,9 +52,7 @@ impl Handler for Upload {
             .headers
             .get("Content-Type")
         {
-            Some(content_type)
-                if content_type.contains("multipart/form-data") =>
-            {
+            Some(content_type) if content_type.contains("multipart/form-data") => {
                 println!("Detected multipart/form-data upload");
                 Self::process_multipart_upload(req)
             }
@@ -172,18 +170,16 @@ impl Upload {
                         println!("Filename detected: {}", filename);
 
                         // Extract content type
-                        let content_type_str = if let Some(ct_caps) =
-                            CONTENT_TYPE_REGEX.captures(part)
-                        {
-                            ct_caps[1].to_string()
-                        }
-                        else {
-                            "application/octet-stream".to_string()
-                        };
+                        let content_type_str =
+                            if let Some(ct_caps) = CONTENT_TYPE_REGEX.captures(part) {
+                                ct_caps[1].to_string()
+                            }
+                            else {
+                                "application/octet-stream".to_string()
+                            };
 
                         // Find the beginning of the actual file content
-                        if let Some(content_start) = part.find("\r\n\r\n")
-                        {
+                        if let Some(content_start) = part.find("\r\n\r\n") {
                             let content = &part[(content_start + 4)..];
 
                             // Remove trailing \r\n
@@ -195,51 +191,33 @@ impl Upload {
                             };
 
                             // Save the file
-                            let file_path =
-                                format!("{}/{}", upload_dir, filename);
-                            println!(
-                                "Attempting to save file: {}",
-                                file_path
-                            );
+                            let file_path = format!("{}/{}", upload_dir, filename);
+                            println!("Attempting to save file: {}", file_path);
 
                             match File::create(&file_path) {
-                                Ok(mut file) => {
-                                    match file
-                                        .write_all(content.as_bytes())
-                                    {
-                                        Ok(_) => {
-                                            println!(
-                                                "File saved successfully"
-                                            );
-                                            upload_results.push(format!(
-                                                "Uploaded {} ({} bytes, \
-                                                 type: {})",
-                                                filename,
-                                                content.len(),
-                                                content_type_str
-                                            ));
-                                        }
-                                        Err(e) => {
-                                            println!(
-                                                "File write error: {:?}",
-                                                e
-                                            );
-                                        }
+                                Ok(mut file) => match file.write_all(content.as_bytes()) {
+                                    Ok(_) => {
+                                        println!("File saved successfully");
+                                        upload_results.push(format!(
+                                            "Uploaded {} ({} bytes, type: {})",
+                                            filename,
+                                            content.len(),
+                                            content_type_str
+                                        ));
                                     }
-                                }
+                                    Err(e) => {
+                                        println!("File write error: {:?}", e);
+                                    }
+                                },
                                 Err(e) => {
-                                    println!(
-                                        "File creation error: {:?}",
-                                        e
-                                    );
+                                    println!("File creation error: {:?}", e);
                                 }
                             }
                         }
                     }
                     else {
                         // Regular form field handling
-                        if let Some(content_start) = part.find("\r\n\r\n")
-                        {
+                        if let Some(content_start) = part.find("\r\n\r\n") {
                             let content = &part[(content_start + 4)..];
                             let content = if content.ends_with("\r\n") {
                                 &content[..(content.len() - 2)]
@@ -298,8 +276,7 @@ impl Upload {
                     "<html><head><title>File Upload</title></head>
                     <body>
                       <h1>Upload File</h1>
-                      <form action='/upload' method='post' \
-                     enctype='multipart/form-data'>
+                      <form action='/upload' method='post' enctype='multipart/form-data'>
                         <input type='file' name='file' required><br>
                         <input type='submit' value='Upload'>
                       </form>

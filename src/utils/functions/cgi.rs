@@ -40,8 +40,7 @@ pub fn process_cgi_output(output: &str) -> HttpResult<Response> {
         }
 
         // Create response
-        let mut response =
-            Response::ok(Some(headers), Some(body.to_string()));
+        let mut response = Response::ok(Some(headers), Some(body.to_string()));
         response.set_status_code(status_code);
         response.set_status_txt(status_txt);
         Ok(response)

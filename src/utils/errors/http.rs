@@ -13,10 +13,9 @@ impl From<io::Error> for HttpErr {
 impl From<AppErr> for HttpErr {
     fn from(value: AppErr) -> Self {
         match value {
-            AppErr::NoCGI
-            | AppErr::ExtNotFound
-            | AppErr::NotFound(_)
-            | AppErr::TmplNotFound(_) => Self::from(404),
+            AppErr::NoCGI | AppErr::ExtNotFound | AppErr::NotFound(_) | AppErr::TmplNotFound(_) => {
+                Self::from(404)
+            }
             AppErr::Custom(msg) => Self::from(msg),
             _ => Self::from(500),
         }
