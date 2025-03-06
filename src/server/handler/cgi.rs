@@ -36,13 +36,16 @@ use {
         ffi::CString,
         fs::File,
         io::{
-            self, Read, Write
+            self,
+            Read,
+            Write,
         },
         os::fd::FromRawFd,
         path::{
             Path,
             PathBuf,
-        }, process::Command,
+        },
+        process::Command,
     },
 };
 
@@ -51,36 +54,48 @@ impl Cgi {
 
     pub fn interprete_python(path: &str) -> Result<String, AppErr> {
         println!("Chemin reçu: {}", path);
-        
+
         // Construire le chemin complet
         let full_path = format!("{}/{}", env!("CARGO_MANIFEST_DIR"), path);
-        
+
         println!("Chemin complet: {}", full_path);
-        
+
         let script_path = Path::new(&full_path);
-        
+
         // Vérifier si le fichier existe
         if !script_path.exists() {
             println!("Le fichier n'existe pas: {}", full_path);
-            return Err(AppErr::NotFound(io::Error::new(io::ErrorKind::NotFound, 
-                format!("Fichier non trouvé: {}", full_path))));
+            return Err(AppErr::NotFound(io::Error::new(
+                io::ErrorKind::NotFound,
+                format!("Fichier non trouvé: {}", full_path),
+            )));
         }
-        
+
         // Exécuter le script Python directement sans fork/exec
         let output = Command::new("python3")
             .arg(&full_path)
-            .current_dir(script_path.parent().unwrap_or(Path::new("/")))
+            .current_dir(
+                script_path
+                    .parent()
+                    .unwrap_or(Path::new("/")),
+            )
             .output()
-            .map_err(|e| AppErr::NotFound(io::Error::new(io::ErrorKind::Other, 
-                format!("Échec de l'exécution: {}", e))))?;
-        
+            .map_err(|e| {
+                AppErr::NotFound(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Échec de l'exécution: {}", e),
+                ))
+            })?;
+
         if !output.status.success() {
             let error_msg = String::from_utf8_lossy(&output.stderr);
             println!("Erreur Python: {}", error_msg);
-            return Err(AppErr::NotFound(io::Error::new(io::ErrorKind::Other, 
-                format!("Le script a échoué: {}", error_msg))));
+            return Err(AppErr::NotFound(io::Error::new(
+                io::ErrorKind::Other,
+                format!("Le script a échoué: {}", error_msg),
+            )));
         }
-        
+
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
         Ok(stdout)
     }

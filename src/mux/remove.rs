@@ -1,10 +1,10 @@
-use libc::EPOLL_CTL_DEL;
 #[cfg(target_os = "linux")]
 use libc::{
     epoll_event,
     EPOLLET,
     EPOLLIN,
     EPOLL_CTL_ADD,
+    EPOLL_CTL_DEL,
 };
 #[cfg(target_os = "windows")]
 use windows::Win32::System::IO::{

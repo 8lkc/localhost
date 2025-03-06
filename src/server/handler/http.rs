@@ -1,12 +1,37 @@
 use {
-    super::{FileSystem, Handler, Http},
+    super::{
+        FileSystem,
+        Handler,
+        Http,
+    },
     crate::{
         debug,
-        message::{Headers, Method, Request, Resource, Response},
-        server::{handler::Cgi, Middleware, SessionStore},
-        utils::{get_session_id, AppErr, HttpErr, HttpResult, HTTP, TEMPLATES},
+        message::{
+            Headers,
+            Method,
+            Request,
+            Resource,
+            Response,
+        },
+        server::{
+            handler::Cgi,
+            Middleware,
+            SessionStore,
+        },
+        utils::{
+            get_session_id,
+            AppErr,
+            HttpErr,
+            HttpResult,
+            HTTP,
+            TEMPLATES,
+        },
     },
-    std::{fmt::format, fs, path::Path},
+    std::{
+        fmt::format,
+        fs,
+        path::Path,
+    },
     tera::Context,
 };
 
@@ -58,6 +83,7 @@ impl Http {
         let filepath: Vec<&str> = path.split("/").collect();
         let final_path: String = filepath[1..].join("/");
         let mut cgi = false;
+
         // Déterminer le Content-Type en fonction de l'extension du fichier
         let content_type = match final_path.split('.').last() {
             Some("css") => "text/css",
@@ -69,7 +95,7 @@ impl Http {
             Some("gif") => "image/gif",
             Some("py") => {
                 cgi = true;
-                "text/plain"
+                "text/html"
             }
             Some("svg") => "image/svg+xml",
             Some("txt") => "text/plain",
@@ -107,11 +133,12 @@ impl Http {
                     return Err(debug!(HttpErr::from(500)));
                 }
             }
-        } else {
+        }
+        else {
             Ok(Response::ok(Some(headers), Some(content)))
         }
     }
-    
+
     pub fn has_valid_session(&mut self, req: &Request) -> bool {
         if let Some(cookie) = req.headers.get("Cookie") {
             if let Some(session_id) = get_session_id(cookie) {

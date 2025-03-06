@@ -39,21 +39,31 @@ pub struct Multiplexer {
     file_descriptor: RawFd,
     servers:         Vec<Server>,
     listeners:       Vec<(TcpListener, usize)>,
-    streams:         HashMap<RawFd, ClientConnectionState>,
+    streams:         HashMap<RawFd, Client>,
 }
 
-pub(self) struct ClientConnectionState {
+enum ClientState {
+    WaitingForRequest,
+    ReadingRequest,
+    RequestComplete,
+}
+
+pub(self) struct Client {
     stream:     TcpStream,
     req_buf:    Vec<u8>,
     server_idx: usize,
+    state:      ClientState,
 }
 
-impl ClientConnectionState {
+impl Client {
     pub fn new(stream: TcpStream, server_idx: usize) -> Self {
         Self {
             stream,
             req_buf: Vec::new(),
             server_idx,
+            state: ClientState::WaitingForRequest,
         }
     }
+
+    pub fn set_state(&mut self, state: ClientState) { self.state = state; }
 }

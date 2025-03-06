@@ -20,6 +20,7 @@ impl Display for AppErr {
             Self::NonBlocking(e) => writeln!(f, "Non-blocking: {e}."),
             Self::ParseAddr(e) => writeln!(f, "Address Parsing: {e}."),
             Self::TmplNotFound(e) => writeln!(f, "Template: {e}."),
+            Self::IncompleteRequest => writeln!(f, "Incomplete Request"),
             Self::NotFound(e) => writeln!(f, "Not Found: {e}."),
             Self::Other(e) => writeln!(f, "ERROR: {e}."),
             Self::EmptyBuffer => writeln!(f, "Empty buffer"),

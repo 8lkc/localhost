@@ -2,7 +2,10 @@ use {
     crate::utils::AppResult,
     serde::Serialize,
     std::{
-        fs::{self, ReadDir},
+        fs::{
+            self,
+            ReadDir,
+        },
         io,
         path::Path,
         time::SystemTime,
@@ -15,9 +18,9 @@ pub(super) struct FileSystem {
 
 #[derive(serde::Serialize)]
 pub(super) struct Item {
-    name: String,
-    link: String,
-    size: u64,
+    name:        String,
+    link:        String,
+    size:        u64,
     modified_at: i64, // Déjà converti en timestamp i64
 }
 

@@ -66,9 +66,9 @@ impl Router {
     fn check_session(&self, path: &str, req: &Request) -> bool {
         if !self.get_session(path) {
             println!("Path doesn't require session");
-            return true; 
+            return true;
         }
-    
+
         match HTTP.write() {
             Ok(mut http) => {
                 let has_session = http.has_valid_session(req);
@@ -86,17 +86,26 @@ impl Router {
         match &request.resource {
             Resource::Path(s) => {
                 let route: Vec<&str> = s.split("/").collect();
-                let path = if route[1].is_empty() { "/" } else { route[1] };
+                let path = if let Some(p) = route.iter().next_back() {
+                    p
+                }
+                else {
+                    "/"
+                };
+                // let path = if route[1].is_empty() { "/" } else { route[1] };
                 println!("<=================================>");
-                println!("<=====Path : {}=====>",path);
+                println!("<=====Path : {}=====>", path);
                 println!("<=================================>");
-                
+
                 if !self.check_session(path, &request) || path == "auth" {
                     if let Some(auth_page) = self.redirect(path) {
                         return Http::serve_auth(&auth_page).unwrap_or_else(|e| e.into());
                     };
                 };
+
                 match path {
+                    "api" => Api::handle(&request),
+                    // "cgi" => Cgi::handle(&request),
                     "upload" => match request.method {
                         Method::GET => Upload::serve_form(),
                         Method::POST => Upload::handle(&request),

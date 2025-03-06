@@ -4,9 +4,14 @@ use {
         Request,
         Resource,
     },
-    crate::utils::{
-        process_header_line,
-        process_req_line,
+    crate::{
+        debug,
+        utils::{
+            process_header_line,
+            process_req_line,
+            AppErr,
+            AppResult,
+        },
     },
     std::{
         collections::HashMap,
@@ -43,14 +48,18 @@ impl Resource {
     }
 }
 
-impl From<String> for Request {
-    fn from(req: String) -> Self {
+impl TryFrom<&Vec<u8>> for Request {
+    type Error = AppErr;
+
+    fn try_from(req_buf: &Vec<u8>) -> AppResult<Self> {
+        let req_str = String::from_utf8_lossy(&req_buf[..]).to_string();
+
         let mut resource = Resource::Path("".to_string());
         let mut method = Method::Uninitialized;
         let mut headers = HashMap::new();
         let mut body = String::new();
 
-        let mut lines = req.lines();
+        let mut lines = req_str.lines();
         if let Some(first_line) = lines.next() {
             if first_line.contains("HTTP") {
                 let (parsed_method, parsed_resource) = process_req_line(first_line);
@@ -67,27 +76,36 @@ impl From<String> for Request {
                 continue;
             }
 
-            if !reached_body {
-                if line.contains(":") {
-                    let (key, value) = process_header_line(line);
-                    headers.insert(key, value);
-                }
-                else {
-                    // Append to body (with new line if not first
-                    // line)
-                    if !body.is_empty() {
-                        body.push('\n');
-                    }
-                    body.push_str(line);
-                }
+            if reached_body {
+                continue;
             }
+
+            if line.contains(":") {
+                let (key, value) = process_header_line(line);
+                if key == "Content-Length" {
+                    if let Ok(content_length) = value.parse::<usize>() {
+                        if debug!(req_buf.len()) < debug!(content_length) {
+                            return Err(AppErr::IncompleteRequest);
+                        }
+                    }
+                }
+                headers.insert(key, value);
+                continue;
+            }
+
+            // Append to body (with new line if not first line)
+            if !body.is_empty() {
+                body.push('\n');
+            }
+
+            body.push_str(line);
         }
         // Parse the incoming HTTP request into HttpRequest struct
-        Request {
+        Ok(Request {
             resource,
             method,
             headers,
-            body,
-        }
+            body: debug!(body),
+        })
     }
 }

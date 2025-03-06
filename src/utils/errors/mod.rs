@@ -17,6 +17,7 @@ pub enum AppErr {
     NotFound(io::Error),
     Other(io::Error),
     EmptyBuffer,
+    IncompleteRequest,
     NoServer,
     ExtNotFound,
     NoCGI,
