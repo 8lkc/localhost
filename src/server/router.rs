@@ -64,42 +64,39 @@ impl Router {
     }
 
     fn check_session(&self, path: &str, req: &Request) -> bool {
-        if self.get_session(path) {
-            if let Ok(mut http) = HTTP.write() {
-                http.has_valid_session(req)
+        if !self.get_session(path) {
+            println!("Path doesn't require session");
+            return true; 
+        }
+    
+        match HTTP.write() {
+            Ok(mut http) => {
+                let has_session = http.has_valid_session(req);
+                println!("Session validation result: {}", has_session);
+                has_session
             }
-            else {
+            Err(e) => {
+                println!("Failed to access HTTP: {:?}", e);
                 false
             }
-        }
-        else {
-            true
         }
     }
 
     pub(crate) fn direct(&self, request: &Request) -> Response {
         match &request.resource {
             Resource::Path(s) => {
-                let route: Vec<&str> = s
-                    .split("/")
-                    .filter(|&x| !x.is_empty())
-                    .collect();
-
-                // More flexible routing logic
-                let path = route.first().unwrap_or(&"");
+                let route: Vec<&str> = s.split("/").collect();
+                let path = if route[1].is_empty() { "/" } else { route[1] };
                 println!("<=================================>");
                 println!("<=====Path : {}=====>",path);
                 println!("<=================================>");
                 
-                if !self.check_session(path, &request) || *path == "auth" {
+                if !self.check_session(path, &request) || path == "auth" {
                     if let Some(auth_page) = self.redirect(path) {
                         return Http::serve_auth(&auth_page).unwrap_or_else(|e| e.into());
                     };
                 };
-
-                match *path {
-                    "api" => Api::handle(&request),
-                   // "cgi" => Cgi::handle(&request),
+                match path {
                     "upload" => match request.method {
                         Method::GET => Upload::serve_form(),
                         Method::POST => Upload::handle(&request),

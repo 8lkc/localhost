@@ -111,6 +111,7 @@ impl Http {
             Ok(Response::ok(Some(headers), Some(content)))
         }
     }
+    
     pub fn has_valid_session(&mut self, req: &Request) -> bool {
         if let Some(cookie) = req.headers.get("Cookie") {
             if let Some(session_id) = get_session_id(cookie) {
