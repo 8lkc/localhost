@@ -99,7 +99,7 @@ impl Router {
 
                 match *path {
                     "api" => Api::handle(&request),
-                    "cgi" => Cgi::handle(&request),
+                   // "cgi" => Cgi::handle(&request),
                     "upload" => match request.method {
                         Method::GET => Upload::serve_form(),
                         Method::POST => Upload::handle(&request),

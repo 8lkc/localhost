@@ -3,7 +3,7 @@ use {
     crate::{
         debug,
         message::{Headers, Method, Request, Resource, Response},
-        server::{Middleware, SessionStore},
+        server::{handler::Cgi, Middleware, SessionStore},
         utils::{get_session_id, AppErr, HttpErr, HttpResult, HTTP, TEMPLATES},
     },
     std::{fmt::format, fs, path::Path},
@@ -57,6 +57,7 @@ impl Http {
         let mut headers = Headers::new();
         let filepath: Vec<&str> = path.split("/").collect();
         let final_path: String = filepath[1..].join("/");
+        let mut cgi = false;
         // Déterminer le Content-Type en fonction de l'extension du fichier
         let content_type = match final_path.split('.').last() {
             Some("css") => "text/css",
@@ -66,21 +67,25 @@ impl Http {
             Some("png") => "image/png",
             Some("jpg") | Some("jpeg") => "image/jpeg",
             Some("gif") => "image/gif",
+            Some("py") => {
+                cgi = true;
+                "text/plain"
+            }
             Some("svg") => "image/svg+xml",
             Some("txt") => "text/plain",
             Some("pdf") => "application/pdf",
             Some("xml") => "application/xml",
             Some("zip") => "application/zip",
-            _ => "application/octet-stream", // Type par défaut pour les fichiers inconnus
+            _ => "text/plain", // Type par défaut pour les fichiers inconnus
         };
-        
+
         // Ajouter le Content-Type aux en-têtes
         headers.insert(
             "Content-Type".to_string(),
             content_type.to_string(),
         );
 
-        println!("final path{}",final_path);
+        println!("final path{}", final_path);
 
         if !Path::exists(Path::new(&final_path)) {
             let _ = HttpErr::from(404);
@@ -89,7 +94,22 @@ impl Http {
         let content = fs::read_to_string(&final_path)?;
 
         // Retourner la réponse avec les en-têtes et le contenu
-        Ok(Response::ok(Some(headers), Some(content)))
+        if cgi {
+            match Cgi::interprete_python(&final_path) {
+                Ok(res) => {
+                    // Traitement en cas de succès avec la sortie du script Python
+                    Ok(Response::ok(Some(headers), Some(res)))
+                    // Utilisez res comme nécessaire
+                }
+                Err(err) => {
+                    // Journaliser l'erreur et retourner une réponse d'erreur
+                    eprintln!("Erreur d'exécution Python: {:?}", err);
+                    return Err(debug!(HttpErr::from(500)));
+                }
+            }
+        } else {
+            Ok(Response::ok(Some(headers), Some(content)))
+        }
     }
     pub fn has_valid_session(&mut self, req: &Request) -> bool {
         if let Some(cookie) = req.headers.get("Cookie") {
