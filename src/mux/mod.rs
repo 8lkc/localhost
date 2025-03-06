@@ -42,17 +42,11 @@ pub struct Multiplexer {
     streams:         HashMap<RawFd, Client>,
 }
 
-enum ClientState {
-    WaitingForRequest,
-    ReadingRequest,
-    RequestComplete,
-}
-
 pub(self) struct Client {
     stream:     TcpStream,
     req_buf:    Vec<u8>,
     server_idx: usize,
-    state:      ClientState,
+    content:    Option<usize>,
 }
 
 impl Client {
@@ -61,9 +55,9 @@ impl Client {
             stream,
             req_buf: Vec::new(),
             server_idx,
-            state: ClientState::WaitingForRequest,
+            content: None,
         }
     }
 
-    pub fn set_state(&mut self, state: ClientState) { self.state = state; }
+    pub fn set_content_len(&mut self, len: usize) { self.content = Some(len) }
 }

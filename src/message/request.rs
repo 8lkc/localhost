@@ -62,25 +62,23 @@ impl From<String> for Request {
         // Parse headers until empty line
         let mut reached_body = false;
         for line in lines {
+            if !reached_body && line.contains(":") {
+                let (key, value) = process_header_line(line);
+                headers.insert(key, value);
+                continue;
+            }
+
             if line.is_empty() {
                 reached_body = true;
                 continue;
             }
 
-            if reached_body {
-                // Append to body (with new line if not first line)
-                if !body.is_empty() {
-                    body.push('\n');
-                }
-
-                body.push_str(line);
-                continue;
+            // Append to body (with new line if not first line)
+            if !body.is_empty() {
+                body.push('\n');
             }
 
-            if line.contains(":") {
-                let (key, value) = process_header_line(line);
-                headers.insert(key, value);
-            }
+            body.push_str(line);
         }
         // Parse the incoming HTTP request into HttpRequest struct
         Self {

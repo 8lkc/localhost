@@ -110,20 +110,27 @@ impl Multiplexer {
                                     let req_str =
                                         String::from_utf8_lossy(&client.req_buf).to_string();
 
-                                    let content_length = match req_str
+                                    match req_str
                                         .lines()
                                         .find(|line| line.contains("Content-Length"))
                                     {
-                                        Some(line) => line
-                                            .split(": ")
-                                            .nth(1)
-                                            .unwrap_or("0")
-                                            .parse()
-                                            .unwrap_or(0),
-                                        None => 0,
+                                        Some(line) => {
+                                            if client.content.is_none() {
+                                                client.set_content_len(
+                                                    line.split(": ")
+                                                        .nth(1)
+                                                        .unwrap_or("0")
+                                                        .parse()
+                                                        .unwrap_or(0),
+                                                )
+                                            }
+                                        }
+                                        None => {}
                                     };
 
-                                    if debug!(client.req_buf.len()) < debug!(content_length) {
+                                    if client.content.is_some()
+                                        && client.req_buf.len() <= client.content.unwrap()
+                                    {
                                         continue;
                                     }
 
