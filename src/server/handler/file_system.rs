@@ -2,19 +2,23 @@ use {
     crate::utils::AppResult,
     serde::Serialize,
     std::{
-        fs::{
-            self,
-            ReadDir,
-        },
+        fs::{self, ReadDir},
         io,
         path::Path,
         time::SystemTime,
     },
 };
-
-#[derive(Serialize)]
+#[derive(serde::Serialize)]
 pub(super) struct FileSystem {
     items: Vec<Item>,
+}
+
+#[derive(serde::Serialize)]
+pub(super) struct Item {
+    name: String,
+    link: String,
+    size: u64,
+    modified_at: i64, // Déjà converti en timestamp i64
 }
 
 impl FileSystem {
@@ -26,6 +30,7 @@ impl FileSystem {
 
         for entry in content {
             let entry = entry?;
+            let full_path = entry.path();
             let name = entry
                 .file_name()
                 .into_string()
@@ -36,7 +41,13 @@ impl FileSystem {
             let item = Item {
                 name,
                 size,
-                modified_at,
+                link: full_path
+                    .to_string_lossy()
+                    .into_owned(),
+                modified_at: modified_at
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs() as i64,
             };
 
             items.push(item);
@@ -44,13 +55,6 @@ impl FileSystem {
 
         Ok(items)
     }
-}
-
-#[derive(Serialize)]
-pub(super) struct Item {
-    name:        String,
-    size:        u64,
-    modified_at: SystemTime,
 }
 
 // impl Item {

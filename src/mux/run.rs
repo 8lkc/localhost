@@ -11,10 +11,7 @@ use {
             Write,
         },
         net::Shutdown,
-        os::fd::{
-            AsRawFd,
-            RawFd,
-        },
+        os::fd::{AsRawFd, RawFd},
     },
 };
 
@@ -102,7 +99,7 @@ impl Multiplexer {
                                             .extend_from_slice(&buf[..bytes]);
 
                                         let request =
-                                            String::from_utf8_lossy(&client_state.req_buf)
+                                            &String::from_utf8_lossy(&client_state.req_buf)
                                                 .to_string()
                                                 .into();
 

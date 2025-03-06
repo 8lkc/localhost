@@ -1,3 +1,4 @@
+use libc::EPOLL_CTL_DEL;
 #[cfg(target_os = "linux")]
 use libc::{
     epoll_event,
@@ -42,7 +43,7 @@ impl Multiplexer {
                 self.file_descriptor,
                 EPOLL_CTL_DEL,
                 fd,
-                null()
+                core::ptr::null_mut()
             )
         }
         #[cfg(target_os = "macos")]

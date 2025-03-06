@@ -27,7 +27,7 @@
         {% for item in list %}
             <div class="item">
                 <div class="name {% if item.is_dir %}directory{% endif %}">
-                    <li data-value="{{ item.name }}">{{ item.name }}</li>
+                    <a href="{{ item.link }}">{{ item.name }}</a>
                 </div>
                 <div class="size">{{ item.size }}</div>
                 <!-- <div class="date">{{ item.modified_at | date(format="%Y-%m-%d %H:%M:%S") }}</div> -->

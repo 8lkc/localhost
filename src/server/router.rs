@@ -77,7 +77,7 @@ impl Router {
         }
     }
 
-    pub(crate) fn direct(&self, request: Request) -> Response {
+    pub(crate) fn direct(&self, request: &Request) -> Response {
         match &request.resource {
             Resource::Path(s) => {
                 let route: Vec<&str> = s
@@ -87,7 +87,10 @@ impl Router {
 
                 // More flexible routing logic
                 let path = route.first().unwrap_or(&"");
-
+                println!("<=================================>");
+                println!("<=====Path : {}=====>",path);
+                println!("<=================================>");
+                
                 if !self.check_session(path, &request) || *path == "auth" {
                     if let Some(auth_page) = self.redirect(path) {
                         return Http::serve_auth(&auth_page).unwrap_or_else(|e| e.into());

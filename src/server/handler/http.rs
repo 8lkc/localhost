@@ -1,31 +1,12 @@
 use {
-    super::{
-        FileSystem,
-        Handler,
-        Http,
-    },
+    super::{FileSystem, Handler, Http},
     crate::{
         debug,
-        message::{
-            Headers,
-            Method,
-            Request,
-            Resource,
-            Response,
-        },
-        server::{
-            Middleware,
-            SessionStore,
-        },
-        utils::{
-            get_session_id,
-            AppErr,
-            HttpErr,
-            HttpResult,
-            HTTP,
-            TEMPLATES,
-        },
+        message::{Headers, Method, Request, Resource, Response},
+        server::{Middleware, SessionStore},
+        utils::{get_session_id, AppErr, HttpErr, HttpResult, HTTP, TEMPLATES},
     },
+    std::{fmt::format, fs, path::Path},
     tera::Context,
 };
 
@@ -40,10 +21,13 @@ impl Handler for Http {
 
         // Parse the URI
         let route: Vec<&str> = s.split("/").collect();
-
-        match route[1] {
-            "" => Self::serve_default("index.html"),
-            path => Self::serve_static(path),
+        let mut root_directory = format!("public{}", s);
+        if route.len() > 1 && route[1] == "public" {
+            root_directory = format!("public/{}", route[2..].join("/"));
+        }
+        match !s.contains(".") {
+            true => Self::serve_default("index.html", &root_directory),
+            _ => Self::serve_static(&root_directory),
         }
     }
 }
@@ -55,11 +39,11 @@ impl Http {
         }
     }
 
-    fn serve_default(tmpl: &str) -> HttpResult<Response> {
+    fn serve_default(tmpl: &str, route: &str) -> HttpResult<Response> {
         let mut ctx = Context::new();
         ctx.insert("title", "Rust");
 
-        let items = FileSystem::listing("public")?;
+        let items = FileSystem::listing(route)?;
         ctx.insert("list", &items);
 
         let page = TEMPLATES
@@ -71,31 +55,42 @@ impl Http {
 
     fn serve_static(path: &str) -> HttpResult<Response> {
         let mut headers = Headers::new();
-        if path.ends_with(".css") {
-            headers.insert(
-                "Content-Type".to_string(),
-                "text/css".to_string(),
-            );
-        }
-        else if path.ends_with(".js") {
-            headers.insert(
-                "Content-Type".to_string(),
-                "text/javascript".to_string(),
-            );
-        }
-        else {
-            let tmpl = format!("{}.html", path);
-            let ctx = Context::new();
-            let page = TEMPLATES
-                .render(&tmpl, &ctx)
-                .map_err(|e| AppErr::from(debug!(e)))?;
-            return Ok(Response::ok(None, Some(page)));
-        }
+        let filepath: Vec<&str> = path.split("/").collect();
+        let final_path: String = filepath[1..].join("/");
+        // Déterminer le Content-Type en fonction de l'extension du fichier
+        let content_type = match final_path.split('.').last() {
+            Some("css") => "text/css",
+            Some("js") => "text/javascript",
+            Some("html") => "text/html",
+            Some("json") => "application/json",
+            Some("png") => "image/png",
+            Some("jpg") | Some("jpeg") => "image/jpeg",
+            Some("gif") => "image/gif",
+            Some("svg") => "image/svg+xml",
+            Some("txt") => "text/plain",
+            Some("pdf") => "application/pdf",
+            Some("xml") => "application/xml",
+            Some("zip") => "application/zip",
+            _ => "application/octet-stream", // Type par défaut pour les fichiers inconnus
+        };
+        
+        // Ajouter le Content-Type aux en-têtes
+        headers.insert(
+            "Content-Type".to_string(),
+            content_type.to_string(),
+        );
 
-        let content = Self::load_file(path).ok_or(HttpErr::from(404))?;
+        println!("final path{}",final_path);
+
+        if !Path::exists(Path::new(&final_path)) {
+            let _ = HttpErr::from(404);
+        }
+        // Charger le contenu du fichier
+        let content = fs::read_to_string(&final_path)?;
+
+        // Retourner la réponse avec les en-têtes et le contenu
         Ok(Response::ok(Some(headers), Some(content)))
     }
-
     pub fn has_valid_session(&mut self, req: &Request) -> bool {
         if let Some(cookie) = req.headers.get("Cookie") {
             if let Some(session_id) = get_session_id(cookie) {
