@@ -4,14 +4,9 @@ use {
         Request,
         Resource,
     },
-    crate::{
-        debug,
-        utils::{
-            process_header_line,
-            process_req_line,
-            AppErr,
-            AppResult,
-        },
+    crate::utils::{
+        process_header_line,
+        process_req_line,
     },
     std::{
         collections::HashMap,
@@ -48,12 +43,8 @@ impl Resource {
     }
 }
 
-impl TryFrom<&Vec<u8>> for Request {
-    type Error = AppErr;
-
-    fn try_from(req_buf: &Vec<u8>) -> AppResult<Self> {
-        let req_str = String::from_utf8_lossy(&req_buf[..]).to_string();
-
+impl From<String> for Request {
+    fn from(req_str: String) -> Self {
         let mut resource = Resource::Path("".to_string());
         let mut method = Method::Uninitialized;
         let mut headers = HashMap::new();
@@ -77,35 +68,26 @@ impl TryFrom<&Vec<u8>> for Request {
             }
 
             if reached_body {
+                // Append to body (with new line if not first line)
+                if !body.is_empty() {
+                    body.push('\n');
+                }
+
+                body.push_str(line);
                 continue;
             }
 
             if line.contains(":") {
                 let (key, value) = process_header_line(line);
-                if key == "Content-Length" {
-                    if let Ok(content_length) = value.parse::<usize>() {
-                        if debug!(req_buf.len()) < debug!(content_length) {
-                            return Err(AppErr::IncompleteRequest);
-                        }
-                    }
-                }
                 headers.insert(key, value);
-                continue;
             }
-
-            // Append to body (with new line if not first line)
-            if !body.is_empty() {
-                body.push('\n');
-            }
-
-            body.push_str(line);
         }
         // Parse the incoming HTTP request into HttpRequest struct
-        Ok(Request {
+        Self {
             resource,
             method,
             headers,
-            body: debug!(body),
-        })
+            body,
+        }
     }
 }

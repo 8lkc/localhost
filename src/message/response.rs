@@ -7,10 +7,7 @@ use {
         HttpErr,
         TEMPLATES,
     },
-    std::{
-        collections::HashMap,
-        io::Write,
-    },
+    std::collections::HashMap,
     tera::Context,
 };
 
@@ -92,12 +89,6 @@ impl Response {
         response.body = body;
 
         response
-    }
-
-    pub fn send(&self, write_stream: &mut impl Write) {
-        let res = self.clone();
-        let response_string: String = String::from(res);
-        let _ = write!(write_stream, "{}", response_string);
     }
 
     pub fn set_status_code(&mut self, status_code: u16) { self.status_code = status_code; }

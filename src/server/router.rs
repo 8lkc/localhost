@@ -82,7 +82,7 @@ impl Router {
         }
     }
 
-    pub(crate) fn direct(&self, request: &Request) -> Response {
+    pub(crate) fn direct(&self, request: Request) -> Response {
         match &request.resource {
             Resource::Path(s) => {
                 let route: Vec<&str> = s.split("/").collect();

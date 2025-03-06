@@ -105,37 +105,49 @@ impl Multiplexer {
                                 Ok(bytes) => {
                                     client
                                         .req_buf
-                                        .extend_from_slice(&buf[..bytes]);
+                                        .extend_from_slice(&buf[..debug!(bytes)]);
 
-                                    match Request::try_from(&client.req_buf) {
-                                        Ok(request) => {
-                                            let response: String = self.servers[client.server_idx]
-                                                .router()
-                                                .direct(&request)
-                                                .into();
+                                    let req_str =
+                                        String::from_utf8_lossy(&client.req_buf).to_string();
 
-                                            if let Err(e) = client
-                                                .stream
-                                                .write(response.as_bytes())
-                                            {
-                                                debug!(e);
-                                                if let Err(e) = client
-                                                    .stream
-                                                    .shutdown(Shutdown::Both)
-                                                {
-                                                    debug!(e);
-                                                };
-                                            };
+                                    let content_length = match req_str
+                                        .lines()
+                                        .find(|line| line.contains("Content-Length"))
+                                    {
+                                        Some(line) => line
+                                            .split(": ")
+                                            .nth(1)
+                                            .unwrap_or("0")
+                                            .parse()
+                                            .unwrap_or(0),
+                                        None => 0,
+                                    };
 
-                                            // debug!(String::from_utf8_lossy(&client.req_buf)
-                                            //     .to_string());
-                                            client.req_buf.clear();
-                                        }
-                                        Err(e) => {
-                                            debug!(e);
-                                            continue;
-                                        }
+                                    if debug!(client.req_buf.len()) < debug!(content_length) {
+                                        continue;
                                     }
+
+                                    let request: Request = req_str.into();
+
+                                    let response: String = self.servers[client.server_idx]
+                                        .router()
+                                        .direct(request)
+                                        .into();
+
+                                    if let Err(e) = client
+                                        .stream
+                                        .write(response.as_bytes())
+                                    {
+                                        debug!(e);
+                                        if let Err(e) = client
+                                            .stream
+                                            .shutdown(Shutdown::Both)
+                                        {
+                                            debug!(e);
+                                        };
+                                    };
+
+                                    client.req_buf.clear();
                                 }
                                 Err(e) if e.kind() == ErrorKind::WouldBlock => {
                                     continue;
